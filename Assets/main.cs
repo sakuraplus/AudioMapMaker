@@ -35,7 +35,7 @@ public class main : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-
+		//测试用
 		if(Input.GetKeyDown (KeyCode.A)){
 			//	_audio.Stop();
 			Debug.Log(_audio.timeSamples+"/stop//"+_audio.time+"///"+Time.time );
@@ -105,33 +105,40 @@ public class main : MonoBehaviour {
 			//_audio.UnPause   ();
 
 		}
-
+		//end测试用
 
 	
 	}
 
 	void recordmusicdata()
 	{
-		float[] spectrum = new float[64];
-		float[] clips = new float[8];
+		float[] spectrum = new float[64];//每帧采样64个
+		float[] clips = new float[8];//分成8个频段
 		//float[] spectrumlow = new float[64];
-		low = 0;
-		high = 0;
-		mid = 0;
+		low = 0;//测试用
+		high = 0;//测试用
+		mid = 0;//测试用
 		float musicenergy = 0;
-		strclips = "";
+		strclips = "";//测试用
+
 		_audio .GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
 		//AudioListener.GetSpectrumData(spectrumlow, 0, FFTWindow.Rectangular);
-	//	int recfreq =spectrum.Length;// (int)Mathf.Floor (spectrum.Length*_audio.clip.frequency/AudioSettings.outputSampleRate  );// 
-		int recfreq =(int)Mathf.Floor (spectrum.Length*_audio.clip.frequency/AudioSettings.outputSampleRate  );// 
-		for (int i = 1; i < spectrum.Length - 1; i++)
+		//	int recfreq =spectrum.Length;// (int)Mathf.Floor (spectrum.Length*_audio.clip.frequency/AudioSettings.outputSampleRate  );// 
+		//int recfreq =(int)Mathf.Floor (spectrum.Length*_audio.clip.frequency/AudioSettings.outputSampleRate  );// 
+
+		//当音频频率没有达到48000时，根据音频频率取全部采样中的前几个
+		int freqlength=(int)Mathf.Floor (spectrum.Length*_audio.clip.frequency/AudioSettings.outputSampleRate  );
+		//for (int i = 1; i < spectrum.Length - 1; i++)
+		for (int i = 1; i < freqlength - 1; i++)
 		{
 			Debug.DrawLine(new Vector3(i - 1, 100*spectrum[i], 0), new Vector3(i, 100*spectrum[i + 1], 0), Color.red);
+			//int icic =(int) Mathf.Floor (Mathf.Log((i*recfreq/spectrum.Length)+1,spectrum.Length )*clips.Length ) ;
 
-			int icic =(int) Mathf.Floor (0.5f+Mathf.Log(i*recfreq/spectrum.Length+1,spectrum.Length )*clips.Length ) -1;
-			clips [icic] += spectrum [i];
+			int icic =(int) Mathf.Floor (0.5f+Mathf.Log(i+1,freqlength )*clips.Length ) -1;//对数方式，将频率分为几段
+			//Debug.Log  ("icic="+icic);
+			clips [icic] += spectrum [i-1];//每个频段的音量和，可能需要求平均数再使用
 			//low= spectrum[i]*100000;
-			musicenergy += spectrum [i];
+			musicenergy += spectrum [i];//总音量和，需要取平均数使用
 		}
 		low = clips [0];
 		mid = (clips [1] + clips [2]);
@@ -150,12 +157,15 @@ public class main : MonoBehaviour {
 		strclips = maxind+"   "+c.ToString ();
 
 		//low = musicenergy;
-		musicenergy /= spectrum.Length;
+		musicenergy /= spectrum.Length;//总音量和，需要取平均数使用
 		//high = musicenergy*100000;
-		MusicData _md = new MusicData ();
+
+		MusicData _md = new MusicData ();//存播放时间与当前音量总和
 		_md.Average = musicenergy;
 		_md.playtime = _audio.time;
 		md.Add (_md);
+
+		//测试用
 		float tt = low + high + mid;
 		low /= tt;
 		high /= tt;
@@ -167,8 +177,10 @@ public class main : MonoBehaviour {
 		} else {
 			ggg.transform.position=new Vector3 (64, -10, 0);
 		}
-
+		//测试用end
 	}
+
+
 	void calcAverage()
 	{
 

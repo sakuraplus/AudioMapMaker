@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
-public class MusicData
-{
-	public float playtime = 0;
-	public float Average = 0;
-}
+//public class MusicData
+//{
+//	public float playtime = 0;
+//	public float Average = 0;
+//	public bool onbeat = false;
+//}
 
 public class main : MonoBehaviour {
 	AudioSource _audio;
@@ -35,6 +36,12 @@ public class main : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+		if (_audio.isPlaying) {
+			recordmusicdata ();
+		} else {
+			Debug.Log ("stop");
+			searchBeat ();
+		}
 		//测试用
 		if(Input.GetKeyDown (KeyCode.A)){
 			//	_audio.Stop();
@@ -51,11 +58,7 @@ public class main : MonoBehaviour {
 				//Debug.Log (_audio.timeSamples + "/Play//" + _audio.time + "///" + Time.time);
 			//}
 		}
-		if (_audio.isPlaying) {
-			recordmusicdata ();
-		} else {
-			Debug.Log ("stop");
-		}
+	
 		if(Input.GetKeyDown (KeyCode.S  )){
 			_audio.Pause  ();
 			//pausetime = Time.time;
@@ -179,16 +182,58 @@ public class main : MonoBehaviour {
 		}
 		//测试用end
 	}
-
-
-	void calcAverage()
+	float[] avgs = new float[20];
+	float[] avgIncreases = new float[20];
+	float calcAverage(int index)
 	{
-
-		int lastindex = md.Count - 20;
-		for (int i = lastindex; i < md.Count; i++) {
-		
+		float sum = 0;
+		MusicData mdnow;//= md [i];
+		MusicData mdlast;
+		if (md.Count < 20) {
+			//return -1;
+			for (int i = 1; i < md.Count ; i++) {
+				mdnow = md [i] as MusicData;
+				mdlast = md [i-1] as MusicData;
+				sum +=(mdnow.Average -mdlast.Average);
+				avgs [i] = (mdnow.Average - mdlast.Average);// md [i ];
+			}
+			return sum/md.Count ;
+		}
+		int startindex;
+		int endindex;
+		if (index > md.Count - 20) {
+			startindex = md.Count - 21;
+			endindex = md.Count;
+		} else {
+			startindex = index - 10;
+			endindex = index + 9;
 		}
 
+		for (int i = 0; i < 20 ; i++) {
+			//sum += md [i+startindex ];
+			//avgs[i]= md [i+startindex ];
+			if (startindex > 0) {
+				mdnow = md [i + startindex] as MusicData;
+				mdlast = md [i + startindex - 1] as MusicData;
+				avgIncreases [i] = mdnow.Average - mdlast.Average;
+				sum += avgIncreases [i];
+			} else {
+				avgIncreases [i] = 0;
+				sum += 0;
+			}
+		}
+		//float avg = sum / 20;
+		return sum/20;
 	}
 
+	void searchBeat()
+	{
+//		for (int i = 20; i < md.Count; i++) {
+//			if (md [i] - md [i - 1] > calcAverage [i] * 2) {
+//				md[i].on
+//			}
+//		}
+
+
+	}
 }

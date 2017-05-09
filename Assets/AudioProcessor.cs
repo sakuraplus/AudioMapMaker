@@ -112,30 +112,30 @@ public class AudioProcessor : MonoBehaviour
 		lastT = getCurrentTimeMillis ();
 	}
 
-	public void tapTempo ()
-	{
-		nowT = getCurrentTimeMillis ();
-		diff = nowT - lastT;
-		lastT = nowT;
-		sum = sum + diff;
-		entries++;
+//	public void tapTempo ()
+//	{
+//		nowT = getCurrentTimeMillis ();
+//		diff = nowT - lastT;
+//		lastT = nowT;
+//		sum = sum + diff;
+//		entries++;
+//
+//		int average = (int)(sum / entries);
+//
+//		Debug.Log ("average = " + average);
+//	}
 
-		int average = (int)(sum / entries);
-
-		Debug.Log ("average = " + average);
-	}
-
-	double[] toDoubleArray (float[] arr)
-	{
-		if (arr == null)
-			return null;
-		int n = arr.Length;
-		double[] ret = new double[n];
-		for (int i = 0; i < n; i++) {
-			ret [i] = (float)arr [i];
-		}
-		return ret;
-	}
+//	double[] toDoubleArray (float[] arr)
+//	{
+//		if (arr == null)
+//			return null;
+//		int n = arr.Length;
+//		double[] ret = new double[n];
+//		for (int i = 0; i < n; i++) {
+//			ret [i] = (float)arr [i];
+//		}
+//		return ret;
+//	}
 
 	// Update is called once per frame
 	void Update ()
@@ -234,21 +234,21 @@ public class AudioProcessor : MonoBehaviour
 		}
 	}
 
-	public void changeCameraColor ()
-	{
-		//Debug.Log("camera");
-		float r = Random.Range (0f, 1f);
-		float g = Random.Range (0f, 1f);
-		float b = Random.Range (0f, 1f);
-
-		//Debug.Log(r + "," + g + "," + b);
-		Color color = new Color (r, g, b);
-
-		GetComponent<Camera> ().clearFlags = CameraClearFlags.Color;
-		Camera.main.backgroundColor = color;
-
-		//camera.backgroundColor = color;
-	}
+//	public void changeCameraColor ()
+//	{
+//		//Debug.Log("camera");
+//		float r = Random.Range (0f, 1f);
+//		float g = Random.Range (0f, 1f);
+//		float b = Random.Range (0f, 1f);
+//
+//		//Debug.Log(r + "," + g + "," + b);
+//		Color color = new Color (r, g, b);
+//
+//		GetComponent<Camera> ().clearFlags = CameraClearFlags.Color;
+//		Camera.main.backgroundColor = color;
+//
+//		//camera.backgroundColor = color;
+//	}
 
 	public float getBandWidth ()
 	{

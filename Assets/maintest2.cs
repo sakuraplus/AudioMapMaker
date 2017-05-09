@@ -12,6 +12,7 @@ public class maintest2 : MonoBehaviour {
 	public AudioClip mmm;
 	public  GameObject ggg;
 	float gggtestpos=0;
+	float gggscale=1;
 
 	public float  low;
 	public float  mid;
@@ -53,6 +54,17 @@ public class maintest2 : MonoBehaviour {
 			Debug.Log ("stop");
 			//searchBeat ();
 		}
+
+		if (onbeat) {
+			gggtestpos = 10+(0.1f*gggscale);
+			ggg.transform.localScale = new Vector3 (gggtestpos, gggtestpos , gggtestpos);
+		} else {
+			if (gggtestpos > 0) {
+				gggtestpos-=gggtestpos/5;
+				ggg.transform.localScale  = new Vector3 (gggtestpos, gggtestpos, gggtestpos);
+			}
+		}
+
 		//测试用
 		if(Input.GetKeyDown (KeyCode.A)){
 			//	_audio.Stop();
@@ -113,90 +125,13 @@ public class maintest2 : MonoBehaviour {
 
 	void recordmusicdata()
 	{
-
-		//float[] spectrumlow = new float[64];
-		low = 0;//测试用
-		high = 0;//测试用
-		mid = 0;//测试用
-		float musicenergy = 0;
-		strclips = "";//测试用
-
-
-		////////////////////////////////////////
+	////////////////////////////////////////
 		_audio .GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
 		CurrentFrameAvg = CalcCurrentFrameAvg (spectrum);
 		recordAvgInc ();
 		CheckBeat ();
-		if (onbeat) {
-			gggtestpos = 10;
-			ggg.transform.localScale = new Vector3 (gggtestpos, gggtestpos , gggtestpos);
-		} else {
-			if (gggtestpos > 0) {
-				gggtestpos-=gggtestpos/5;
-				ggg.transform.localScale  = new Vector3 (gggtestpos, gggtestpos, gggtestpos);
-			}
-		}
 
 
-
-		//当音频频率没有达到48000时，根据音频频率取全部采样中的前几个
-		int freqlength=(int)Mathf.Floor (spectrum.Length*_audio.clip.frequency/AudioSettings.outputSampleRate  );
-
-
-
-
-
-
-		//for (int i = 1; i < spectrum.Length - 1; i++)
-		for (int i = 1; i < freqlength - 1; i++)
-		{
-			Debug.DrawLine(new Vector3(i - 1, 100*spectrum[i], 0), new Vector3(i, 100*spectrum[i + 1], 0), Color.red);
-			//int icic =(int) Mathf.Floor (Mathf.Log((i*recfreq/spectrum.Length)+1,spectrum.Length )*clips.Length ) ;
-
-			int icic =(int) Mathf.Floor (0.5f+Mathf.Log(i+1,freqlength )*clips.Length ) -1;//对数方式，将频率分为几段
-			//Debug.Log  ("icic="+icic);
-			clips [icic] += spectrum [i-1];//每个频段的音量和，可能需要求平均数再使用
-			//low= spectrum[i]*100000;
-			musicenergy += spectrum [i];//总音量和，需要取平均数使用
-		}
-		low = clips [0];
-		mid = (clips [1] + clips [2]);
-		high =  (clips [3] + clips [4]);
-		superhigh =( clips [5] + clips [6] + clips [7]);
-
-		float c=clips[0];
-		int maxind = 0;
-		for (int i = 0; i < clips.Length; i++) {
-			if (clips [i] > c) {
-				c = clips [i ];
-				maxind = i;
-			}
-			//strclips += clips[i].ToString ()+"/";
-		}
-		strclips = maxind+"   "+c.ToString ();
-
-		//low = musicenergy;
-		musicenergy /= spectrum.Length;//总音量和，需要取平均数使用
-		//high = musicenergy*100000;
-
-		MusicData _md = new MusicData ();//存播放时间与当前音量总和
-		_md.Average = musicenergy;
-		_md.playtime = _audio.time;
-		//md.Add (_md);
-
-		//测试用
-//		float tt = low + high + mid;
-//		low /= tt;
-//		high /= tt;
-//		mid /= tt;
-//		if (low > mid && low > high) {
-//			ggg.transform.position = new Vector3 (0, -10, 0);
-//		} else if (mid > low && mid > high) {
-//			ggg.transform.position = new Vector3 (32, -10, 0);
-//		} else {
-//			ggg.transform.position=new Vector3 (64, -10, 0);
-//		}
-		//测试用end
 	}
 
 	//计算当前帧的平均值
@@ -204,14 +139,21 @@ public class maintest2 : MonoBehaviour {
 	{
 		//当音频频率没有达到48000时，根据音频频率取全部采样中的前几个
 		int freqlength=(int)Mathf.Floor (bufferSize *_audio.clip.frequency/AudioSettings.outputSampleRate  );
-	//	Debug.Log  ("freqlength="+freqlength);
+		//Debug.Log  ("freqlength="+_audio.clip.frequency+"/"+AudioSettings.outputSampleRate+"="+freqlength+"///"+Mathf.Log(1));
 		float musicenergy=0;
+		float musicenergylow=0;
 		for (int i =0; i < freqlength; i++)
 		{
 			musicenergy += spectrum [i];//总音量和，需要取平均数使用
+			int icic =(int) Mathf.Floor (0.5f+Mathf.Log(i+2,freqlength )*clips.Length ) -1;//对数方式，将频率分为几段
+			//Debug.Log  ("icic="+icic);;
+			clips [icic] += spectrum [i];//每个频段的音量和，可能需要求平均数再使用
+
 		}
 		musicenergy /= freqlength;//当前帧 平均值
-		return musicenergy ;
+		musicenergylow=(clips[0]+clips[1]);
+		//return musicenergy ;
+		return musicenergylow ;
 	}
 	//end 计算当前帧的平均值
 
@@ -220,19 +162,19 @@ public class maintest2 : MonoBehaviour {
 
 
 	//存当前帧前面帧数，或前1024帧平均值
-	void recordAvg(float currentframeavg)
-	{
-		if (CurrentIndex < bufferSize) {
-			//1024帧之前
-			lastAverage  [CurrentIndex] = currentframeavg;
-		} else { 
-			lastAverage  [CurrentIndex - bufferSize] = currentframeavg;
-		}
-		CurrentIndex++;
-		if (CurrentIndex > bufferSize * 2) {
-			CurrentIndex = 1024;
-		}
-	}
+//	void recordAvg(float currentframeavg)
+//	{
+//		if (CurrentIndex < bufferSize) {
+//			//1024帧之前
+//			lastAverage  [CurrentIndex] = currentframeavg;
+//		} else { 
+//			lastAverage  [CurrentIndex - bufferSize] = currentframeavg;
+//		}
+//		CurrentIndex++;
+//		if (CurrentIndex > bufferSize * 2) {
+//			CurrentIndex = bufferSize;
+//		}
+//	}
 	//end//存当前帧前面帧数，或前1024帧平均值
 
 	//存当前帧之前或，前1024帧增长值
@@ -280,9 +222,11 @@ public class maintest2 : MonoBehaviour {
 			}
 		}
 
-		if (CurrentFrameAvg > largeenergy*enegryaddup) {
+		if (CurrentFrameAvg > largeenergy*enegryaddup  && (CurrentIndex-lastbeatindex )>bufferSize /4) {
+		//if (CurrentFrameAvg > largeenergy*enegryaddup  && (CurrentIndex-lastbeatindex )>bufferSize /8) {
 			onbeat = true;
-				lastbeatindex = largeindex;
+			gggscale = CurrentFrameAvg / largeenergy;
+			lastbeatindex = CurrentIndex;//largeindex;
 			Debug.LogError   ("onbeat"+lastbeatindex+","+CurrentIndex +","+largeindex+","+largeenergy+"---"+CurrentFrameAvg);
 
 		} else {

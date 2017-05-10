@@ -26,6 +26,7 @@ public class maintest2 : MonoBehaviour {
 	/// <summary>
 	/// ////////////////////////////////////////////
 	/// </summary>
+	public int SpecSize = 256;
 	public int bufferSize = 256;
 	MusicData [] md;//=new MusicData[bufferSize] ;//存音乐信息
 	float[] lastAverage;//=new float[bufferSize] ;//存前1024帧
@@ -52,7 +53,7 @@ public class maintest2 : MonoBehaviour {
 		 md=new MusicData[bufferSize] ;//存音乐信息
 		lastAverage=new float[bufferSize] ;//存前1024帧
 		lastAverageInc=new float[bufferSize] ;//存前1024帧
-		spectrum =new float[bufferSize ];
+		spectrum =new float[SpecSize ];
 
 		_audio=GetComponent<AudioSource> ();
 		_audio.Play();
@@ -101,8 +102,6 @@ public class maintest2 : MonoBehaviour {
 			onbeatlow = false;
 			onbeatmid = false;
 			onbeathigh = false;
-		} else {
-			_audio.PlayOneShot (mmm);
 		}
 		//测试用
 		if(Input.GetKeyDown (KeyCode.A)){
@@ -150,7 +149,7 @@ public class maintest2 : MonoBehaviour {
 	{
 		
 		//当音频频率没有达到48000时，根据音频频率取全部采样中的前几个
-		int freqlength=(int)Mathf.Floor (bufferSize *_audio.clip.frequency/AudioSettings.outputSampleRate  );
+		int freqlength=(int)Mathf.Floor (SpecSize *_audio.clip.frequency/AudioSettings.outputSampleRate  );
 		//Debug.Log  ("freqlength="+_audio.clip.frequency+"/"+AudioSettings.outputSampleRate+"="+freqlength+"///"+Mathf.Log(1));
 		float musicenergy=0;
 		//float musicenergylow=0;
@@ -228,18 +227,21 @@ public class maintest2 : MonoBehaviour {
 			return;
 		}
 		int largeindex = 0;
+		int largeindexF = 0;
 		//int lastAverageInc = 0;
 		float largeenergy = lastAverageInc [lastbeatindex];
 		for (int i = lastbeatindex+1; i < CurrentIndex-2; i++) {
 			if (lastAverageInc [i] > largeenergy) {
+				largeindexF = largeindex;
 				largeindex = i;
 				largeenergy = lastAverageInc [i];
 			}
 		}
 
 		float beatsincelast = CurrentIndex - lastbeatindex;
-		if (beatsincelast > bufferSize / 4) {
-			if (lastAverageInc [CurrentIndex - 1] > largeenergy * enegryaddup) {
+		if (beatsincelast > bufferSize / 4 ) {
+			//&& bufferSize-largeindexF<4
+			if (lastAverageInc [CurrentIndex - 1] > largeenergy * enegryaddup  ) {
 				//if (CurrentFrameAvg > largeenergy*enegryaddup  && (CurrentIndex-lastbeatindex )>bufferSize /8) {
 
 				onbeat = true;
@@ -255,6 +257,8 @@ public class maintest2 : MonoBehaviour {
 				timestep = _audio.timeSamples - timelast;
 				timelast = _audio.timeSamples;
 				Debug.LogError ("onbeat  " + _audio.timeSamples + "-" + lastbeatindex + "," + largeindex + "," + largeenergy + "---" + lastAverageInc [CurrentIndex - 1]);
+
+					_audio.PlayOneShot (mmm);
 
 			} else {
 				onbeat = false;

@@ -10,13 +10,17 @@ public class MusicData
 public class maintest2 : MonoBehaviour {
 	AudioSource _audio;
 	public AudioClip mmm;
-	public  GameObject ggg;
-	float gggtestpos=0;
+	public  GameObject cubelow;
+	public  GameObject cubemid;
+	public  GameObject cubehigh;
+	float gggtestposlow=0;
+	float gggtestposmid=0;
+	float gggtestposhigh=0;
 	float gggscale=1;
 
-	public float  low;
-	public float  mid;
-	public float high;
+	public float  AvgLow;
+	public float  AvgMid;
+	public float AvgHigh;
 	public float superhigh;
 	public string strclips;
 	/// <summary>
@@ -29,6 +33,16 @@ public class maintest2 : MonoBehaviour {
 	ArrayList beatlist=new ArrayList() ;//存音乐信息
 	float[] spectrum ;// new float[bufferSize ];//每帧采样64个
 	float[] clips = new float[8];//分成8个频段
+
+	//end存当前帧之前或，前1024帧增长值
+	int lastbeatindex=0;
+	bool  onbeat=false;
+	bool  onbeatlow=false;
+	bool  onbeatmid=false;
+	bool  onbeathigh=false;
+
+	float CurrentFrameAvg=0;
+	float LastFrameAvg=0;
 	/// <summary>
 	/// ///////////////////////////////////
 	/// </summary>
@@ -55,16 +69,41 @@ public class maintest2 : MonoBehaviour {
 			//searchBeat ();
 		}
 
-		if (onbeat) {
-			gggtestpos = 10+(0.1f*gggscale);
-			ggg.transform.localScale = new Vector3 (gggtestpos, gggtestpos , gggtestpos);
+		if (onbeatlow) {
+			gggtestposlow = 10;//+(0.1f*gggscale);
+
 		} else {
-			if (gggtestpos > 0) {
-				gggtestpos-=gggtestpos/5;
-				ggg.transform.localScale  = new Vector3 (gggtestpos, gggtestpos, gggtestpos);
+			if (gggtestposlow > 0) {
+				gggtestposlow-=gggtestposlow/5;
 			}
 		}
+		cubelow.transform.localScale = new Vector3 (gggtestposlow, gggtestposlow , gggtestposlow);
+		if (onbeatmid) {
+			gggtestposmid = 10;//+(0.1f*gggscale);
 
+		} else {
+			if (gggtestposmid > 0) {
+				gggtestposmid-=gggtestposmid/5;
+			}
+		}
+		cubemid.transform.localScale = new Vector3 (gggtestposmid, gggtestposmid , gggtestposmid);
+		if (onbeathigh) {
+			gggtestposhigh = 10;//+(0.1f*gggscale);
+
+		} else {
+			if (gggtestposhigh > 0) {
+				gggtestposhigh-=gggtestposhigh/5;
+			}
+		}
+		cubehigh.transform.localScale = new Vector3 (gggtestposhigh, gggtestposhigh , gggtestposhigh);
+
+		if (!onbeat) {
+			onbeatlow = false;
+			onbeatmid = false;
+			onbeathigh = false;
+		} else {
+			_audio.PlayOneShot (mmm);
+		}
 		//测试用
 		if(Input.GetKeyDown (KeyCode.A)){
 			//	_audio.Stop();
@@ -81,43 +120,8 @@ public class maintest2 : MonoBehaviour {
 			_audio.Pause  ();
 
 		}
-		if(Input.GetKeyDown (KeyCode.X   )){
 
-			Debug.Log ( md.Length );
-			Debug.Log("SampleRate= "+_audio .clip.frequency  );
-			Debug.Log("outputSampleRate= "+AudioSettings .outputSampleRate );
-			Debug.Log ((int)Mathf.Floor (64*_audio.clip.frequency/AudioSettings.outputSampleRate  ));
-			float  iclips;
-			float  iclipsint;
-			int speclength=8;
-			int cliplength=4;
-			string ttt = "";
-			string tttint = "";
-			for (int i =1; i <= speclength; i++) {
-				iclips = Mathf.Log (i+1, speclength) * cliplength;
-				ttt+=iclips +",";
-				iclipsint = Mathf.Floor (0.5f+iclips)-1;
-				tttint += iclipsint+",";
-			}
-			Debug.Log ("ttt=" + ttt);
-			Debug.Log ("tttint=" + tttint);
-		
 
-		}
-		if(Input.GetKeyDown (KeyCode.Q )){
-			float lastavg = 0;
-			string stt="";
-			for (int i = 0; i <  md.Length; i++) {
-				//Debug.Log (md);
-				MusicData mmm=(MusicData )md[i];
-				stt+=mmm.Average +","+mmm.playtime +" **";
-
-				Debug.DrawRay (new Vector3 (i - 1, mmm.Average * 100, 0), new Vector3 (1, lastavg, 0), Color.blue);
-					lastavg=mmm.Average ;
-			}
-			Debug.Log (stt);
-
-		}
 		//end测试用
 
 	
@@ -126,8 +130,15 @@ public class maintest2 : MonoBehaviour {
 	void recordmusicdata()
 	{
 	////////////////////////////////////////
-		_audio .GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
-		CurrentFrameAvg = CalcCurrentFrameAvg (spectrum);
+		_audio .GetSpectrumData(spectrum, 0, FFTWindow.BlackmanHarris);
+
+		CurrentFrameAvg =CalcCurrentFrameAvg (spectrum);// musicenergy;
+		AvgLow = (clips [0] )/1;
+		AvgMid = (clips [2] + clips [3]+ clips [4]+clips [1])/4;
+		AvgHigh = ( clips [5] + clips [6] + clips [7])/3;
+		superhigh =( clips [5] + clips [6] + clips [7]);
+
+		strclips=AvgLow+","+AvgMid+","+AvgHigh;
 		recordAvgInc ();
 		CheckBeat ();
 
@@ -135,25 +146,37 @@ public class maintest2 : MonoBehaviour {
 	}
 
 	//计算当前帧的平均值
-	float CalcCurrentFrameAvg(float[] spec)
+	float   CalcCurrentFrameAvg(float[] spec)
 	{
+		
 		//当音频频率没有达到48000时，根据音频频率取全部采样中的前几个
 		int freqlength=(int)Mathf.Floor (bufferSize *_audio.clip.frequency/AudioSettings.outputSampleRate  );
 		//Debug.Log  ("freqlength="+_audio.clip.frequency+"/"+AudioSettings.outputSampleRate+"="+freqlength+"///"+Mathf.Log(1));
 		float musicenergy=0;
-		float musicenergylow=0;
+		//float musicenergylow=0;
+		int[] cliplength = new int[clips.Length ];
+
+		for (int i = 0; i < clips.Length; i++) {
+			clips [i] =0;
+			cliplength [i] = 0;
+		}
+
 		for (int i =0; i < freqlength; i++)
 		{
 			musicenergy += spectrum [i];//总音量和，需要取平均数使用
 			int icic =(int) Mathf.Floor (0.5f+Mathf.Log(i+2,freqlength )*clips.Length ) -1;//对数方式，将频率分为几段
 			//Debug.Log  ("icic="+icic);;
 			clips [icic] += spectrum [i];//每个频段的音量和，可能需要求平均数再使用
+			cliplength[icic]++;
 
 		}
+		for (int i = 0; i < clips.Length; i++) {
+			clips [i] /= cliplength [i];
+		}
 		musicenergy /= freqlength;//当前帧 平均值
-		musicenergylow=(clips[0]+clips[1]);
-		//return musicenergy ;
-		return musicenergylow ;
+	//	musicenergylow=(clips[0]+clips[1]);
+		return musicenergy ;
+		//return musicenergylow ;
 	}
 	//end 计算当前帧的平均值
 
@@ -161,25 +184,10 @@ public class maintest2 : MonoBehaviour {
 	int CurrentIndex=0;//存1024帧中的位置
 
 
-	//存当前帧前面帧数，或前1024帧平均值
-//	void recordAvg(float currentframeavg)
-//	{
-//		if (CurrentIndex < bufferSize) {
-//			//1024帧之前
-//			lastAverage  [CurrentIndex] = currentframeavg;
-//		} else { 
-//			lastAverage  [CurrentIndex - bufferSize] = currentframeavg;
-//		}
-//		CurrentIndex++;
-//		if (CurrentIndex > bufferSize * 2) {
-//			CurrentIndex = bufferSize;
-//		}
-//	}
-	//end//存当前帧前面帧数，或前1024帧平均值
 
 	//存当前帧之前或，前1024帧增长值
-	float CurrentFrameAvg=0;
-	float LastFrameAvg=0;
+	public  GameObject drawline;
+	public  float  lastAvgInc;
 	void  recordAvgInc()
 	{
 		if (CurrentIndex == 0) {
@@ -188,16 +196,19 @@ public class maintest2 : MonoBehaviour {
 
 		}else if (CurrentIndex < bufferSize) {
 			//1024帧之前
-			lastAverageInc  [CurrentIndex] = CurrentFrameAvg-LastFrameAvg ;
+			lastAverageInc  [CurrentIndex] =CurrentFrameAvg-LastFrameAvg;//Mathf.Sqrt (Mathf.Abs( CurrentFrameAvg-LastFrameAvg)) ;
 
 		} else { 
 			//lastAverage  [CurrentIndex - bufferSize] = currentframeavg-LastFrameAvg ;
 			for (int i = 0; i < bufferSize-1; ++i) {
 				lastAverageInc [i] = lastAverageInc [i + 1];
 			}
-			lastAverageInc [bufferSize - 1] = CurrentFrameAvg-LastFrameAvg;
-		}
+			lastAverageInc [bufferSize - 1] = CurrentFrameAvg - LastFrameAvg;// Mathf.Sqrt  ( Mathf.Abs( CurrentFrameAvg-LastFrameAvg));
 
+			//Debug.DrawLine(new Vector3 (1,0,0),new Vector3 (1,100*lastAverageInc [bufferSize - 1],0));
+		}
+		lastAvgInc = lastAverageInc [bufferSize - 1];
+		drawline.transform.localScale = new Vector3 (1,Mathf.Max(0.5f, 100 * lastAverageInc [bufferSize - 1]), 0);
 
 		LastFrameAvg = CurrentFrameAvg;
 		if (CurrentIndex < bufferSize) {
@@ -205,33 +216,52 @@ public class maintest2 : MonoBehaviour {
 		}	
 	}
 	//end存当前帧之前或，前1024帧增长值
-	int lastbeatindex=0;
-	bool  onbeat=false;
+
 	[Range(1,4)]
 	public float enegryaddup = 1.2f;
+	int timelast;
+	public int timestep;
 	//检查是否为beat
 	void CheckBeat()
 	{  
+		if (CurrentIndex < bufferSize) {
+			return;
+		}
 		int largeindex = 0;
 		//int lastAverageInc = 0;
 		float largeenergy = lastAverageInc [lastbeatindex];
-		for (int i = lastbeatindex+1; i < CurrentIndex-1; i++) {
+		for (int i = lastbeatindex+1; i < CurrentIndex-2; i++) {
 			if (lastAverageInc [i] > largeenergy) {
 				largeindex = i;
 				largeenergy = lastAverageInc [i];
 			}
 		}
 
-		if (CurrentFrameAvg > largeenergy*enegryaddup  && (CurrentIndex-lastbeatindex )>bufferSize /4) {
-		//if (CurrentFrameAvg > largeenergy*enegryaddup  && (CurrentIndex-lastbeatindex )>bufferSize /8) {
-			onbeat = true;
-			gggscale = CurrentFrameAvg / largeenergy;
-			lastbeatindex = CurrentIndex;//largeindex;
-			Debug.LogError   ("onbeat"+lastbeatindex+","+CurrentIndex +","+largeindex+","+largeenergy+"---"+CurrentFrameAvg);
+		float beatsincelast = CurrentIndex - lastbeatindex;
+		if (beatsincelast > bufferSize / 4) {
+			if (lastAverageInc [CurrentIndex - 1] > largeenergy * enegryaddup) {
+				//if (CurrentFrameAvg > largeenergy*enegryaddup  && (CurrentIndex-lastbeatindex )>bufferSize /8) {
 
-		} else {
-			onbeat = false;
-			Debug.Log ("checkbeat "+lastbeatindex+","+CurrentIndex +","+largeindex+","+largeenergy+"---"+CurrentFrameAvg);
+				onbeat = true;
+				if (AvgLow > AvgMid && AvgLow > AvgHigh) {
+					onbeatlow = true;
+				} else if (AvgMid > AvgLow && AvgMid > AvgHigh) {
+					onbeatmid = true;
+				} else {
+					onbeathigh = true;
+				}
+				gggscale = CurrentFrameAvg / largeenergy;
+				lastbeatindex = CurrentIndex;//largeindex;
+				timestep = _audio.timeSamples - timelast;
+				timelast = _audio.timeSamples;
+				Debug.LogError ("onbeat  " + _audio.timeSamples + "-" + lastbeatindex + "," + largeindex + "," + largeenergy + "---" + lastAverageInc [CurrentIndex - 1]);
+
+			} else {
+				onbeat = false;
+
+			}
+			Debug.Log ("oncheck  " + _audio.timeSamples + "-" + lastbeatindex + "," + largeindex + "," + largeenergy + "---" + lastAverageInc [CurrentIndex - 1]);
+
 		}
 		lastbeatindex--;//后退一位
 		if (lastbeatindex < 0) {

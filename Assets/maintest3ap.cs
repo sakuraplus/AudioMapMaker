@@ -1,26 +1,13 @@
-﻿/*
- * Copyright (c) 2015 Allan Pichardo
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *  http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
+//public class MusicData
+//{
+//	public float playtime = 0;
+//	public float Average = 0;
+//	public bool onbeat = false;
+//}
 
-[RequireComponent (typeof(AudioSource))]
-public class AudioProcessor : MonoBehaviour
-{
+public class maintest3ap : MonoBehaviour {
 	public AudioSource audioSource;
 
 	private long lastT, nowT, diff, entries, sum;
@@ -32,27 +19,28 @@ public class AudioProcessor : MonoBehaviour
 
 	/* log-frequency averaging controls */
 	private int nBand = 12;
-	// number of bands
+	// number of bands 频段
 
 	public float gThresh = 0.1f;
-	// sensitivity
+	// sensitivity灵敏度
 
-	int blipDelayLen = 16;
-	int[] blipDelay;
+//	int blipDelayLen = 16;
+//	int[] blipDelay;
 
 	private int sinceLast = 0;
-	// counter to suppress double-beats
+	// counter to suppress double-beats到上一个beat之间的时间
 
 	private float framePeriod;
 
 	/* storage space */
-	private int colmax = 120;
-	float[] spectrum;
-	float[] averages;
-	float[] acVals;
-	float[] onsets;
-	float[] scorefun;
-	float[] dobeat;
+	private int colmax = 120;//存当前帧之前的帧数
+
+	float[] spectrum;//当前帧所有数据
+	float[] averages;//当前帧 各频段 增加值 平均数
+//	float[] acVals;
+//	float[] onsets;
+	float[] scorefun;//当前帧及之前120帧
+//	float[] dobeat;
 	int now = 0;
 	// time index for circular buffer within above
 
@@ -60,13 +48,13 @@ public class AudioProcessor : MonoBehaviour
 	// the spectrum of the previous step
 
 	/* Autocorrelation structure */
-	int maxlag = 100;
+	int maxlag = 100;//最大间隔
 	// (in frames) largest lag to track
-	float decay = 0.997f;
+	float decay = 0.997f;//衰减?
 	// smoothing constant for running average
 	Autoco auco;
 
-	private float alph;
+	private float alph;//灵敏度相关？
 	// trade-off constant between tempo deviation penalty and onset strength
 
 	[Header ("Events")]
@@ -82,13 +70,13 @@ public class AudioProcessor : MonoBehaviour
 
 	private void initArrays ()
 	{
-		blipDelay = new int[blipDelayLen];
-		onsets = new float[colmax];
+//		blipDelay = new int[blipDelayLen];
+//		onsets = new float[colmax];//colmax = 120;//存当前帧之前的帧数
 		scorefun = new float[colmax];
-		dobeat = new float[colmax];
+//		dobeat = new float[colmax];
 		spectrum = new float[bufferSize];
 		averages = new float[12];
-		acVals = new float[maxlag];
+//		acVals = new float[maxlag];//100最大间隔
 		alph = 100 * gThresh;
 	}
 
@@ -109,7 +97,7 @@ public class AudioProcessor : MonoBehaviour
 
 		auco = new Autoco (maxlag, decay, framePeriod, getBandWidth ());
 
-		lastT = getCurrentTimeMillis ();
+		lastT = getCurrentTimeMillis ();//上一帧时间
 	}
 
 
@@ -118,38 +106,46 @@ public class AudioProcessor : MonoBehaviour
 	void Update ()
 	{
 		if (audioSource.isPlaying) {
-			audioSource.GetSpectrumData (spectrum, 0, FFTWindow.BlackmanHarris);
+			audioSource.GetSpectrumData (spectrum, 0, FFTWindow.BlackmanHarris);//BlackmanHarris
 			computeAverages (spectrum);
-			onSpectrum.Invoke (averages);
+		//	onSpectrum.Invoke (averages);
 
 			/* calculate the value of the onset function in this frame */
 			float onset = 0;
 			for (int i = 0; i < nBand; i++) {
+				//12个频段
 				float specVal = (float)System.Math.Max (-100.0f, 20.0f * (float)System.Math.Log10 (averages [i]) + 160); // dB value of this band
 				specVal *= 0.025f;
-				float dbInc = specVal - spec [i]; // dB increment since last frame
-				spec [i] = specVal; // record this frome to use next time around
-				onset += dbInc; // onset function is the sum of dB increments
+				float dbInc = specVal - spec [i]; // dB increment since last frame当前频段,当前帧与前一帧增加值
+				spec [i] = specVal; // record this frome to use next time around更新前一帧音量
+				onset += dbInc; // onset function is the sum of dB increments所有频段的增加值
 			}
 
-			onsets [now] = onset;
+//			onsets [now] = onset;//当前帧所有频段的增加值
+			//onsets = new float[colmax];colmax = 120;存当前帧之前的帧数,now为在120帧内的当前时间,循环使用
 
-			/* update autocorrelator and find peak lag = current tempo */
-			auco.newVal (onset);
+			/* update autocorrelator and 找峰值间隔 find peak lag = current tempo */
+			auco.newVal (onset);//保存100个增加值,处理数据
+
 			// record largest value in (weighted) autocorrelation as it will be the tempo
 			float aMax = 0.0f;
 			int tempopd = 0;
 			//float[] acVals = new float[maxlag];
 			for (int i = 0; i < maxlag; ++i) {
-				float acVal = (float)System.Math.Sqrt (auco.autoco (i));
+				//在保存的100个数据中找最大值,平方或绝对值
+				float acVal =(float)System.Math.Sqrt (auco.autoco (i));
 				if (acVal > aMax) {
 					aMax = acVal;
-					tempopd = i;
+					tempopd = i;//记录最大值在100个中的位置
 				}
 				// store in array backwards, so it displays right-to-left, in line with traces
-				acVals [maxlag - 1 - i] = acVal;
+//				acVals [maxlag - 1 - i] = acVal;//acVals没有什么用?
+				//倒序
 			}
 
+
+
+			//计算 scorefun ,
 			/* calculate DP-ish function to update the best-score function */
 			float smax = -999999;
 			int smaxix = 0;
@@ -159,6 +155,7 @@ public class AudioProcessor : MonoBehaviour
 			for (int i = tempopd / 2; i < System.Math.Min (colmax, 2 * tempopd); ++i) {
 				// objective function - this beat's cost + score to last beat + transition penalty
 				float score = onset + scorefun [(now - i + colmax) % colmax] - alph * (float)System.Math.Pow (System.Math.Log ((float)i / (float)tempopd), 2);
+				//onset当前增加值.now在120帧中位置,
 				// keep track of the best-scoring predecesor
 				if (score > smax) {
 					smax = score;
@@ -166,14 +163,25 @@ public class AudioProcessor : MonoBehaviour
 				}
 			}
 
-			scorefun [now] = smax;
+			scorefun [now] = smax;//当前帧的什么最大值?
+
 			// keep the smallest value in the score fn window as zero, by subtracing the min val
 			float smin = scorefun [0];
-			for (int i = 0; i < colmax; ++i)
-				if (scorefun [i] < smin)
+			for (int i = 0; i < colmax; ++i){
+				if (scorefun [i] < smin){
 					smin = scorefun [i];
-			for (int i = 0; i < colmax; ++i)
+					}
+				}
+			for (int i = 0; i < colmax; ++i){
 				scorefun [i] -= smin;
+				}
+			//end计算 scorefun ,
+ 
+				/////////////////////////////////////////////888
+
+		//	scorefun [now] =onset;
+				/////////////////////////////////////////////888
+
 
 			/* find the largest value in the score fn window, to decide if we emit a blip */
 			smax = scorefun [0];
@@ -186,17 +194,17 @@ public class AudioProcessor : MonoBehaviour
 			}
 
 			// dobeat array records where we actally place beats
-			dobeat [now] = 0;  // default is no beat this frame
+//			dobeat [now] = 0;  // default is no beat this frame
 			++sinceLast;
-			// if current value is largest in the array, probably means we're on a beat
+			// if current value is largest in the array, probably means we're on a beat 当前帧在120帧中score最大
 			if (smaxix == now) {
 				//tapTempo();
 				// make sure the most recent beat wasn't too recently
 				if (sinceLast > tempopd / 4) {
 					onBeat.Invoke ();			
-					blipDelay [0] = 1;
+//					blipDelay [0] = 1;
 					// record that we did actually mark a beat this frame
-					dobeat [now] = 1;
+//					dobeat [now] = 1;
 					// reset counter of frames since last beat
 					sinceLast = 0;
 				}
@@ -206,30 +214,15 @@ public class AudioProcessor : MonoBehaviour
 			if (++now == colmax)
 				now = 0;
 
-			//Debug.Log(System.Math.Round(60 / (tempopd * framePeriod)) + " bpm");
-			//Debug.Log(System.Math.Round(auco.avgBpm()) + " bpm");
 		}
 	}
 
-//	public void changeCameraColor ()
-//	{
-//		//Debug.Log("camera");
-//		float r = Random.Range (0f, 1f);
-//		float g = Random.Range (0f, 1f);
-//		float b = Random.Range (0f, 1f);
-//
-//		//Debug.Log(r + "," + g + "," + b);
-//		Color color = new Color (r, g, b);
-//
-//		GetComponent<Camera> ().clearFlags = CameraClearFlags.Color;
-//		Camera.main.backgroundColor = color;
-//
-//		//camera.backgroundColor = color;
-//	}
+
 
 	public float getBandWidth ()
 	{
-		return (2f / (float)bufferSize) * (samplingRate / 2f);
+		//spec中有效的部分
+		return (float)samplingRate/bufferSize;// (2f / (float)bufferSize) * (samplingRate / 2f);
 	}
 
 	public int freqToIndex (int freq)
@@ -250,13 +243,17 @@ public class AudioProcessor : MonoBehaviour
 	public void computeAverages (float[] data)
 	{
 		for (int i = 0; i < 12; i++) {
+			//分12个频段,平均分配的,建议用对数分配
 			float avg = 0;
 			int lowFreq;
-			if (i == 0)
+			if (i == 0){
 				lowFreq = 0;
-			else
+			}else{
 				lowFreq = (int)((samplingRate / 2) / (float)System.Math.Pow (2, 12 - i));
+			}
 			int hiFreq = (int)((samplingRate / 2) / (float)System.Math.Pow (2, 11 - i));
+
+
 			int lowBound = freqToIndex (lowFreq);
 			int hiBound = freqToIndex (hiFreq);
 			for (int j = lowBound; j <= hiBound; j++) {
@@ -266,27 +263,10 @@ public class AudioProcessor : MonoBehaviour
 			// line has been changed since discussion in the comments
 			// avg /= (hiBound - lowBound);
 			avg /= (hiBound - lowBound + 1);
-			averages [i] = avg;
+			averages [i] = avg;//分12个频段保存平均值
 		}
 	}
 
-	float map (float s, float a1, float a2, float b1, float b2)
-	{
-		return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
-	}
-
-	public float constrain (float value, float inclusiveMinimum, float inlusiveMaximum)
-	{
-		if (value >= inclusiveMinimum) {
-			if (value <= inlusiveMaximum) {
-				return value;
-			}
-
-			return inlusiveMaximum;
-		}
-
-		return inclusiveMinimum;
-	}
 
 	[System.Serializable]
 	public class OnBeatEventHandler : UnityEngine.Events.UnityEvent
@@ -314,11 +294,12 @@ public class AudioProcessor : MonoBehaviour
 		private float wmidbpm = 120f;
 		private float woctavewidth;
 
+		//auco = new Autoco (maxlag, decay, framePeriod, getBandWidth ());100最大间隔,衰减,,spec中有效部分
 		public Autoco (int len, float alpha, float framePeriod, float bandwidth)
 		{
 			woctavewidth = bandwidth;
-			decay = alpha;
-			del_length = len;
+			decay = alpha;//decay=0.997衰减?
+			del_length = len;//100最大间隔
 			delays = new float[del_length];
 			outputs = new float[del_length];
 			indx = 0;
@@ -337,12 +318,14 @@ public class AudioProcessor : MonoBehaviour
 		public void newVal (float val)
 		{
 
-			delays [indx] = val;
+			delays [indx] = val;//更新为前100帧
 
 			// update running autocorrelator values
 			for (int i = 0; i < del_length; ++i) {
-				int delix = (indx - i + del_length) % del_length;
+				int delix = (indx - i + del_length) % del_length;//index前一帧在100帧中的位置
 				outputs [i] += (1 - decay) * (delays [indx] * delays [delix] - outputs [i]);
+				//outputs [i] =(1-衰减)*(当前-前帧)+outputs [i] *衰减
+				//变化平滑
 			}
 
 			if (++indx == del_length)
@@ -356,15 +339,6 @@ public class AudioProcessor : MonoBehaviour
 			return blah;
 		}
 
-		public float avgBpm ()
-		{
-			float sum = 0;
-			for (int i = 0; i < bpms.Length; ++i) {
-				sum += bpms [i];
-			}
-			return sum / del_length;
-		}
+
 	}
 }
-
-

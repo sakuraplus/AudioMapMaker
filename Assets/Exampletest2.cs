@@ -17,7 +17,7 @@
 using UnityEngine;
 using System;
 
-public class Example : MonoBehaviour
+public class Exampletest2 : MonoBehaviour
 {
 	public  GameObject ggg;
 	float ii=0;
@@ -27,8 +27,8 @@ public class Example : MonoBehaviour
 		sd=GetComponent<AudioSource>();
 		//Select the instance of AudioProcessor and pass a reference
 		//to this object
-//		AudioProcessor processor = FindObjectOfType<AudioProcessor> ();
-		maintest3ap processor = FindObjectOfType<maintest3ap > ();
+		AudioProcessor processor = FindObjectOfType<AudioProcessor> ();
+//		maintest3ap processor = FindObjectOfType<maintest3ap > ();
 		processor.onBeat.AddListener (onOnbeatDetected);
 		processor.onSpectrum.AddListener (onSpectrum);
 	}

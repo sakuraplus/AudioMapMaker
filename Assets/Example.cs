@@ -19,6 +19,7 @@ using System;
 
 public class Example : MonoBehaviour
 {
+	public AudioClip mmm;
 	public  GameObject ggg;
 	float ii=0;
 	AudioSource sd;
@@ -40,6 +41,7 @@ public class Example : MonoBehaviour
 	{
 		//Debug.Log ("Beat!!!");
 		ii = 5;
+		sd.PlayOneShot (mmm);
 		ggg.transform.localScale   = new Vector3 (5,5,5);
 	}
 	float playtime=0;
@@ -51,32 +53,7 @@ public class Example : MonoBehaviour
 			ii -= ii / 5;
 			ggg.transform.localScale    = new Vector3 (ii,ii,ii);
 		}
-		if(Input.GetKeyDown (KeyCode.A)){
-		//	sd.Stop();
-			Debug.Log(sd.timeSamples+"/stop//"+sd.time+"///"+Time.time );
-		}
-		if (Input.GetKeyDown (KeyCode.Z)) {
-			if (!sd.isPlaying) {
-				sd.Play ();
-			
-				playtime = Time.time;
-				Debug.Log (sd.timeSamples + "/Play//" + sd.time + "///" + Time.time);
-			}
-		}
-		if(Input.GetKeyDown (KeyCode.S  )){
-			sd.Pause  ();
-			pausetime = Time.time;
-			Debug.Log(sd.timeSamples+"/Pause//"+sd.time+"///"+Time.time );
-		}
-		if(Input.GetKeyDown (KeyCode.X   )){
-			unpausetime = Time.time;
-			sd.UnPause   ();
-			Debug.Log(sd.timeSamples+"/UnPause//"+sd.time+"///"+Time.time );
-		}
-		if(Input.GetKeyDown (KeyCode.Q )){
-			//sd.UnPause   ();
-			Debug.Log((sd.time+playtime+unpausetime-pausetime  )+"/UnPause//"+sd.time+"///"+Time.time );
-		}
+	
 
 	}
 	//This event will be called every frame while music is playing

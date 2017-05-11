@@ -1,12 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
-//public class MusicData
-//{
-//	public float playtime = 0;
-//	public float Average = 0;
-//	public bool onbeat = false;
-//}
 
+/// <summary>
+/// audioprocessor的方法/// 
+/// </summary>
 public class maintest3ap : MonoBehaviour {
 	public AudioSource audioSource;
 

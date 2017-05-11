@@ -6,7 +6,9 @@ using System.Collections;
 //	public float Average = 0;
 //	public bool onbeat = false;
 //}
-
+/// <summary>
+/// 检测音量大小
+/// </summary>
 public class main : MonoBehaviour {
 	AudioSource _audio;
 	public AudioClip mmm;

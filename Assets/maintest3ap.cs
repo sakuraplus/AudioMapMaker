@@ -240,7 +240,7 @@ public class maintest3ap : MonoBehaviour {
 	public void computeAverages (float[] data)
 	{
 		for (int i = 0; i < 12; i++) {
-			//分12个频段,平均分配的,建议用对数分配
+			//分12个频段,平均分配的,建议用对数分配?
 			float avg = 0;
 			int lowFreq;
 			if (i == 0){
@@ -309,6 +309,7 @@ public class maintest3ap : MonoBehaviour {
 				//Debug.Log(bpms[i]);
 				// weighting is Gaussian on log-BPM axis, centered at wmidbpm, SD = woctavewidth octaves
 				rweight [i] = (float)System.Math.Exp (-0.5f * System.Math.Pow (System.Math.Log (bpms [i] / wmidbpm) / System.Math.Log (2.0f) / woctavewidth, 2.0f));
+				Debug.Log(rweight[i]);
 			}
 		}
 

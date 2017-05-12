@@ -4,7 +4,8 @@ public class MusicData
 {
 	public float playtime = 0;
 	public float Average = 0;
-	public bool onbeat = false;
+	public bool OnBeat = false;
+	public int BeatPos=-1;
 }
 /// <summary>
 /// 检测音量变化幅度
@@ -13,6 +14,7 @@ public class MusicData
 public class maintest2 : MonoBehaviour {
 	AudioSource _audio;
 	public AudioClip mmm;
+	public AudioClip mmmhigh;
 	public  GameObject cubelow;
 	public  GameObject cubemid;
 	public  GameObject cubehigh;
@@ -21,10 +23,19 @@ public class maintest2 : MonoBehaviour {
 	float gggtestposhigh=0;
 	float gggscale=1;
 
-	public float  方差;//
+
+	/// <summary>
+	/// ////////////////////////////////////////////
+	/// </summary>
+	[Header("最后帧/方差")]
+	public float  AvgLow;//
+	[Header("限制范围后的 最后帧/方差")]
 	public float  AvgMid;
+	[Header("方差")]
 	public float AvgHigh;
-	public float superhigh;
+	[Header("包含当前帧方差/不包含帧方差")]
+	public float AvgSuperhigh;
+	[Header("方差/前一帧方差")]
 	public float Avgmax;
 	public string strclips;
 	/// <summary>
@@ -68,7 +79,7 @@ public class maintest2 : MonoBehaviour {
 		lastbeatindexInClip=new int[numclips];//存各个频段上一次节拍的位置 
 		_audio=GetComponent<AudioSource> ();
 		_audio.Play();
-		_audio.loop = true;
+	//	_audio.loop = true;
 		//Application.targetFrameRate = 1;
 	}
 
@@ -78,7 +89,10 @@ public class maintest2 : MonoBehaviour {
 			recordmusicdata ();
 		} else {
 			Debug.Log ("stop");
-			//searchBeat ();
+
+	
+
+			DrawBeatMap ();
 		}
 
 		if (onbeatlow) {
@@ -121,10 +135,15 @@ public class maintest2 : MonoBehaviour {
 		//测试用
 		if(Input.GetKeyDown (KeyCode.A)){
 			//	_audio.Stop();
-			Debug.Log(_audio.timeSamples+"/stop//"+_audio.time+"///"+Time.time );
+			string sssss = "";
+			for(int i=0;i<spectrum.Length ;i++){
+				sssss+=spectrum[i]+" , ";
+			}
+			Debug.LogError ("----"+_audio.clip.frequency +" // "+_audio.time +" //   "+sssss );
+
+
 		}
 	
-
 		//end测试用
 
 	
@@ -133,15 +152,12 @@ public class maintest2 : MonoBehaviour {
 	void recordmusicdata()
 	{
 	////////////////////////////////////////
-		_audio .GetSpectrumData(spectrum, 0, FFTWindow.BlackmanHarris);
+		_audio .GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
 
 		CurrentFrameAvg =CalcCurrentFrameAvg (spectrum);// musicenergy;
-//		AvgLow = (clips [0] )/1;
-//		AvgMid = (clips [2] + clips [3]+ clips [4]+clips [1])/4;
-//		AvgHigh = ( clips [5] + clips [6] + clips [7])/3;
-//		superhigh =( clips [5] + clips [6] + clips [7]);
 
-		strclips=方差+","+AvgMid+","+AvgHigh;
+
+		//strclips=AvgLow+","+AvgMid+","+AvgHigh;
 		recordAvgInc ();
 		recordAvgInClip ();
 		//CheckBeat ();
@@ -154,7 +170,7 @@ public class maintest2 : MonoBehaviour {
 	float   CalcCurrentFrameAvg(float[] spec)
 	{
 		
-		//当音频频率没有达到48000时，根据音频频率取全部采样中的前几个
+		//当音频频率没有达到48000时，根据音频频率取全部采样中的前几个，单声道和立体声似乎没有区别
 		int freqlength=(int)Mathf.Floor (SpecSize *_audio.clip.frequency/AudioSettings.outputSampleRate  );
 		//Debug.Log  ("freqlength="+_audio.clip.frequency+"/"+AudioSettings.outputSampleRate+"="+freqlength+"///"+Mathf.Log(1));
 		float musicenergy=0;
@@ -166,6 +182,8 @@ public class maintest2 : MonoBehaviour {
 			cliplength [i] = 0;
 		}
 
+
+		//计算平均数及分频段时，只计算有效部分，忽略超出的freqlength
 		for (int i =0; i < freqlength; i++)
 		{
 			musicenergy += spectrum [i];//总音量和，需要取平均数使用
@@ -331,9 +349,9 @@ public class maintest2 : MonoBehaviour {
 				//if (CurrentFrameAvg > largeenergy*enegryaddup  && (CurrentIndex-lastbeatindex )>bufferSize /8) {
 
 				onbeat = true;
-				if (方差 > AvgMid && 方差 > AvgHigh) {
+				if (AvgLow > AvgMid && AvgLow > AvgHigh) {
 					onbeatlow = true;
-				} else if (AvgMid > 方差 && AvgMid > AvgHigh) {
+				} else if (AvgMid > AvgLow && AvgMid > AvgHigh) {
 					onbeatmid = true;
 				} else {
 					onbeathigh = true;
@@ -401,32 +419,46 @@ public class maintest2 : MonoBehaviour {
 			float tempVarInc;//计算之前帧的方差与当前帧平方的关系 
 			if (variance != 0) {
 				tempVarInc = Mathf.Pow (AvgInClipInc [CurrentIndex - 1, ic], 2) / variance;//当前帧增量的平方/当前之前的方差
-				方差=tempVarInc;//测试
+				AvgLow=tempVarInc;//测试
 			} else {
 				tempVarInc = 1.1f;//Mathf.Pow (AvgInClipInc [CurrentIndex - 1, ic], 2);
 			}
-			tempVarInc = Mathf.Clamp (tempVarInc, 0.9f, 1.1f);
+			tempVarInc = 0.5f + tempVarInc / 5000;
+			tempVarInc = Mathf.Clamp (tempVarInc, 0.5f, 1.2f);
 			AvgMid  = tempVarInc;//测试
+			AvgSuperhigh =(Mathf.Pow (AvgInClipInc [CurrentIndex - 1, ic], 2)-variance )/(2*variance);
+			strclips = "当前帧平方" + Mathf.Pow (AvgInClipInc [CurrentIndex - 1, ic], 2);
 			strvariance+=variance+",";//显示方差
+
+
+			//判断节拍///////////////////////
 			float beatsincelast = CurrentIndex - lastbeatindexInClip[ic];//当前频段与上一节拍之间的帧数
 			if (beatsincelast > bufferSize / 2) {//与上一节拍之间的帧数不够大则不认为此处是节拍
 				//&& bufferSize-largeindexF<4
 				if (AvgInClipInc [CurrentIndex - 1,ic]/Mathf.Abs( largeenergy * enegryaddup*tempVarInc)>1 ) {//当前帧增量为buffersize中最大的，且远大于之前的最大值
 					//if (CurrentFrameAvg > largeenergy*enegryaddup  && (CurrentIndex-lastbeatindex )>bufferSize /8) {
 
-					//onbeat = true;
+					//保存鼓点信息
+					MusicData md=new MusicData();
+					md.playtime = _audio.time;
+					md.OnBeat = true;
+					md.BeatPos = ic;
+					beatlist.Add (md);
+					//end 保存鼓点信息
+
 
 					//将频段分为高中低音，确定当前节拍属高中低音
 					if (ic<Mathf .Floor(numclips/3)) {
 						onbeatlow = true;
-						//_audio.PlayOneShot (mmm);
+						_audio.PlayOneShot (mmm);
 					} else if (ic>=Mathf .Floor(numclips/3)&&ic<Mathf .Floor(2*numclips/3)) {
 						onbeatmid = true;
 					} else {
 						onbeathigh = true;
 					}
-					_audio.PlayOneShot (mmm);
-
+					if (!onbeatlow &&(onbeatmid || onbeathigh)) {
+						_audio.PlayOneShot (mmmhigh );
+					}
 					lastbeatindexInClip[ic] = CurrentIndex;//记录当前频段的上一个节拍位置，每帧-1
 
 					//测试用
@@ -434,8 +466,8 @@ public class maintest2 : MonoBehaviour {
 					timestep = _audio.timeSamples - timelast;
 					timelast = _audio.timeSamples;
 					//end测试用
-					Debug.LogError ("onbeat time="+_audio.timeSamples +" ic=" + ic + " lastbeat=" + lastbeatindexInClip[ic] + ",largeindex=" + largeindex + "," + largeenergy + "---" + AvgInClipInc [CurrentIndex - 1,ic]);
-			
+					Debug.LogWarning  ("onbeat time="+_audio.timeSamples +" ic=" + ic + " lastbeat=" + lastbeatindexInClip[ic] + ",largeindex=" + largeindex + "," + largeenergy + "---" + AvgInClipInc [CurrentIndex - 1,ic]);
+					//Debug.LogError ("on   AvgSuperhigh="+AvgSuperhigh);
 
 
 				} else {
@@ -471,62 +503,87 @@ public class maintest2 : MonoBehaviour {
 	//end分频段检测是否为节拍
 
 
-	float[] avgs = new float[20];
-	float[] avgIncreases = new float[20];
+//	float[] avgs = new float[20];
+//	float[] avgIncreases = new float[20];
 
 
 
-
-	float calcAverage(int index)
-	{
-		float sum = 0;
-		MusicData mdnow;//= md [i];
-		MusicData mdlast;
-		if ( md.Length < 20) {
-			//return -1;
-			for (int i = 1; i <  md.Length ; i++) {
-				mdnow = md [i] as MusicData;
-				mdlast = md [i-1] as MusicData;
-				sum +=(mdnow.Average -mdlast.Average);
-				avgs [i] = (mdnow.Average - mdlast.Average);// md [i ];
-			}
-			return sum/ md.Length ;
-		}
-		int startindex;
-		int endindex;
-		if (index >  md.Length - 20) {
-			startindex = md.Length  - 21;
-			endindex =  md.Length;
-		} else {
-			startindex = index - 10;
-			endindex = index + 9;
-		}
-
-		for (int i = 0; i < 20 ; i++) {
-			//sum += md [i+startindex ];
-			//avgs[i]= md [i+startindex ];
-			if (startindex > 0) {
-				mdnow = md [i + startindex] as MusicData;
-				mdlast = md [i + startindex - 1] as MusicData;
-				avgIncreases [i] = mdnow.Average - mdlast.Average;
-				sum += avgIncreases [i];
-			} else {
-				avgIncreases [i] = 0;
-				sum += 0;
-			}
-		}
-		//float avg = sum / 20;
-		return sum/20;
-	}
-
-	void searchBeat()
-	{
-//		for (int i = 20; i <  md.Length; i++) {
-//			if (md [i] - md [i - 1] > calcAverage [i] * 2) {
-//				md[i].on
+//
+//	float calcAverage(int index)
+//	{
+//		float sum = 0;
+//		MusicData mdnow;//= md [i];
+//		MusicData mdlast;
+//		if ( md.Length < 20) {
+//			//return -1;
+//			for (int i = 1; i <  md.Length ; i++) {
+//				mdnow = md [i] as MusicData;
+//				mdlast = md [i-1] as MusicData;
+//				sum +=(mdnow.Average -mdlast.Average);
+//				avgs [i] = (mdnow.Average - mdlast.Average);// md [i ];
+//			}
+//			return sum/ md.Length ;
+//		}
+//		int startindex;
+//		int endindex;
+//		if (index >  md.Length - 20) {
+//			startindex = md.Length  - 21;
+//			endindex =  md.Length;
+//		} else {
+//			startindex = index - 10;
+//			endindex = index + 9;
+//		}
+//
+//		for (int i = 0; i < 20 ; i++) {
+//			//sum += md [i+startindex ];
+//			//avgs[i]= md [i+startindex ];
+//			if (startindex > 0) {
+//				mdnow = md [i + startindex] as MusicData;
+//				mdlast = md [i + startindex - 1] as MusicData;
+//				avgIncreases [i] = mdnow.Average - mdlast.Average;
+//				sum += avgIncreases [i];
+//			} else {
+//				avgIncreases [i] = 0;
+//				sum += 0;
 //			}
 //		}
+//		//float avg = sum / 20;
+//		return sum/20;
+//	}
+//
 
 
+
+	public float speed=2000;
+	GameObject beatmap;// = new GameObject ();
+	GameObject[] beats;// = new GameObject[beatlist.Count ];
+	public GameObject BeatPfb;
+	//
+	void DrawBeatMap()
+	{
+		if (beatmap != null) {
+			return;
+		}
+		beatmap = new GameObject ();
+		beats = new GameObject[beatlist.Count ];
+		float [] beattimes=new float[beatlist.Count ] ;
+		for (int i = 0; i < beatlist.Count; i++) {
+			MusicData md = (MusicData )beatlist [i];
+			GameObject beat= Instantiate (BeatPfb) as GameObject ;
+			beat.transform.parent = beatmap.transform ;
+//			beatmap.transform.position.y=
+			//beat.AddComponent<cub
+			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
+			beats[i]=beat;
+			beattimes [i] = md.playtime;
+
+		}
 	}
+
+
+	void PlayBeatMap()
+	{
+//		beatmap.transform p
+	}
+
 }

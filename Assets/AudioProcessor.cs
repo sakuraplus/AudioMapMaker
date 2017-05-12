@@ -331,6 +331,7 @@ public class AudioProcessor : MonoBehaviour
 				//Debug.Log(bpms[i]);
 				// weighting is Gaussian on log-BPM axis, centered at wmidbpm, SD = woctavewidth octaves
 				rweight [i] = (float)System.Math.Exp (-0.5f * System.Math.Pow (System.Math.Log (bpms [i] / wmidbpm) / System.Math.Log (2.0f) / woctavewidth, 2.0f));
+			
 			}
 		}
 

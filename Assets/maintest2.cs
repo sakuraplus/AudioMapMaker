@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.IO;
+
+[System. Serializable]
 public class MusicData
 {
 	public float playtime = 0;
@@ -7,12 +10,17 @@ public class MusicData
 	public bool OnBeat = false;
 	public int BeatPos=-1;
 }
+[System.Serializable]
+public class savedBeatMap{
+
+	public  MusicData[] MD;
+}
 /// <summary>
 /// 检测音量变化幅度
 /// 
 /// </summary>
 public class maintest2 : MonoBehaviour {
-	AudioSource _audio;
+	public  AudioSource _audio;
 	public AudioClip mmm;
 	public AudioClip mmmhigh;
 	public  GameObject cubelow;
@@ -50,6 +58,8 @@ public class maintest2 : MonoBehaviour {
 	float[,] AvgInClipInc;
 	float[,] AvgInClip;
 	ArrayList beatlist=new ArrayList() ;//存音乐信息
+	//
+
 	float[] spectrum ;// new float[bufferSize ];//每帧采样64个
 	float[] clips;// = new float[8];//分成8个频段
 	int[] lastbeatindexInClip;//存各个频段上一次节拍的位置 =new int[8];
@@ -63,6 +73,7 @@ public class maintest2 : MonoBehaviour {
 
 	float CurrentFrameAvg=0;
 	float LastFrameAvg=0;
+	bool playmap=false;
 	/// <summary>
 	/// ///////////////////////////////////
 	/// </summary>
@@ -78,21 +89,22 @@ public class maintest2 : MonoBehaviour {
 		lastframeclips =new float[numclips ];//分8个频段
 		lastbeatindexInClip=new int[numclips];//存各个频段上一次节拍的位置 
 		_audio=GetComponent<AudioSource> ();
-		_audio.Play();
+		_audio.pitch = 4;
+		//_audio.Play();
 	//	_audio.loop = true;
 		//Application.targetFrameRate = 1;
 	}
 
 	// Update is called once per frame
 	void Update () {
-		if (_audio.isPlaying) {
+		if (_audio.isPlaying && !playmap ) {
 			recordmusicdata ();
 		} else {
-			Debug.Log ("stop");
+			//Debug.Log ("stop");
 
 	
 
-			DrawBeatMap ();
+			//DrawBeatMap ();
 		}
 
 		if (onbeatlow) {
@@ -134,18 +146,41 @@ public class maintest2 : MonoBehaviour {
 //		}
 		//测试用
 		if(Input.GetKeyDown (KeyCode.A)){
-			//	_audio.Stop();
+
 			string sssss = "";
 			for(int i=0;i<spectrum.Length ;i++){
 				sssss+=spectrum[i]+" , ";
 			}
 			Debug.LogError ("----"+_audio.clip.frequency +" // "+_audio.time +" //   "+sssss );
 
+			playmap = true;
+			_audio.Play ();
+		}
+		if(Input.GetKeyDown (KeyCode.D   )){
+
+			DrawBeatMap ();
 
 		}
-	
-		//end测试用
+		if(Input.GetKeyDown (KeyCode.C )){
+			
+			CheckBeatMap ();
 
+		}
+		if(Input.GetKeyDown (KeyCode.L  )){
+
+			load (xxxx );
+
+		}
+		if(Input.GetKeyDown (KeyCode.S   )){
+
+			_audio.Play ();
+
+		}
+		//end测试用
+		if (playmap) {
+			_audio.pitch = 1;
+			PlayBeatMap ();
+		}
 	
 	}
 
@@ -564,26 +599,104 @@ public class maintest2 : MonoBehaviour {
 		if (beatmap != null) {
 			return;
 		}
+		savedBeatMap sbm=new savedBeatMap();
+		sbm.MD=new MusicData[beatlist.Count ] ;
+		string jsonstr="";
+		 jsonstr="{\"MD\":[\n";
 		beatmap = new GameObject ();
 		beats = new GameObject[beatlist.Count ];
 		float [] beattimes=new float[beatlist.Count ] ;
 		for (int i = 0; i < beatlist.Count; i++) {
 			MusicData md = (MusicData )beatlist [i];
+			sbm.MD [i] = md;
+			jsonstr += JsonUtility.ToJson (md)+",\n";
+			jsonstr = JsonUtility.ToJson (md);
 			GameObject beat= Instantiate (BeatPfb) as GameObject ;
+			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
 			beat.transform.parent = beatmap.transform ;
-//			beatmap.transform.position.y=
-			//beat.AddComponent<cub
+
 			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
 			beats[i]=beat;
 			beattimes [i] = md.playtime;
 
 		}
-	}
+		//jsonstr+= "]}";
+		Debug.Log(sbm.MD[1]);
+		Debug.Log("jsonstr="+jsonstr);
+		string ttt = JsonUtility.ToJson (sbm);
+		Debug.Log("ttt="+ttt);
 
+		Save (ttt);
+	}
+	 void Save(string jsonstr) {  
+
+		if(!Directory.Exists("Assets/save")) {  
+			Directory.CreateDirectory("Assets/save");  
+        }  
+		string filename="Assets/save/"+System.DateTime.Now.ToString ("dd-hh-mm-ss")+".json";
+		FileStream file = new FileStream(filename, FileMode.Create);  
+		byte[] bts = System.Text.Encoding.UTF8.GetBytes(jsonstr);  
+        file.Write(bts,0,bts.Length);  
+        if(file != null) {  
+            file.Close();  
+        }  
+    }  
+	[TextArea ]
+	public string xxxx;
+
+	void load(string jsonstr) {  
+		savedBeatMap  smdread = JsonUtility.FromJson<savedBeatMap> (jsonstr);
+		Debug.Log ("load smdread.md="+smdread.MD );
+
+		if (beats!=null) {
+			Debug.Log (beatmap.transform.childCount);
+			for (int i = 0; i < beats.Length; i++) {
+				DestroyImmediate (beats [i]);
+			}
+
+		} else {
+			beatmap = new GameObject ();
+			beats = new GameObject[smdread.MD.Length];
+		}
+
+
+	
+		float [] beattimes=new float[smdread.MD.Length ] ;
+		for (int i = 0; i < smdread.MD.Length; i++) {
+			MusicData md = (MusicData )smdread.MD [i];
+
+			GameObject beat= Instantiate (BeatPfb) as GameObject ;
+			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
+			beat.transform.parent = beatmap.transform ;
+
+			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
+			beats[i]=beat;
+			beattimes [i] = md.playtime;
+
+		}
+
+
+	}  
 
 	void PlayBeatMap()
 	{
-//		beatmap.transform p
+		beatmap.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
+		//beatmap.transform.position = Vector3.MoveTowards(beatmap.transform.position, myWaypoints[_myWaypointIndex].transform.position, moveSpeed * Time.deltaTime);
+	
 	}
+	void CheckBeatMap()
+	{
+
+		Beat[] beats = beatmap.GetComponentsInChildren <Beat> ();
+		foreach(Beat b in beats){
+			if (b.CheckState) {
+				b.transform.localScale = new Vector3 (10, 1, 1);
+				Debug.Log (_audio.time +"///"+ b.Destorytime);
+			//	_audio.PlayOneShot (mmm);
+			}
+		}
+	}
+
+
 
 }

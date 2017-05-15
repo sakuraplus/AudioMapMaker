@@ -99,7 +99,7 @@ public class maintest2 : MonoBehaviour {
 		lastAverage=new float[bufferSize] ;//存前1024帧
 		lastAverageInc=new float[bufferSize] ;//存前1024帧
 		spectrum =new float[SpecSize ];
-		clips=new float[numclips ];//分8个频段
+		clips=new float[numclips+1 ];//分8个频段
 		lastframeclips =new float[numclips ];//分8个频段
 		lastbeatindexInClip=new int[numclips];//存各个频段上一次节拍的位置 
 		_audio=GetComponent<AudioSource> ();
@@ -107,6 +107,11 @@ public class maintest2 : MonoBehaviour {
 		//_audio.Play();
 		//	_audio.loop = true;
 		//Application.targetFrameRate = 1;
+
+
+		MusicArrayList.Add (new float[4]{1.9f, 2, 3, 4});
+		MusicArrayList.Add (new float[4]{1.2f, 1,1.1f, 1});
+		MusicArrayList.Add (new float[4]{1.1f, 2, 2.1f, 2});
 	}
 
 	// Update is called once per frame
@@ -172,9 +177,11 @@ public class maintest2 : MonoBehaviour {
 
 		}
 		if(Input.GetKeyDown (KeyCode.L  )){
-
-			//load (BeatMapDataJson );
-
+			Debug.Log ("MusicArrayList="+MusicArrayList.Count);
+			float[] ff =(float[]) MusicArrayList [1];
+			Debug.Log ("key1L"+ff[0]+"//"+ff[1]+"//"+ff[2]);
+			ff =(float[]) MusicArrayList [2];
+			Debug.Log ("key2L"+ff[0]+"//"+ff[1]+"//"+ff[2]);
 		}
 		if(Input.GetKeyDown (KeyCode.S   )){
 
@@ -221,9 +228,9 @@ public class maintest2 : MonoBehaviour {
 		//Debug.Log  ("freqlength="+_audio.clip.frequency+"/"+AudioSettings.outputSampleRate+"="+freqlength+"///"+Mathf.Log(1));
 		//float musicenergy=0;
 		//float musicenergylow=0;
-		int[] cliplength = new int[clips.Length ];//存每个频段的数据数量
+		int[] cliplength = new int[numclips ];//存每个频段的数据数量
 
-		for (int i = 0; i < clips.Length; i++) {
+		for (int i = 0; i <numclips; i++) {
 			//初始化各频段和各频段的数据数量
 			clips [i] =0;
 			cliplength [i] = 0;
@@ -234,17 +241,18 @@ public class maintest2 : MonoBehaviour {
 		for (int i =0; i < freqlength; i++)
 		{
 			//musicenergy += spectrum [i];//总音量和，需要取平均数使用
-			int icic =(int) Mathf.Floor (0.5f+Mathf.Log(i+2,freqlength )*clips.Length ) -1;//对数方式，将频率分为几段
+			int icic =(int) Mathf.Floor (0.5f+Mathf.Log(i+2,freqlength )*numclips) -1;//对数方式，将频率分为几段
 			icic=Mathf.Clamp(icic,0,numclips-1 );//限制频段编号范围
 			//Debug.Log  ("icic="+icic);;
 			clips [icic] += spectrum [i];//每个频段的音量和，可能需要求平均数再使用
 			cliplength[icic]++;//计数增加
 
 		}
-		for (int i = 0; i < clips.Length; i++) {
+		for (int i = 0; i < numclips ; i++) {
 			//根据每频段计数计算平均值
 			clips [i] /= cliplength [i];
 		}
+		clips [numclips] = _audio.time;
 		//musicenergy /= freqlength;//当前帧 所有频段 平均值	
 		//return musicenergy ;
 	}
@@ -438,67 +446,39 @@ public class maintest2 : MonoBehaviour {
 		for (int i = 0; i < numclips ; i++) {
 		
 		
-			int[] peaktimes = new int[4];
+			float[] peaktimes = new float[4];
 			int index = 0;
-			int bandlength = 64;//(int)Mathf.Floor( Mathf.Clamp ( MusicArrayList.Count / 32, 512, 128));
+			int bandlength = 32;//(int)Mathf.Floor( Mathf.Clamp ( MusicArrayList.Count / 32, 512, 128));
 			int numPeak = 0; 
 			float[] firstclipinframe = (float[])MusicArrayList [0];
 			float peakvalue=firstclipinframe[i];
-			int peaktime = 0;
+			Debug.Log ("peakvalue1=" + peakvalue + "firstclipinframe=" + firstclipinframe.Length);
+			int peaktimeindex = 0;
 			int peaktimelast = 0;
 
 			do {
 
 				for (int ind = 0; ind < bandlength; ind++) {
 					float[] clipinframe = (float[])MusicArrayList [ind+peaktimelast];
+					Debug.Log("clipinframe"+(float[])MusicArrayList [ind+peaktimelast] +"//"+(ind+peaktimelast)+"//"+clipinframe[i ]);
 					if(peakvalue<clipinframe[i])
 					{
 						peakvalue=clipinframe[i];
-						peaktime=ind+peaktimelast;						
+						peaktimes[index ]=clipinframe[numclips ] ;
+						peaktimeindex=ind+peaktimelast;						
 					}
 				}
-				peaktimes[index ]=peaktime ;
-				peaktimelast=peaktime ;
+				Debug.Log("peaktimes"+index +"="+peaktimes[index ]);
+				peaktimelast=peaktimeindex ;
 				index++;
 			} while(index < 4);
-			float avgWavelength = (peaktime [3] - peaktime [2]) + (peaktime [2] - peaktime [1]) + (peaktime [1] - peaktime [0]);
+			float avgWavelength = (peaktimes [3] - peaktimes [2]) + (peaktimes [2] - peaktimes [1]) + (peaktimes [1] - peaktimes [0]);
 			avgWavelength /= 3;
 			Debug.LogError ("avgWavelength"+avgWavelength);
 			//while(index< MusicArrayList.Count && numPeak <= 4);
 		}
 
-//		if (BeatMapContainer != null) {
-//			return;
-//		}
-//		savedBeatMap sbm=new savedBeatMap();
-//		sbm.MD=new MusicData[BeatArrayList.Count ] ;
-//		string jsonstr="";
-//		jsonstr="{\"MD\":[\n";
-//		BeatMapContainer = new GameObject ();
-//		GameObjBeats = new GameObject[BeatArrayList.Count ];
-//		BeatMapContainer.transform.position = new Vector3 (0,0-speed/100,0);
-//		float [] beattimes=new float[BeatArrayList.Count ] ;
-//		for (int i = 0; i < BeatArrayList.Count; i++) {
-//			MusicData md = (MusicData )BeatArrayList [i];
-//			sbm.MD [i] = md;
-//			jsonstr += JsonUtility.ToJson (md)+",\n";
-//			jsonstr = JsonUtility.ToJson (md);
-//			GameObject beat= Instantiate (BeatPfb) as GameObject ;
-//			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
-//			beat.transform.parent = BeatMapContainer.transform ;
-//
-//			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
-//			GameObjBeats[i]=beat;
-//			beattimes [i] = md.playtime;
-//
-//		}
-//		//jsonstr+= "]}";
-//		Debug.Log(sbm.MD[1]);
-//		Debug.Log("jsonstr="+jsonstr);
-//		string ttt = JsonUtility.ToJson (sbm);
-//		Debug.Log("ttt="+ttt);
-//
-//		Save (ttt);
+//	
 	}
 
 

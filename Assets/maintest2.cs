@@ -180,7 +180,7 @@ public class maintest2 : MonoBehaviour {
 
 			//_audio.Play ();
 			Debug.Log(MusicArrayList.Count);
-
+			DetectBeatMap ();
 		}
 		//end测试用
 	
@@ -435,44 +435,70 @@ public class maintest2 : MonoBehaviour {
 	void DetectBeatMap()
 	{
 		
-		//for (int i = 0; i <; i++) {
+		for (int i = 0; i < numclips ; i++) {
 		
-		//}
+		
+			int[] peaktimes = new int[4];
+			int index = 0;
+			int bandlength = 64;//(int)Mathf.Floor( Mathf.Clamp ( MusicArrayList.Count / 32, 512, 128));
+			int numPeak = 0; 
+			float[] firstclipinframe = (float[])MusicArrayList [0];
+			float peakvalue=firstclipinframe[i];
+			int peaktime = 0;
+			int peaktimelast = 0;
 
+			do {
 
-
-		if (BeatMapContainer != null) {
-			return;
+				for (int ind = 0; ind < bandlength; ind++) {
+					float[] clipinframe = (float[])MusicArrayList [ind+peaktimelast];
+					if(peakvalue<clipinframe[i])
+					{
+						peakvalue=clipinframe[i];
+						peaktime=ind+peaktimelast;						
+					}
+				}
+				peaktimes[index ]=peaktime ;
+				peaktimelast=peaktime ;
+				index++;
+			} while(index < 4);
+			float avgWavelength = (peaktime [3] - peaktime [2]) + (peaktime [2] - peaktime [1]) + (peaktime [1] - peaktime [0]);
+			avgWavelength /= 3;
+			Debug.LogError ("avgWavelength"+avgWavelength);
+			//while(index< MusicArrayList.Count && numPeak <= 4);
 		}
-		savedBeatMap sbm=new savedBeatMap();
-		sbm.MD=new MusicData[BeatArrayList.Count ] ;
-		string jsonstr="";
-		jsonstr="{\"MD\":[\n";
-		BeatMapContainer = new GameObject ();
-		GameObjBeats = new GameObject[BeatArrayList.Count ];
-		BeatMapContainer.transform.position = new Vector3 (0,0-speed/100,0);
-		float [] beattimes=new float[BeatArrayList.Count ] ;
-		for (int i = 0; i < BeatArrayList.Count; i++) {
-			MusicData md = (MusicData )BeatArrayList [i];
-			sbm.MD [i] = md;
-			jsonstr += JsonUtility.ToJson (md)+",\n";
-			jsonstr = JsonUtility.ToJson (md);
-			GameObject beat= Instantiate (BeatPfb) as GameObject ;
-			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
-			beat.transform.parent = BeatMapContainer.transform ;
 
-			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
-			GameObjBeats[i]=beat;
-			beattimes [i] = md.playtime;
-
-		}
-		//jsonstr+= "]}";
-		Debug.Log(sbm.MD[1]);
-		Debug.Log("jsonstr="+jsonstr);
-		string ttt = JsonUtility.ToJson (sbm);
-		Debug.Log("ttt="+ttt);
-
-		Save (ttt);
+//		if (BeatMapContainer != null) {
+//			return;
+//		}
+//		savedBeatMap sbm=new savedBeatMap();
+//		sbm.MD=new MusicData[BeatArrayList.Count ] ;
+//		string jsonstr="";
+//		jsonstr="{\"MD\":[\n";
+//		BeatMapContainer = new GameObject ();
+//		GameObjBeats = new GameObject[BeatArrayList.Count ];
+//		BeatMapContainer.transform.position = new Vector3 (0,0-speed/100,0);
+//		float [] beattimes=new float[BeatArrayList.Count ] ;
+//		for (int i = 0; i < BeatArrayList.Count; i++) {
+//			MusicData md = (MusicData )BeatArrayList [i];
+//			sbm.MD [i] = md;
+//			jsonstr += JsonUtility.ToJson (md)+",\n";
+//			jsonstr = JsonUtility.ToJson (md);
+//			GameObject beat= Instantiate (BeatPfb) as GameObject ;
+//			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
+//			beat.transform.parent = BeatMapContainer.transform ;
+//
+//			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
+//			GameObjBeats[i]=beat;
+//			beattimes [i] = md.playtime;
+//
+//		}
+//		//jsonstr+= "]}";
+//		Debug.Log(sbm.MD[1]);
+//		Debug.Log("jsonstr="+jsonstr);
+//		string ttt = JsonUtility.ToJson (sbm);
+//		Debug.Log("ttt="+ttt);
+//
+//		Save (ttt);
 	}
 
 

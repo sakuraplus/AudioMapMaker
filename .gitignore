@@ -81,5 +81,5 @@ $RECYCLE.BIN/
 *.lnk
 
 
-*.mp3
-*.mp3.meta
+/Assets/save
+/Assets/Resources/song

@@ -31,7 +31,7 @@ public class Beat : MonoBehaviour {
 //			Debug.Log(GameObject.Find ("MCamera") );
 //			GameObject ggg = GameObject.Find ("MCamera");
 //			Debug.Log(ggg.GetComponent<maintest2>()._audio.time  );
-			Debug.Log(Destorytime+"//"+GameObject.Find ("MCamera").GetComponent<maintest2>()._audio.time);
+			Debug.Log(Destorytime+"//"+GameObject.Find ("MCamera").GetComponent<BeatAnalysisRealtime>()._audio.time);
 		}
 	//	Debug.Log ("ttt  "+collider.name );
 

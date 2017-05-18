@@ -20,7 +20,8 @@ public class savedBeatMap{
 /// 
 /// </summary>
 public class BeatAnalysisRealtime : MonoBehaviour {
-	public  AudioSource _audio;
+	[HideInInspector ]
+	public   AudioSource _audio;
 	public AudioClip mmm;
 	public AudioClip mmmhigh;
 	public  GameObject cubelow;
@@ -51,6 +52,10 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	public int SpecSize = 256;
 	public static int bufferSize = 256;
 	public static  int numBands =8;
+	[SerializeField ]
+	  int _bufferSize = 256;
+	[SerializeField ]
+	   int _numBands =8;
 	MusicData [] md;//=new MusicData[bufferSize] ;//存音乐信息
 	float[] lastAverage;//=new float[bufferSize] ;//存前1024帧
 	float[] lastAverageInc;//=new float[bufferSize] ;//存前1024帧增长值
@@ -82,11 +87,13 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	public int timestep;
 	[SerializeField ]
 	float decay = 0.997f;//衰减?
-	//[SerializeField ]
-	public static int bandlength = 64;//
+	[SerializeField ]
+	 int _bandlength = 32;//
+	public static int bandlength = 32;//
 
 	public float speed=2000;
 	GameObject BeatMapContainer;// = new GameObject ();
+	GameObject BeatMapContainer2;// = new GameObject ();
 	GameObject[] GameObjBeats;// = new GameObject[beatlist.Count ];
 	public GameObject BeatPfb;
 	public  string strvariance="";//测试用
@@ -97,6 +104,9 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	/// </summary>
 	// Use this for initialization
 	void Start () {
+		bandlength = _bandlength;
+		numBands = _numBands;
+		bufferSize = _bufferSize;
 		RecAvgInBandInc=new float[bufferSize ,numBands ]; 
 		RecAvgInBand=new float[bufferSize ,numBands ]; 
 		 md=new MusicData[bufferSize] ;//存音乐信息
@@ -107,7 +117,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 		lastframeBandss =new float[numBands ];//分8个频段
 		lastbeatindexInBand=new int[numBands];//存各个频段上一次节拍的位置 
 		_audio=GetComponent<AudioSource> ();
-		//_audio.pitch = 6;
+		_audio.pitch = 2;
 		//_audio.Play();
 		//	_audio.loop = true;
 		//Application.targetFrameRate = 30;
@@ -126,7 +136,9 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 			recordmusicdata ();
 		} 	else if (_audio.isPlaying && playmap &&!bpmsetting) {
 			_audio.pitch = 1;
-			PlayBeatMap ();
+			//PlayBeatMap ();
+			PlayBeatMap2 ();
+
 		}else if (_audio.isPlaying && bpmsetting ) {
 			_audio.pitch = 1;
 			//PlayBeatMap ();
@@ -195,7 +207,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 			//_audio.Play ();
 			Debug.Log(MusicArrayList.Count);
-			DetectBeatMap ();
+			//DetectBeatMap ();
 		}
 		//end测试用
 	
@@ -203,9 +215,15 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	}
 	public void playmusic()
 	{
-		if (BeatMapContainer != null) {
+//		if (BeatMapContainer != null) {
+//			playmap = true;
+//		}
+		//////////////////
+		if (GameObject.Find ("nonrealtime") != null) {
 			playmap = true;
+			BeatMapContainer2 = GameObject.Find ("nonrealtime");
 		}
+			////////////////////
 		_audio.Play ();
 	}
 
@@ -353,15 +371,15 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 			float variance=0;//方差
 			for (int i = lastbeatindexInBand[ic]+1; i < CurrentIndex-2; i++) {
 				//遍历当前频段，上一节拍至当前帧的所有平均值增量
-				if (RecAvgInBandInc [i,ic] > largeenergy) {
+				if (RecAvgInBandInc [i,ic] > largeenergy ) {
 					
 					largeindexF = largeindex;
 					largeindex = i;//最大值在buffersize中所在的位置
-					largeenergy = RecAvgInBandInc [i,ic];//最大
+					largeenergy = RecAvgInBandInc [i,ic] ;//最大
 
 				}//获取平均数增量最大值，及最大值在buffersize中所在的位置
 				variance += Mathf.Pow (RecAvgInBandInc [i, ic], 2);
-
+				largeenergy *= decay;//衰减
 				variance /= CurrentIndex - lastbeatindexInBand [ic] - 1;//上一个节拍至当前节拍之前的节拍，当前频段，音量的方差
 				AvgHigh=variance;//测试
 			}//end遍历当前频段，上一节拍至当前帧的所有平均值增量，获取最大值及其序号
@@ -385,7 +403,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 			float beatsincelast = CurrentIndex - lastbeatindexInBand[ic];//当前频段与上一节拍之间的帧数
 			if (beatsincelast > bufferSize / 2) {//与上一节拍之间的帧数不够大则不认为此处是节拍
 				//&& bufferSize-largeindexF<4
-				if (RecAvgInBandInc [CurrentIndex - 1,ic]/Mathf.Abs( largeenergy * enegryaddup*tempVarInc)>1 ) {//当前帧增量为buffersize中最大的，且远大于之前的最大值
+				if (RecAvgInBandInc [CurrentIndex - 1,ic]/Mathf.Abs( largeenergy  * enegryaddup*tempVarInc)>1 ) {//当前帧增量为buffersize中最大的，且远大于之前的最大值
 					
 
 					//保存鼓点信息
@@ -504,90 +522,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 	//
 
-	void DetectBeatMap()
-	{
-		//int bandlength =(int)Mathf.Floor( MusicArrayList.Count / 8);
-		//bandlength =  Mathf.Clamp (bandlength, 64, 512);// ( MusicArrayList.Count / 32, 512, 128);
-		Debug.LogError ("DetectBeatMap     bandlength="+bandlength+"/"+MusicArrayList.Count);
-		float avgWavelength = 0;//全部频段的平均波长
-		float[] avgwavelengths=new float[numBands ];
-		for (int i = 0; i < numBands ; i++) {
-		
-		
-			float[] peaktimes = new float[4];
-			//int index = 0;
-			int numPeak = 0; //已经
-		
-			int peaktimeindex = 0;
-			int peaktimelast = 0;//上一个峰值的位置
-			do {
-				//取4个峰值
-			
-				float[] firstclipinframe = MusicArrayList [peaktimelast+1] as float[];
-				float peakvalue=firstclipinframe[i];
-				peaktimes[numPeak ]=firstclipinframe[numBands ];
-				Debug.Log ("peakvalue1=" + peakvalue + "peaktimelast index=" + peaktimelast+" time="+firstclipinframe[numBands ]);
 
-
-				for (int ind = 0; (ind < bandlength &&ind+peaktimelast <MusicArrayList.Count  ); ind++) {
-					//在bandlength中找最高值
-
-					float Avginclipframe =((float[])MusicArrayList [ind+peaktimelast])[i];// as float[];
-//					string ssss="";
-//					for(int iii=0;iii<=numclips;iii++){
-//						ssss+=((float[])MusicArrayList [ind+peaktimelast])[iii]+",";
-//					}
-//					Debug.Log("clipinframe "+ssss +"// index="+(ind+peaktimelast)+"//value="+Avginclipframe);
-					if(peakvalue<Avginclipframe)
-					{
-						peakvalue=Avginclipframe*(bandlength-4)/(decay*bandlength) ;//*衰减
-						peaktimes[numPeak ]=((float[])MusicArrayList [ind+peaktimelast])[numBands ] ;
-						peaktimeindex=ind+peaktimelast;						
-					}
-					///////////////////////
-//
-//					float[] clipinframe =MusicArrayList [ind+peaktimelast] as float[];
-//					Debug.Log("clipinframe"+(float[])MusicArrayList [ind+peaktimelast] +"//"+(ind+peaktimelast)+"//"+clipinframe[i ]);
-//					if(peakvalue<clipinframe[i])
-//					{
-//						peakvalue=clipinframe[i];
-//						peaktimes[index ]=clipinframe[numclips ] ;
-//						peaktimeindex=ind+peaktimelast;						
-//					}
-				}
-
-				Debug.LogError ("peaktimes index="+numPeak +" time="+peaktimes[numPeak ]+" value="+peakvalue+" peaktimeindex="+peaktimeindex );
-				peaktimelast=peaktimeindex+(int)Mathf.Floor (bandlength/8) ;
-				numPeak++;
-			} while(numPeak < 4);
-
-
-			float avgWavelengthInclip = (peaktimes [3] -  peaktimes [0])/3;
-			//avgWavelengthInclip /= 3;//单个频段波长
-			avgWavelength += avgWavelengthInclip;//计算全部频段平均波长
-			avgwavelengths [i] = avgWavelength;//存所有频段的波长
-			Debug.LogError ("avgWavelengthInclip="+avgWavelengthInclip);
-		}
-
-		avgWavelength /= numBands;//全部频段平均波长
-		Debug.LogError ("avgWavelength="+avgWavelength);
-		if (numBands >= 2) {
-			//如果频段较多，则取与平均最接近的频段的波长
-			int avgind = 0;
-			float avgdiff = Mathf.Abs (avgwavelengths [1] - avgWavelength);
-			for (int i = 1; i < numBands; i++) {
-				if (avgdiff > Mathf.Abs (avgwavelengths [i] -avgWavelength)) {
-					avgdiff = Mathf.Abs (avgwavelengths [i] - avgWavelength);
-					avgind = i;
-				}
-			}
-			avgWavelength = avgwavelengths [avgind];//如果频段较多，则取与平均最接近的频段的波长
-		}
-		Debug.LogError ("avgWavelength final="+avgWavelength);
-//	
-
-
-	}
 
 
 	//根据实时采集到数据生成map
@@ -693,13 +628,18 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	//beatmap下落
 	void PlayBeatMap()
 	{
-		BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
+				BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
+	}
+	//beatmap下落
+	void PlayBeatMap2()
+	{
+		BeatMapContainer2.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
 	}
 	//按键
 	public void CheckBeatMap()
 	{
 		Debug.Log(MusicArrayList.Count);
-		DetectBeatMap  ();
+	//	DetectBeatMap  ();
 //		Beat[] beats = BeatMapContainer.GetComponentsInChildren <Beat> ();
 //		foreach(Beat b in beats){
 //			if (b.CheckState) {

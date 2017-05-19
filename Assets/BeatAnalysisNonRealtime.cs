@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.IO;
 
 public class BeatAnalysisNonRealtime : MonoBehaviour {
 	
@@ -69,7 +70,8 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 		Debug.Log (BufferSize+",,"+MusicArrayList.Count +",,,"+numBands);
 		CalcIncrement ();
 		CalcWavelength ();
-		for (int j = 0; j <= numBands; j++) {
+		for (int j = 0; j < numBands; j++) {
+			Debug.LogError (j);
 			CheckBeatInClip (j);/////////////////////////
 		}
 	}
@@ -175,39 +177,49 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 		return (int)Mathf.Floor ( avgWavelength) ;
 	}
 
-	//分频段，实时检测节拍
+	//单频段检测节拍
 	void CheckBeatInClip(int indBand)
 	{  
-		//float[] peaktimes = new float[4];
-		//int index = 0;
-		//int numPeak = 0; //已经
+		Debug.LogWarning ("band="+indBand+"  BeatArrayList count "+BeatArrayList.Count );
+		string temp="";
+
 		int peaktimeindex = 0;
 		int peaktimeindexlast = 0;//上一个峰值的位置
-		float peakvalue=RecAvgInBandInc  [0,indBand];//第一个用来比较的值
+		//float peakvalue=RecAvgInBandInc  [0,indBand];//第一个用来比较的值
+		float peakvalue=RecAvgInBand  [0,indBand];//第一个用来比较的值
 		int startindex = -1;
 		int endindex = -1;
 		int _wavelength = -1;
-		for (int i = 0; i < MusicArrayList.Count-1; i++) {
+		for (int i = 0; i < MusicArrayList.Count-5; i++) {
 			float _wavelengthindex=i/(MusicArrayList.Count/numSubdivide*1f) ;
 			_wavelengthindex = Mathf.Clamp (_wavelengthindex, 0, (numSubdivide - 1));
 			_wavelength =(int) wavelengths [(int)Mathf.Floor (_wavelengthindex)];
 
 
-			startindex = (int)Mathf.Max (0,( 0-_wavelength/8+peaktimeindexlast), (i - _wavelength / 2));
+			startindex = (int)Mathf.Max (0,( _wavelength/8+peaktimeindexlast), (i - _wavelength / 2));
 			startindex = (int)Mathf.Min (startindex, MusicArrayList.Count - 1);
 			endindex = (int)Mathf.Min ((startindex+_wavelength ),MusicArrayList.Count );
-			//int peakindex = startindex;
+
+
 			int finallength = endindex - startindex;
-			peakvalue=RecAvgInBandInc[startindex ,indBand ];
+
+			temp += i + " ,start=" + startindex + " ,end=" + endindex+" length="+finallength+" wavelength="+_wavelength ;
+
+			//peakvalue=RecAvgInBandInc[startindex ,indBand ];
+			peakvalue=RecAvgInBand[startindex ,indBand ];
 			for (int ind = 0; (ind < finallength && ind+startindex<MusicArrayList.Count ); ind++) {
-				float newvalue=RecAvgInBandInc[startindex +ind,indBand ];
+				//float newvalue=RecAvgInBandInc[startindex +ind,indBand ];
+				float newvalue=RecAvgInBand[startindex +ind,indBand ];
 				if (peakvalue < newvalue) {
 					peakvalue = newvalue;
 					peaktimeindex = startindex + ind;
 				}
+
 				peakvalue *= decay;//衰减
+				//outputs [i] =(1-衰减)*(当前-前帧)+outputs [i] *衰减
 			
 			}
+			temp += " peaktimeindex=" + peaktimeindex;
 			if(peaktimeindex-peaktimeindexlast>_wavelength/4){
 				//保存鼓点信息
 				MusicData md=new MusicData();
@@ -215,9 +227,10 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 				md.OnBeat = true;
 				md.BeatPos = indBand;
 				BeatArrayList.Add (md);
+				temp+="   beat";
 				//end 保存鼓点信息
 			}
-
+			temp+="\n";
 			peaktimeindexlast = peaktimeindex;
 
 			if (i < peaktimeindexlast) {
@@ -226,9 +239,9 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 			}
 		
 		}
-		Debug.LogWarning ("band="+indBand+"  BeatArrayList count "+BeatArrayList.Count );
+		Debug.LogWarning ("band="+indBand+"  BeatArrayList count "+BeatArrayList.Count +" ////"+temp);
 	}
-	//end分频段检测是否为节拍
+	//end单频段检测节拍
 
 
 
@@ -256,8 +269,9 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 			}
 			BeatMapContainer = new GameObject ();
 			BeatMapContainer.name="nonrealtime";
+
 			//GameObjBeats = new GameObject[BeatArrayList.Count ];
-			BeatMapContainer.transform.position=new Vector3(0,0-speed/100,0);
+			BeatMapContainer.transform.position=new Vector3(50,0-speed/100,0);
 		}
 
 		savedBeatMap sbm=new savedBeatMap();
@@ -284,9 +298,23 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 		string ttt = JsonUtility.ToJson (sbm);
 		Debug.Log("ttt="+ttt);
 
-		//Save (ttt);
+		Save (ttt);
 	}
 
+	//保存json格式化的map
+	void Save(string jsonstr) {  
+
+		if(!Directory.Exists("Assets/save")) {  
+			Directory.CreateDirectory("Assets/save");  
+		}  
+		string filename="Assets/save/NonRT"+BeatAnalysisRealtime.AudioName  +System.DateTime.Now.ToString ("dd-hh-mm-ss")+".json";
+		FileStream file = new FileStream(filename, FileMode.Create);  
+		byte[] bts = System.Text.Encoding.UTF8.GetBytes(jsonstr);  
+		file.Write(bts,0,bts.Length);  
+		if(file != null) {  
+			file.Close();  
+		}  
+	} 
 
 	public  void Btnload() {
 		//load(BeatMapDataJson) ;

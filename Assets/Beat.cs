@@ -12,7 +12,7 @@ public class Beat : MonoBehaviour {
 //	}
 
 	void Awake () {
-		_audio = GetComponent<AudioSource> ();
+		_audio =GameObject.Find("MCamera"). GetComponent<AudioSource> ();
 		// invote the DestroyNow funtion to run after timeOut seconds
 	//	Invoke ("DestroyNow", time);
 	}
@@ -22,17 +22,20 @@ public class Beat : MonoBehaviour {
 	}
 	void OnTriggerEnter(Collider collider) 
 	{
+		
+		
 		if (collider.tag == "destoryzone") {
 			Destroy (gameObject);
 		}
 		if (collider.tag == "checkzone") {
 			CheckState = true;
-
+			AudioClip ac = GameObject.Find ("MCamera").GetComponent<BeatAnalysisRealtime> ().mmm  as AudioClip;
+			_audio.PlayOneShot  (ac);
 			Destroy (gameObject);
-		
+			Debug.Log ("ttt  "+collider.name );
 		}
-		_audio.Play ();
-		Debug.Log ("ttt  "+collider.name );
+
+		//Debug.Log ("ttt  "+collider.name );
 
 	}
 

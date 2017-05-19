@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.IO;
-
+using UnityEngine.UI;
 [System. Serializable]
 public class MusicData
 {
@@ -22,6 +22,14 @@ public class savedBeatMap{
 public class BeatAnalysisRealtime : MonoBehaviour {
 	[HideInInspector ]
 	public   AudioSource _audio;
+	[SerializeField]
+	AudioClip musicA;
+	[SerializeField]
+	AudioClip musicB;
+	[SerializeField]
+	AudioClip musicC;
+
+	public static string AudioName="";
 	public AudioClip mmm;
 	public AudioClip mmmhigh;
 	public  GameObject cubelow;
@@ -56,7 +64,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	  int _bufferSize = 256;
 	[SerializeField ]
 	   int _numBands =8;
-	MusicData [] md;//=new MusicData[bufferSize] ;//存音乐信息
+	//MusicData [] md;//=new MusicData[bufferSize] ;//存音乐信息
 	float[] lastAverage;//=new float[bufferSize] ;//存前1024帧
 	float[] lastAverageInc;//=new float[bufferSize] ;//存前1024帧增长值
 	float[,] RecAvgInBandInc;
@@ -79,6 +87,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	//float CurrentFrameAvg=0;
 	float LastFrameAvg=0;
 	bool playmap=false;
+	bool playmap2=false;
 	public  GameObject drawline;
 	public  float  lastAvgInc;
 	[Range (0.5f,3)]
@@ -109,7 +118,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 		bufferSize = _bufferSize;
 		RecAvgInBandInc=new float[bufferSize ,numBands ]; 
 		RecAvgInBand=new float[bufferSize ,numBands ]; 
-		 md=new MusicData[bufferSize] ;//存音乐信息
+		// md=new MusicData[bufferSize] ;//存音乐信息
 		lastAverage=new float[bufferSize] ;//存前1024帧
 		lastAverageInc=new float[bufferSize] ;//存前1024帧
 		spectrum =new float[SpecSize ];
@@ -117,6 +126,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 		lastframeBandss =new float[numBands ];//分8个频段
 		lastbeatindexInBand=new int[numBands];//存各个频段上一次节拍的位置 
 		_audio=GetComponent<AudioSource> ();
+		AudioName = _audio.name;
 		_audio.pitch = 2;
 		//_audio.Play();
 		//	_audio.loop = true;
@@ -124,25 +134,12 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 		Debug.Log(Time.frameCount );
 		Debug.Log(Time.captureFramerate );
 
-//		MusicArrayList.Add (new float[4]{1.9f, 2, 3, 4});
-//		MusicArrayList.Add (new float[4]{1.2f, 1,1.1f, 1});
-//		MusicArrayList.Add (new float[4]{1.1f, 2, 2.1f, 2});
+
 	}
 
 	// Update is called once per frame
 	void Update () {
 		
-		if (_audio.isPlaying && !playmap && !bpmsetting) {
-			recordmusicdata ();
-		} 	else if (_audio.isPlaying && playmap &&!bpmsetting) {
-			_audio.pitch = 1;
-			//PlayBeatMap ();
-			PlayBeatMap2 ();
-
-		}else if (_audio.isPlaying && bpmsetting ) {
-			_audio.pitch = 1;
-			//PlayBeatMap ();
-		}
 
 		if (onbeatlow) {
 			gggtestposlow = 10;//+(;
@@ -175,17 +172,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 
 		//测试用
-		if(Input.GetKeyDown (KeyCode.A)){
 
-//			string sssss = "";
-//			for(int i=0;i<spectrum.Length ;i++){
-//				sssss+=spectrum[i]+" , ";
-//			}
-//			Debug.LogError ("----"+_audio.clip.frequency +" // "+_audio.time +" //   "+sssss );
-//
-//			playmap = true;
-//			_audio.Play ();
-		}
 		if(Input.GetKeyDown (KeyCode.D   )){
 
 			//DrawBeatMap ();
@@ -210,23 +197,52 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 			//DetectBeatMap ();
 		}
 		//end测试用
-	
+
+		if (_audio.isPlaying && !playmap && !playmap2 && !bpmsetting) {
+			recordmusicdata ();
+			return;
+		} 
+		if (_audio.isPlaying && playmap && !playmap2 &&!bpmsetting) {
+			_audio.pitch = 1;
+			PlayBeatMap ();
+			Debug.Log ("play1");
+			return;
+			//PlayBeatMap2 ();
+		}
+		if (_audio.isPlaying && playmap2 && !playmap &&!bpmsetting) {
+			_audio.pitch = 1;
+			//PlayBeatMap ();
+			Debug.Log ("play2");
+			PlayBeatMap2 ();
+			return;
+		}
+		if (_audio.isPlaying && bpmsetting ) {
+			_audio.pitch = 1;
+			//PlayBeatMap ();
+		}
 	
 	}
 	public void playmusic()
 	{
-//		if (BeatMapContainer != null) {
-//			playmap = true;
-//		}
-		//////////////////
-		if (GameObject.Find ("nonrealtime") != null) {
+		if (BeatMapContainer != null) {
 			playmap = true;
-			BeatMapContainer2 = GameObject.Find ("nonrealtime");
+			playmap2 = false;
 		}
-			////////////////////
+
 		_audio.Play ();
 	}
-
+	public void playmusic2()
+	{
+		
+		////////////////
+		if (GameObject.Find ("nonrealtime") != null) {
+			playmap2 = true;
+			playmap = false;
+					BeatMapContainer2 = GameObject.Find ("nonrealtime");
+				}
+		////////////////////
+		_audio.Play ();
+	}
 	void recordmusicdata()
 	{
 	////////////////////////////////////////
@@ -472,6 +488,8 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	int lastSetbpmframe=-1;
 	int Setbpmframe=-1;
 	int bpmframe=0;
+	[SerializeField]
+	Text  bpmtxt;
 	bool bpmsetting=false;
 	//ArrayList bpmlist;
 	public void setBPM()
@@ -509,6 +527,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 				Debug.Log ("bpmframe *2=" + (bpmframe * 2));
 			}
 		}
+		bpmtxt.text = "bpm="+bpmframe;
 
 	}
 
@@ -589,6 +608,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	//end保存json格式化的map
 
 	public  void Btnload() {
+		
 		load(BeatMapDataJson) ;
 	}
 
@@ -650,6 +670,31 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 //		}
 	}
 	//测试用
-
+	public void playmusicA()
+	{
+		
+		MusicArrayList=new ArrayList() ;
+		BeatArrayList = new ArrayList ();
+		lastAverage=new float[bufferSize] ;//存前1024帧
+		lastAverageInc=new float[bufferSize] ;//存前1024帧
+		//_audio.PlayOneShot( musicA);
+		_audio.clip= musicA;
+	}
+	public void playmusicB()
+	{
+		MusicArrayList=new ArrayList() ;
+		BeatArrayList = new ArrayList ();
+		lastAverage=new float[bufferSize] ;//存前1024帧
+		lastAverageInc=new float[bufferSize] ;//存前1024帧
+		_audio.PlayOneShot( musicB);
+	}
+	public void playmusicC()
+	{	
+		MusicArrayList=new ArrayList() ;
+		BeatArrayList = new ArrayList ();
+		lastAverage=new float[bufferSize] ;//存前1024帧
+		lastAverageInc=new float[bufferSize] ;//存前1024帧
+		_audio.PlayOneShot (musicC);		
+	}
 
 }

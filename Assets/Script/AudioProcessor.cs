@@ -23,7 +23,7 @@ public class AudioProcessor : MonoBehaviour
 {
 	public AudioSource audioSource;
 
-	private long lastT, nowT, diff, entries, sum;
+	private long  nowT, diff, entries, sum;//lastT,
 
 	public int bufferSize = 1024;
 	// fft size
@@ -109,7 +109,7 @@ public class AudioProcessor : MonoBehaviour
 
 		auco = new Autoco (maxlag, decay, framePeriod, getBandWidth ());
 
-		lastT = getCurrentTimeMillis ();
+//		lastT = getCurrentTimeMillis ();
 	}
 
 

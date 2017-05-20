@@ -3,7 +3,6 @@ using System.Collections;
 using System.IO;
 
 public class BeatAnalysisNonRealtime : MonoBehaviour {
-	
 
 	/// <summary>
 	/// ////////////////////////////////////////////
@@ -13,9 +12,8 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 	public int numBands =8;//分频段的数量
 	public int numSubdivide=1;//细分的段数，针对变化bpm的音乐
 
-	//MusicData [] md;//=new MusicData[bufferSize] ;//存音乐信息
-	float[] lastAverage;//=new float[bufferSize] ;//存前1024帧
-	float[] lastAverageInc;//=new float[bufferSize] ;//存前1024帧增长值
+
+
 	float[,] RecAvgInBandInc;//存分频段每帧增长值
 	float[,] RecAvgInBand;//存musicarraylist
 	float[] wavelengths;
@@ -24,17 +22,7 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 	//
 
 
-	int[] lastbeatindexInBand;//存各个频段上一次节拍的位置 =new int[8];
-	float[] lastframeBands;// = new float[8];//分成8个频段
-	//end存当前帧之前或，前1024帧增长值
-	int lastbeatindex=0;
-	bool  onbeat=false;
-	bool  onbeatlow=false;
-	bool  onbeatmid=false;
-	bool  onbeathigh=false;
-	int CurrentIndex=0;//存1024帧中的位置
-	//float CurrentFrameAvg=0;
-	float LastFrameAvg=0;
+
 	[SerializeField ]
 	float decay = 0.997f;//衰减?
 	[SerializeField ]
@@ -42,11 +30,8 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 	[Range (0.5f,3)]
 	public float enegryaddup = 1.2f;
 
-	int lastSetbpmframe=-1;
-	int Setbpmframe=-1;
-	int bpmframe=0;
-	bool bpmsetting=false;
-	//ArrayList bpmlist;
+
+
 	int beatArrindex=0;
 	/// <summary>
 	/// ///////////////////////////////////
@@ -58,12 +43,10 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 		numBands = BeatAnalysisRealtime.numBands;
 		RecAvgInBandInc=new float[MusicArrayList.Count  ,numBands*2+1 ]; 
 		RecAvgInBand=new float[MusicArrayList.Count  ,numBands *2+1]; 
-	//	md=new MusicData[BufferSize] ;//存音乐信息
-		lastAverage=new float[BufferSize] ;//存前1024帧
-		lastAverageInc=new float[BufferSize] ;//存前1024帧
+
+
 	
-		lastframeBands =new float[numBands ];//分8个频段
-		lastbeatindexInBand=new int[numBands];//存各个频段上一次节拍的位置 
+
 	
 		bandlength =(int)Mathf.Floor( BufferSize * 1.5f);
 		BeatArrayList.Clear ();
@@ -79,9 +62,7 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 		{
 			BeatArrayList.RemoveRange (beatArrindex + 1, BeatArrayList.Count - beatArrindex-1);
 		}
-//		do {
-//			
-//		} while(beatArrindex < BeatArrayList.Count-1);
+
 	}
 
 	void CalcIncrement()
@@ -136,14 +117,13 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 				for (int ind = peaktimelast; ind <( bandlength+peaktimelast) ; ind++) {
 					if(ind+peaktimelast <RecAvgInBand.Length ){
 						//在bandlength中找最高值
-						//float Avginclipframe =((float[])MusicArrayList [ind+peaktimelast])[i];// as float[];
-					//	Debug.Log("RecAvgInBand index= "+ind+">-->"+peaktimelast+"  numbands="+i);
+			
 						float Avginclipframe =RecAvgInBand [ind,i];// as float[];
 
 						if(peakvalue<Avginclipframe)
 						{
 							peakvalue=Avginclipframe*(bandlength-4)/(decay*bandlength) ;//*衰减
-							//peaktimes[numPeak ]=((float[])MusicArrayList [ind+peaktimelast])[numBands ] ;
+					
 							peaktimes[numPeak ]=ind;//+peaktimelast;//RecAvgInBand[ind+peaktimelast,numBands ] ;
 							peaktimeindex=ind;//+peaktimelast;						
 						}
@@ -230,15 +210,18 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 			temp += " peaktimeindex=" + peaktimeindex;
 			if (peaktimeindex - peaktimeindexlast > _wavelength / 4) {
 				//保存鼓点信息
+				MusicData md = new MusicData();
+				//md=
+				md.playtime = RecAvgInBand [peaktimeindex, numBands];//_audio.time;
+				md.OnBeat = true;
+				md.BeatPos = indBand;
 				if (beatArrindex < BeatArrayList.Count) {
-					((MusicData)BeatArrayList [beatArrindex]).playtime = RecAvgInBand [peaktimeindex, numBands];//_audio.time;
-					((MusicData)BeatArrayList [beatArrindex]).OnBeat = true;
-					((MusicData)BeatArrayList [beatArrindex]).BeatPos = indBand;
+					
+					(BeatArrayList [beatArrindex]) = md;//.playtime = RecAvgInBand [peaktimeindex, numBands];//_audio.time;
+			
 				} else {
-					MusicData md = new MusicData ();
-					md.playtime = RecAvgInBand [peaktimeindex, numBands];//_audio.time;
-					md.OnBeat = true;
-					md.BeatPos = indBand;
+					//MusicData 
+				
 					BeatArrayList.Add (md);
 				}
 				beatArrindex++;
@@ -292,10 +275,10 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 			BeatMapContainer.transform.position=new Vector3(50,0-speed/100,0);
 		}
 
-		savedBeatMap sbm=new savedBeatMap();
+		//savedBeatMap sbm=new savedBeatMap();
+		savedBeatMap  sbm=new savedBeatMap();
 		sbm.MD=new MusicData[BeatArrayList.Count ] ;
 
-		//BeatMapContainer = new GameObject ();
 		GameObjBeats = new GameObject[BeatArrayList.Count ];
 		BeatMapContainer.transform.position = new Vector3 (0,0-speed/100,0);
 		float [] beattimes=new float[BeatArrayList.Count ] ;
@@ -313,7 +296,8 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 
 		}
 
-		string ttt = JsonUtility.ToJson (sbm);
+	
+		string ttt = JsonUtility.ToJson (sbm );
 		Debug.Log("ttt="+ttt);
 
 		Save (ttt);

@@ -44,9 +44,9 @@ public class Example : MonoBehaviour
 		sd.PlayOneShot (mmm);
 		ggg.transform.localScale   = new Vector3 (5,5,5);
 	}
-	float playtime=0;
-	float pausetime=0;
-	float unpausetime=0;
+//	float playtime=0;
+//	float pausetime=0;
+//	float unpausetime=0;
 	void Update () {
 		
 		if(ii>1){

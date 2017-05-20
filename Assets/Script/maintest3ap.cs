@@ -7,7 +7,7 @@ using System.Collections;
 public class maintest3ap : MonoBehaviour {
 	public AudioSource audioSource;
 
-	private long lastT, nowT, diff, entries, sum;
+	private long  nowT, diff, entries, sum;
 
 	public int bufferSize = 1024;
 	// fft size
@@ -94,7 +94,7 @@ public class maintest3ap : MonoBehaviour {
 
 		auco = new Autoco (maxlag, decay, framePeriod, getBandWidth ());
 
-		lastT = getCurrentTimeMillis ();//上一帧时间
+//		lastT = getCurrentTimeMillis ();//上一帧时间
 	}
 
 

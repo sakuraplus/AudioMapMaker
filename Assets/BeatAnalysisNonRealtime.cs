@@ -47,7 +47,7 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 	int bpmframe=0;
 	bool bpmsetting=false;
 	//ArrayList bpmlist;
-
+	int beatArrindex=0;
 	/// <summary>
 	/// ///////////////////////////////////
 	/// </summary>
@@ -66,7 +66,8 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 		lastbeatindexInBand=new int[numBands];//存各个频段上一次节拍的位置 
 	
 		bandlength =(int)Mathf.Floor( BufferSize * 1.5f);
-
+		BeatArrayList.Clear ();
+		beatArrindex=0;
 		Debug.Log (BufferSize+",,"+MusicArrayList.Count +",,,"+numBands);
 		CalcIncrement ();
 		CalcWavelength ();
@@ -74,6 +75,13 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 			Debug.LogError (j);
 			CheckBeatInClip (j);/////////////////////////
 		}
+		if(beatArrindex < BeatArrayList.Count-1)
+		{
+			BeatArrayList.RemoveRange (beatArrindex + 1, BeatArrayList.Count - beatArrindex-1);
+		}
+//		do {
+//			
+//		} while(beatArrindex < BeatArrayList.Count-1);
 	}
 
 	void CalcIncrement()
@@ -180,7 +188,7 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 	//单频段检测节拍
 	void CheckBeatInClip(int indBand)
 	{  
-		Debug.LogWarning ("band="+indBand+"  BeatArrayList count "+BeatArrayList.Count );
+		Debug.LogError  ("band start="+indBand+"  BeatArrayList count "+BeatArrayList.Count );
 		string temp="";
 
 		int peaktimeindex = 0;
@@ -190,7 +198,7 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 		int startindex = -1;
 		int endindex = -1;
 		int _wavelength = -1;
-		for (int i = 0; i < MusicArrayList.Count-5; i++) {
+		for (int i =5; i < MusicArrayList.Count-5; i++) {
 			float _wavelengthindex=i/(MusicArrayList.Count/numSubdivide*1f) ;
 			_wavelengthindex = Mathf.Clamp (_wavelengthindex, 0, (numSubdivide - 1));
 			_wavelength =(int) wavelengths [(int)Mathf.Floor (_wavelengthindex)];
@@ -220,18 +228,28 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 			
 			}
 			temp += " peaktimeindex=" + peaktimeindex;
-			if(peaktimeindex-peaktimeindexlast>_wavelength/4){
+			if (peaktimeindex - peaktimeindexlast > _wavelength / 4) {
 				//保存鼓点信息
-				MusicData md=new MusicData();
-				md.playtime = RecAvgInBand[peaktimeindex,numBands  ];//_audio.time;
-				md.OnBeat = true;
-				md.BeatPos = indBand;
-				BeatArrayList.Add (md);
-				temp+="   beat";
+				if (beatArrindex < BeatArrayList.Count) {
+					((MusicData)BeatArrayList [beatArrindex]).playtime = RecAvgInBand [peaktimeindex, numBands];//_audio.time;
+					((MusicData)BeatArrayList [beatArrindex]).OnBeat = true;
+					((MusicData)BeatArrayList [beatArrindex]).BeatPos = indBand;
+				} else {
+					MusicData md = new MusicData ();
+					md.playtime = RecAvgInBand [peaktimeindex, numBands];//_audio.time;
+					md.OnBeat = true;
+					md.BeatPos = indBand;
+					BeatArrayList.Add (md);
+				}
+				beatArrindex++;
+				temp += "   beat";
 				//end 保存鼓点信息
+				peaktimeindexlast = peaktimeindex;
+			} else {
+				peaktimeindexlast += _wavelength/2;
 			}
 			temp+="\n";
-			peaktimeindexlast = peaktimeindex;
+		
 
 			if (i < peaktimeindexlast) {
 				i = peaktimeindexlast;
@@ -239,7 +257,7 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 			}
 		
 		}
-		Debug.LogWarning ("band="+indBand+"  BeatArrayList count "+BeatArrayList.Count +" ////"+temp);
+		Debug.LogError  ("band end="+indBand+"  BeatArrayList count "+BeatArrayList.Count +" ////"+temp);
 	}
 	//end单频段检测节拍
 

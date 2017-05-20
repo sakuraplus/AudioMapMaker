@@ -70,6 +70,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	float[,] RecAvgInBandInc;
 	float[,] RecAvgInBand;
 	ArrayList BeatArrayList=new ArrayList() ;//存beat信息
+	int beatArrindex=0;
 	public  static  ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
 	//
 
@@ -422,12 +423,24 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 				if (RecAvgInBandInc [CurrentIndex - 1,ic]/Mathf.Abs( largeenergy  * enegryaddup*tempVarInc)>1 ) {//当前帧增量为buffersize中最大的，且远大于之前的最大值
 					
 
+
+
+
+						//保存鼓点信息
+						if (beatArrindex < BeatArrayList.Count) {
+							((MusicData)BeatArrayList [beatArrindex]).playtime = _audio.time;
+							((MusicData)BeatArrayList [beatArrindex]).OnBeat = true;
+							((MusicData)BeatArrayList [beatArrindex]).BeatPos = ic;
+						} else {
+							MusicData md = new MusicData ();
+							md.playtime = _audio.time;
+							md.OnBeat = true;
+							md.BeatPos = ic;
+							BeatArrayList.Add (md);
+						}
+						beatArrindex++;
 					//保存鼓点信息
-					MusicData md=new MusicData();
-					md.playtime = _audio.time;
-					md.OnBeat = true;
-					md.BeatPos = ic;
-					BeatArrayList.Add (md);
+				
 					//end 保存鼓点信息
 
 
@@ -672,7 +685,8 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	//测试用
 	public void playmusicA()
 	{
-		
+		playmap = false;
+		playmap2 = false;
 		MusicArrayList=new ArrayList() ;
 		BeatArrayList = new ArrayList ();
 		lastAverage=new float[bufferSize] ;//存前1024帧
@@ -682,19 +696,23 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	}
 	public void playmusicB()
 	{
+		playmap = false;
+		playmap2 = false;
 		MusicArrayList=new ArrayList() ;
 		BeatArrayList = new ArrayList ();
 		lastAverage=new float[bufferSize] ;//存前1024帧
 		lastAverageInc=new float[bufferSize] ;//存前1024帧
-		_audio.PlayOneShot( musicB);
+		_audio.clip= musicB;
 	}
 	public void playmusicC()
 	{	
+		playmap = false;
+		playmap2 = false;
 		MusicArrayList=new ArrayList() ;
 		BeatArrayList = new ArrayList ();
 		lastAverage=new float[bufferSize] ;//存前1024帧
 		lastAverageInc=new float[bufferSize] ;//存前1024帧
-		_audio.PlayOneShot (musicC);		
+		_audio.clip= musicC;		
 	}
 
 }

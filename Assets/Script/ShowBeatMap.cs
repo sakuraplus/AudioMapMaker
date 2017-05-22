@@ -20,6 +20,11 @@ public class ShowBeatMap : MonoBehaviour {
 	public  GameObject beatObjDefault;
 	bool playSFX=false;
 	bool showBeatObj=false;
+	bool playmap=false;
+//	[SerializeField]
+//	GameObject checkzone;
+//	[SerializeField]
+//	GameObject destiryzone;
 
 //	float[] gameobjScale;
 	ArrayList BeatArrayList=new ArrayList() ;//存beat信息
@@ -56,21 +61,20 @@ public class ShowBeatMap : MonoBehaviour {
 
 
 	}
-	void onOnbeatDetected(int i){
-//		if (i < beatsoundFX.Length && playSFX ) {
-//			_audio.PlayOneShot (beatsoundFX[i]);
-//		}
-//		if (i < beatObj.Length && showBeatObj ) {
-//			gameobjScale [i] = 10;
-//		}
-	}
+
 	// Update is called once per frame
 	void Update () {
-//		for (int i = 0; i < beatObj.Length; i++) {
-//			beatObj [i].transform.localScale = new Vector3 (gameobjScale [i], gameobjScale [i], gameobjScale [i]);
-//			gameobjScale [i] -= gameobjScale [i] / 5;
-//		}
-	
+		if (!playmap) {
+			return;
+		}
+		PlayBeatMap  ();
+
+		if(Input.GetKeyDown( KeyCode.A)){
+			CheckBeatMap();
+		}
+		if (!_audio.isPlaying) {
+			playmap = false;
+		}
 	}
 
 
@@ -142,5 +146,34 @@ public class ShowBeatMap : MonoBehaviour {
 		}  
 	} 
 
+	//beatmap下落
+	public  void btnPlaymap()
+	{
+		if(BeatMapContainer!=null){
+		_audio.Play ();
+		playmap = true;
+		//BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
+		}
+	}
 
+	void PlayBeatMap()
+	{
+		
+		BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
+	}
+
+	//	//按键
+		public void CheckBeatMap()
+		{
+			//Debug.Log(MusicArrayList.Count);
+			//DetectBeatMap  ();
+			Beat[] beats = BeatMapContainer.GetComponentsInChildren <Beat> ();
+			foreach(Beat b in beats){
+				if (b.CheckState) {
+					b.transform.localScale = new Vector3 (10, 1, 1);
+					Debug.Log (_audio.time +"///"+ b.Destorytime);
+				//	_audio.PlayOneShot (mmm);
+				}
+			}
+		}
 }

@@ -4,8 +4,10 @@ using System.Collections;
 public class Beat : MonoBehaviour {
 	public float Destorytime;
 	public bool  CheckState;
-	[SerializeField ]
+	//[SerializeField ]
 	 AudioSource _audio;
+	[SerializeField ]
+	AudioClip AC;
 	// Update is called once per frame
 //	void Update () {
 //	
@@ -29,8 +31,8 @@ public class Beat : MonoBehaviour {
 		}
 		if (collider.tag == "checkzone") {
 			CheckState = true;
-			AudioClip ac = GameObject.Find ("MCamera").GetComponent<BeatAnalysisManager > ().beatsoundDefault  as AudioClip;
-			_audio.PlayOneShot  (ac);
+			//AudioClip ac = GameObject.Find ("MCamera").GetComponent<BeatAnalysisManager > ().beatsoundDefault  as AudioClip;
+			_audio.PlayOneShot  (AC);
 			Destroy (gameObject);
 			Debug.Log ("ttt  "+collider.name );
 		}

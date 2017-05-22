@@ -53,7 +53,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	int CurrentIndex=0;//存1024帧中的位置
 
 
-	bool playmap=false;
+	bool playRealtime=false;
 
 	public  GameObject drawline;
 	public  float  lastAvgInc;
@@ -103,31 +103,35 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 		
 
 
-		if (_audio.isPlaying && !playmap  && !bpmsetting) {
+		if (_audio.isPlaying && playRealtime  ) {
 			recordmusicdata ();
 			return;
 		} 
-		if (_audio.isPlaying && playmap &&!bpmsetting) {
-			_audio.pitch = 1;
-			PlayBeatMap ();
-			Debug.Log ("play1");
-			return;
-			//PlayBeatMap2 ();
-		}
+//		if (_audio.isPlaying && playmap &&!bpmsetting) {
+//			_audio.pitch = 1;
+//			PlayBeatMap ();
+//			Debug.Log ("play1");
+//			return;
+//			//PlayBeatMap2 ();
+//		}
 
-		if (_audio.isPlaying && bpmsetting ) {
-			_audio.pitch = 1;
-			//PlayBeatMap ();
+//		if (_audio.isPlaying && bpmsetting ) {
+//			_audio.pitch = 1;
+//			//PlayBeatMap ();
+//		}
+		if (!_audio.isPlaying) {
+			playRealtime = false;
 		}
 	
 	}
 	public void playmusic()
 	{
-		if (BeatMapContainer != null) {
-			playmap = true;
-
-		}
-
+//		if (BeatMapContainer != null) {
+//
+//
+//		}
+		BeatAnalysisManager.BeatArrayList.Clear();
+		playRealtime = true;
 		_audio.Play ();
 	}
 
@@ -407,12 +411,12 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 
 
-	//测试用
-	//beatmap下落
-	void PlayBeatMap()
-	{
-				BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
-	}
+//	//测试用
+//	//beatmap下落
+//	void PlayBeatMap()
+//	{
+//				BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
+//	}
 //
 //	//按键
 //	public void CheckBeatMap()

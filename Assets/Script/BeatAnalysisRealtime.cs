@@ -27,33 +27,17 @@ public class OnBeatrealtimeEventHandler : UnityEngine.Events.UnityEvent< int >
 public class BeatAnalysisRealtime : MonoBehaviour {
 	[HideInInspector ]
 	AudioSource _audio;
-	[SerializeField]
-	AudioClip musicA;
-	[SerializeField]
-	AudioClip musicB;
-	[SerializeField]
-	AudioClip musicC;
 
+//
 	public static string AudioName="";
-	public AudioClip[] beatsoundFX;
-	public AudioClip beatsoundDefault;
-	public AudioClip mmmhigh;
-	public GameObject[] beatObj;
-	public  GameObject beatObjDefault;
-	bool playSFX=false;
-	bool showBeatObj=false;
-	public  GameObject cubemid;
-	public  GameObject cubehigh;
-	float gggtestposlow=0;
-	float gggtestposmid=0;
-	float gggtestposhigh=0;
 
 
-	[SerializeField]
+
+//	[SerializeField]
 	int _SpecSize = 256;
-	[SerializeField]
+//	[SerializeField]
 	int _bufferSize = 256;
-	[SerializeField]
+//	[SerializeField]
 	int _numBands =8;
 
 	float[,] RecAvgInBandInc;
@@ -66,9 +50,6 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	float[] spectrum ;// new float[bufferSize ];//每帧采样64个
 	float[] Bands;// = new float[8];//分成8个频段
 	int[] lastbeatindexInBand;//存各个频段上一次节拍的位置 =new int[8];
-
-
-
 	int CurrentIndex=0;//存1024帧中的位置
 
 
@@ -76,11 +57,10 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 	public  GameObject drawline;
 	public  float  lastAvgInc;
-	[Range (0.5f,3)]
-	public float enegryaddup = 1.2f;
+
+	float enegryaddup = 1.2f;
 	int timelast;
 	public int timestep;
-	[SerializeField ]
 	float decay = 0.997f;//衰减?
 	[SerializeField ]
 	 int _bandlength = 32;//
@@ -88,15 +68,8 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 	public float speed=2000;
 	GameObject BeatMapContainer;// = new GameObject ();
-
 	GameObject[] GameObjBeats;// = new GameObject[beatlist.Count ];
-	public GameObject BeatPfb;
-	public  string strvariance="";//测试用
-	[TextArea ]
-	public string BeatMapDataJson;
-	/// <summary>
-	/// ///////////////////////////////////
-	/// </summary>
+
 	public OnBeatrealtimeEventHandler onBeat;
 	//public OnSpectrumEventHandler onSpectrum;
 
@@ -113,26 +86,12 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 		lastbeatindexInBand=new int[_numBands];//存各个频段上一次节拍的位置 
 		_audio=BeatAnalysisManager._audio ;//GetComponent<AudioSource> ();
 		AudioName = _audio.name;
+		decay = BeatAnalysisManager.decay;
+		enegryaddup = BeatAnalysisManager.enegryaddup;
 		//_audio.pitch = 2;
 
 
 
-		if (beatObj.Length > 0) {
-			showBeatObj = true;
-			for (int i = 0; i < beatObj.Length; i++) {
-				if (beatObj [i] == null) {
-					beatObj [i] = beatObjDefault;
-				}
-			}
-		}
-		if (beatsoundFX .Length > 0) {
-			playSFX  = true;
-			for (int i = 0; i < beatsoundFX.Length; i++) {
-				if (beatsoundFX [i] == null) {
-					beatsoundFX [i] = beatsoundDefault;
-				}
-			}
-		}
 		Debug.Log("2"+Time.frameCount );
 		Debug.Log("2"+Time.captureFramerate );
 
@@ -143,52 +102,6 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	void Update () {
 		
 
-//		if (onbeatlow) {
-//			gggtestposlow = 10;//+(;
-//
-//		} else {
-//			if (gggtestposlow > 0) {
-//				gggtestposlow-=gggtestposlow/5;
-//			}
-//		}
-//		beatObjDefault.transform.localScale = new Vector3 (gggtestposlow, gggtestposlow , gggtestposlow);
-//		if (onbeatmid) {
-//			gggtestposmid = 10;//+(0.1f*);
-//
-//		} else {
-//			if (gggtestposmid > 0) {
-//				gggtestposmid-=gggtestposmid/5;
-//			}
-//		}
-//		cubemid.transform.localScale = new Vector3 (gggtestposmid, gggtestposmid , gggtestposmid);
-//		if (onbeathigh) {
-//			gggtestposhigh = 10;//+(0.1f*);
-//
-//		} else {
-//			if (gggtestposhigh > 0) {
-//				gggtestposhigh-=gggtestposhigh/5;
-//			}
-//		}
-//		cubehigh.transform.localScale = new Vector3 (gggtestposhigh, gggtestposhigh , gggtestposhigh);
-//
-//
-
-
-//
-//		if(Input.GetKeyDown (KeyCode.Z  )){
-//			Debug.Log ("MusicArrayList="+MusicArrayList.Count);
-//			float[] ff =(float[]) MusicArrayList [1];
-//			Debug.Log ("key1L"+ff[0]+"//"+ff[1]+"//"+ff[2]);
-//			ff =(float[]) MusicArrayList [5];
-//			Debug.Log ("key2L"+ff[0]+"//"+ff[1]+"//"+ff[2]);
-//		}
-//		if(Input.GetKeyDown (KeyCode.S   )){
-//
-//			//_audio.Play ();
-//			Debug.Log(MusicArrayList.Count);
-//			//DetectBeatMap ();
-//		}
-		//end测试用
 
 		if (_audio.isPlaying && !playmap  && !bpmsetting) {
 			recordmusicdata ();
@@ -330,7 +243,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	//分频段，实时检测节拍
 	void CheckBeatInBand()
 	{  
-		 strvariance="";
+//		 strvariance="";
 
 		if (CurrentIndex < _bufferSize) {
 			return;
@@ -342,7 +255,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 //			int largeindexF = 0;
 			//int lastAverageInc = 0;
 			float largeenergy = RecAvgInBandInc  [lastbeatindexInBand[ic],ic];//当前频段上一次节拍的位置
-			strvariance+=">>"+Mathf.Pow (RecAvgInBandInc [CurrentIndex - 1, ic], 2)+"////";
+//			strvariance+=">>"+Mathf.Pow (RecAvgInBandInc [CurrentIndex - 1, ic], 2)+"////";
 			float variance=0;//方差
 			for (int i = lastbeatindexInBand[ic]+1; i < CurrentIndex-2; i++) {
 				//遍历当前频段，上一节拍至当前帧的所有平均值增量
@@ -369,7 +282,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 			tempVarInc = 0.5f + tempVarInc / 5000;
 			tempVarInc = Mathf.Clamp (tempVarInc, 0.5f, 1.2f);
 
-			strvariance+=variance+",";//显示方差
+//			strvariance+=variance+",";//显示方差
 
 
 			//判断节拍///////////////////////
@@ -402,20 +315,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 					//将频段分为高中低音，确定当前节拍属高中低音
 					onBeat.Invoke (ic);
-					if(ic<beatsoundFX.Length ){
-						_audio.PlayOneShot (beatsoundFX[ic]);
-					}
-//					if (ic<Mathf .Floor(_numBands/3)) {
-//						onbeatlow = true;
-//						_audio.PlayOneShot (beatsoundDefault);
-//					} else if (ic>=Mathf .Floor(_numBands/3)&&ic<Mathf .Floor(2*_numBands/3)) {
-//						onbeatmid = true;
-//					} else {
-//						onbeathigh = true;
-//					}
-//					if (!onbeatlow &&(onbeatmid || onbeathigh)) {
-//						_audio.PlayOneShot (mmmhigh );
-//					}
+
 					lastbeatindexInBand[ic] = CurrentIndex;//记录当前频段的上一个节拍位置，每帧-1
 
 					//测试用
@@ -428,15 +328,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 
 				} else {
-					////将频段分为高中低音，确定当前范围中没有节拍
-//					if (ic<Mathf .Floor(_numBands/3)) {
-//						onbeatlow = false;
-//						//_audio.PlayOneShot (mmm);
-//					} else if (ic>=Mathf .Floor(_numBands/3)&&ic<Mathf .Floor(2*_numBands/3)) {
-//						onbeatmid = false;
-//					} else {
-//						onbeathigh = false;
-//					}
+
 
 				}
 				////end当前帧增量为buffersize中最大的，且远大于之前的最大值
@@ -462,13 +354,12 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	int Setbpmframe=-1;
 	int bpmframe=0;
 	[SerializeField]
-	Text  bpmtxt;
+	//Text  bpmtxt;
 	bool bpmsetting=false;
 	//ArrayList bpmlist;
 	public void setBPM()
 	{
-		//Debug.Log(Time.frameCount  );
-		//Debug.Log(Time.captureFramerate );
+
 		if (!_audio.isPlaying) {
 			_audio.Play ();
 			bpmsetting = true;
@@ -500,7 +391,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 				Debug.Log ("bpmframe *2=" + (bpmframe * 2));
 			}
 		}
-		bpmtxt.text = "bpm="+bpmframe;
+		//bpmtxt.text = "bpm="+bpmframe;
 
 	}
 
@@ -512,46 +403,8 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 		_audio.Stop ();
 	}
 
-	//
 
 
-
-
-	public  void Btnload() {
-		
-		load(BeatMapDataJson) ;
-	}
-
-	//从json生成map
-	 void load(string jsonstr) {  
-		savedBeatMap  smdread = JsonUtility.FromJson<savedBeatMap> (jsonstr);
-		Debug.Log ("load smdread.md="+smdread.MD );
-
-		if (GameObjBeats!=null) {
-			Debug.Log (BeatMapContainer.transform.childCount);
-			for (int i = 0; i < GameObjBeats.Length; i++) {
-				DestroyImmediate (GameObjBeats [i]);
-			}
-
-		} else {
-			BeatMapContainer = new GameObject ();
-			GameObjBeats = new GameObject[smdread.MD.Length];
-			BeatMapContainer.transform.position=new Vector3(0,0-speed/100,0);
-		}	
-		float [] beattimes=new float[smdread.MD.Length ] ;
-		for (int i = 0; i < smdread.MD.Length; i++) {
-			MusicData md = (MusicData )smdread.MD [i];
-
-			GameObject beat= Instantiate (BeatPfb) as GameObject ;
-			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
-			beat.transform.parent = BeatMapContainer.transform ;
-
-			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
-			GameObjBeats[i]=beat;
-			beattimes [i] = md.playtime;
-		}
-	}  
-	//end从json生成map
 
 
 	//测试用
@@ -560,20 +413,20 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	{
 				BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
 	}
-
-	//按键
-	public void CheckBeatMap()
-	{
-		Debug.Log(MusicArrayList.Count);
-	//	DetectBeatMap  ();
-//		Beat[] beats = BeatMapContainer.GetComponentsInChildren <Beat> ();
-//		foreach(Beat b in beats){
-//			if (b.CheckState) {
-//				b.transform.localScale = new Vector3 (10, 1, 1);
-//				Debug.Log (_audio.time +"///"+ b.Destorytime);
-//			//	_audio.PlayOneShot (mmm);
-//			}
-//		}
-	}
+//
+//	//按键
+//	public void CheckBeatMap()
+//	{
+//		Debug.Log(MusicArrayList.Count);
+//	//	DetectBeatMap  ();
+////		Beat[] beats = BeatMapContainer.GetComponentsInChildren <Beat> ();
+////		foreach(Beat b in beats){
+////			if (b.CheckState) {
+////				b.transform.localScale = new Vector3 (10, 1, 1);
+////				Debug.Log (_audio.time +"///"+ b.Destorytime);
+////			//	_audio.PlayOneShot (mmm);
+////			}
+////		}
+//	}
 
 }

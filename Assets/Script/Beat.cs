@@ -29,7 +29,7 @@ public class Beat : MonoBehaviour {
 		}
 		if (collider.tag == "checkzone") {
 			CheckState = true;
-			AudioClip ac = GameObject.Find ("MCamera").GetComponent<BeatAnalysisRealtime> ().beatsoundDefault  as AudioClip;
+			AudioClip ac = GameObject.Find ("MCamera").GetComponent<BeatAnalysisManager > ().beatsoundDefault  as AudioClip;
 			_audio.PlayOneShot  (ac);
 			Destroy (gameObject);
 			Debug.Log ("ttt  "+collider.name );

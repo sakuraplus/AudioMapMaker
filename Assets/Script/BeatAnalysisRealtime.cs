@@ -106,7 +106,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 		lastbeatindexInBand=new int[numBands];//存各个频段上一次节拍的位置 
 		_audio=GetComponent<AudioSource> ();
 		AudioName = _audio.name;
-		_audio.pitch = 2;
+		//_audio.pitch = 2;
 
 		Debug.Log(Time.frameCount );
 		Debug.Log(Time.captureFramerate );

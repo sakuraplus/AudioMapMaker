@@ -5,21 +5,6 @@ using UnityEngine.UI;
 
 
 
-[System.Serializable]
-public class OnBeatLowEventHandler : UnityEngine.Events.UnityEvent
-{
-
-}
-[System.Serializable]
-public class OnBeatHighEventHandler : UnityEngine.Events.UnityEvent
-{
-
-}
-[System.Serializable]
-public class OnBeatrealtimeEventHandler : UnityEngine.Events.UnityEvent< int >
-{
-
-}
 
 /// <summary>
 /// 检测音量变化幅度

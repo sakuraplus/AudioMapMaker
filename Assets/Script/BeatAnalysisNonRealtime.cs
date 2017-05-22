@@ -38,9 +38,9 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 	/// </summary>
 
 	public  void StartAnaBeat () {
-		BufferSize = BeatAnalysisRealtime.bandlength;//.bufferSize;
-		MusicArrayList=BeatAnalysisRealtime.MusicArrayList ;
-		numBands = BeatAnalysisRealtime.numBands;
+		BufferSize = BeatAnalysisManager.bandlength;//.bufferSize;
+		MusicArrayList=BeatAnalysisManager.MusicArrayList ;
+		numBands = BeatAnalysisManager .numBands;
 		RecAvgInBandInc=new float[MusicArrayList.Count  ,numBands*2+1 ]; 
 		RecAvgInBand=new float[MusicArrayList.Count  ,numBands *2+1]; 
 

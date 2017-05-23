@@ -18,15 +18,11 @@ public class ShowBeatMap : MonoBehaviour {
 	AudioSource _audio;
 	public GameObject[] beatObj;
 	public  GameObject beatObjDefault;
-	bool playSFX=false;
-	bool showBeatObj=false;
+//	bool playSFX=false;
+//	bool showBeatObj=false;
 	bool playmap=false;
-//	[SerializeField]
-//	GameObject checkzone;
-//	[SerializeField]
-//	GameObject destiryzone;
+	bool beatmapauto=true;
 
-//	float[] gameobjScale;
 	ArrayList BeatArrayList=new ArrayList() ;//存beat信息
 	//ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
 
@@ -37,19 +33,19 @@ public class ShowBeatMap : MonoBehaviour {
 	
 		BeatArrayList = BeatAnalysisManager.BeatArrayList;
 	
-//		gameobjScale=new float[beatObj.Length ];
+
 
 		if (beatObj.Length > 0) {
-			showBeatObj = true;
+			//showBeatObj = true;
 			for (int i = 0; i < beatObj.Length; i++) {
-//				gameobjScale [i] = 0;
+
 				if (beatObj [i] == null) {
 					beatObj [i] = beatObjDefault;
 				}
 			}
 		}
 		if (beatsoundFX .Length > 0) {
-			playSFX  = true;
+			//playSFX  = true;
 			for (int i = 0; i < beatsoundFX.Length; i++) {
 				if (beatsoundFX [i] == null) {
 					beatsoundFX [i] = beatsoundDefault;
@@ -61,7 +57,9 @@ public class ShowBeatMap : MonoBehaviour {
 
 
 	}
-
+	public void setbeatmapauto(bool t){
+		beatmapauto = t;
+	}
 	// Update is called once per frame
 	void Update () {
 		if (!playmap) {
@@ -69,9 +67,12 @@ public class ShowBeatMap : MonoBehaviour {
 		}
 		PlayBeatMap  ();
 
-		if(Input.GetKeyDown( KeyCode.A)){
+		if(Input.GetKeyDown( KeyCode.A) ||beatmapauto){
 			CheckBeatMap();
 		}
+//		else if (beatmapauto) {
+//			CheckBeatMap ();
+//		}
 		if (!_audio.isPlaying) {
 			playmap = false;
 		}
@@ -103,7 +104,7 @@ public class ShowBeatMap : MonoBehaviour {
 			BeatMapContainer.transform.position=new Vector3(50,0-speed/100,0);
 		}
 
-		//savedBeatMap sbm=new savedBeatMap();
+
 		savedBeatMap  sbm=new savedBeatMap();
 		sbm.MD=new MusicData[BeatArrayList.Count ] ;
 
@@ -137,7 +138,7 @@ public class ShowBeatMap : MonoBehaviour {
 		if(!Directory.Exists("Assets/save")) {  
 			Directory.CreateDirectory("Assets/save");  
 		}  
-		string filename="Assets/save/NonRT"+BeatAnalysisRealtime.AudioName  +System.DateTime.Now.ToString ("dd-hh-mm-ss")+".json";
+		string filename="Assets/save/"+BeatAnalysisManager._audio.name   +System.DateTime.Now.ToString ("dd-hh-mm-ss")+".json";
 		FileStream file = new FileStream(filename, FileMode.Create);  
 		byte[] bts = System.Text.Encoding.UTF8.GetBytes(jsonstr);  
 		file.Write(bts,0,bts.Length);  
@@ -172,7 +173,8 @@ public class ShowBeatMap : MonoBehaviour {
 				if (b.CheckState) {
 					b.transform.localScale = new Vector3 (10, 1, 1);
 					Debug.Log (_audio.time +"///"+ b.Destorytime);
-				//	_audio.PlayOneShot (mmm);
+				_audio.PlayOneShot (b.AC );
+					Destroy(b);
 				}
 			}
 		}

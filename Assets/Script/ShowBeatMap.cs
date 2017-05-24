@@ -57,9 +57,7 @@ public class ShowBeatMap : MonoBehaviour {
 
 
 	}
-	public void setbeatmapauto(bool t){
-		beatmapauto = t;
-	}
+
 	// Update is called once per frame
 	void Update () {
 		if (!playmap) {
@@ -146,16 +144,35 @@ public class ShowBeatMap : MonoBehaviour {
 			file.Close();  
 		}  
 	} 
-
+	public void setbeatmapauto(Toggle  t){
+		
+		beatmapauto = t.isOn;
+		if (beatmapauto) {
+			t.GetComponentInChildren <Text> ().text = "The beats will check auto";
+		} else {
+			t.GetComponentInChildren <Text> ().text = "click key 'A' to check beats";
+		}
+		Debug.Log (beatmapauto);
+	}
 	//beatmap下落
 	public  void btnPlaymap()
 	{
 		if(BeatMapContainer!=null){
+		//	beatmapauto = true;
 		_audio.Play ();
 		playmap = true;
-		//BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
+		
 		}
 	}
+//	public  void btnPlaymapCheck()
+//	{
+//		if(BeatMapContainer!=null){
+//			beatmapauto = false;
+//			_audio.Play ();
+//			playmap = true;
+
+//		}
+//	}
 
 	void PlayBeatMap()
 	{
@@ -173,8 +190,10 @@ public class ShowBeatMap : MonoBehaviour {
 				if (b.CheckState) {
 					b.transform.localScale = new Vector3 (10, 1, 1);
 					Debug.Log (_audio.time +"///"+ b.Destorytime);
-				_audio.PlayOneShot (b.AC );
-					Destroy(b);
+				//if (beatmapauto) {
+					_audio.PlayOneShot (b.AC);
+					Destroy (b);
+				//}
 				}
 			}
 		}

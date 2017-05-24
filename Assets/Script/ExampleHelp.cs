@@ -35,7 +35,9 @@ public class ExampleHelp : MonoBehaviour {
 			_audio.clip = musics [i];
 		}
 	}
-
+	public void changeAutoBeatmap(){
+	
+	}
 
 
 }

@@ -54,9 +54,9 @@ public class BeatAnalysisManager : MonoBehaviour {
 	public float speed=2000;
 
 
-	GameObject BeatMapContainer;// = new GameObject ();
-	GameObject BeatMapContainer2;// = new GameObject ();
-	GameObject[] GameObjBeats;// = new GameObject[beatlist.Count ];
+//	GameObject BeatMapContainer;// = new GameObject ();
+//	GameObject BeatMapContainer2;// = new GameObject ();
+//	GameObject[] GameObjBeats;// = new GameObject[beatlist.Count ];
 //	public GameObject BeatPfb;
 
 	/// <summary>
@@ -65,19 +65,19 @@ public class BeatAnalysisManager : MonoBehaviour {
 	/// 
 	/// 
 	/// 
-	[SerializeField]
-	AudioClip musicA;
-	[SerializeField]
-	AudioClip musicB;
-	[SerializeField]
-	AudioClip musicC;
-	public  GameObject cubelow;
-	public  GameObject cubemid;
-	public  GameObject cubehigh;
+//	[SerializeField]
+//	AudioClip musicA;
+//	[SerializeField]
+//	AudioClip musicB;
+//	[SerializeField]
+//	AudioClip musicC;
+//	public  GameObject cubelow;
+//	public  GameObject cubemid;
+//	public  GameObject cubehigh;
 
-	public AudioClip[] beatsoundFX;
-	public AudioClip beatsoundDefault;
-	public AudioClip mmmhigh;
+//	public AudioClip[] beatsoundFX;
+//	public AudioClip beatsoundDefault;
+//	public AudioClip mmmhigh;
 
 
 //
@@ -132,12 +132,7 @@ public class BeatAnalysisManager : MonoBehaviour {
 	}
 	public void playmusic()
 	{
-//		if (BeatMapContainer != null) {
-//			playmap = true;
-//
-//		}
-//
-		_audio.Play ();
+	_audio.Play ();
 	}
 	public void StopAudio()
 	{
@@ -148,52 +143,6 @@ public class BeatAnalysisManager : MonoBehaviour {
 	}
 
 
-//
-	//根据实时采集到数据生成map
-//	public void DrawBeatMap()
-//	{
-//		if (GameObjBeats!=null) {
-//			Debug.Log (BeatMapContainer.transform.childCount);
-//			for (int i = 0; i < GameObjBeats.Length; i++) {
-//				DestroyImmediate (GameObjBeats [i]);
-//			}
-//
-//		} else {
-//			if (BeatArrayList.Count <= 0) {
-//				return;
-//			}
-//			BeatMapContainer = new GameObject ();
-//			//GameObjBeats = new GameObject[BeatArrayList.Count ];
-//			BeatMapContainer.transform.position=new Vector3(0,0-speed/100,0);
-//		}
-//
-//		savedBeatMap sbm=new savedBeatMap();
-//		sbm.MD=new MusicData[BeatArrayList.Count ] ;
-//
-//		//BeatMapContainer = new GameObject ();
-//		GameObjBeats = new GameObject[BeatArrayList.Count ];
-//		BeatMapContainer.transform.position = new Vector3 (0,0-speed/100,0);
-//		float [] beattimes=new float[BeatArrayList.Count ] ;
-//		for (int i = 0; i < BeatArrayList.Count; i++) {
-//			MusicData md = (MusicData )BeatArrayList [i];
-//			sbm.MD [i] = md;
-//
-//			GameObject beat= Instantiate (BeatPfb) as GameObject ;
-//			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
-//			beat.transform.parent = BeatMapContainer.transform ;
-//
-//			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
-//			GameObjBeats[i]=beat;
-//			beattimes [i] = md.playtime;
-//
-//		}
-//
-//		string ttt = JsonUtility.ToJson (sbm);
-//		Debug.Log("ttt="+ttt);
-//
-//		Save (ttt);
-//	}
-	//end根据实时采集到数据生成map
 
 
 	//保存json格式化的map
@@ -212,91 +161,5 @@ public class BeatAnalysisManager : MonoBehaviour {
 	}  
 	//end保存json格式化的map
 //
-//	public  void Btnload() {
-//
-//		load(BeatMapDataJson) ;
-//	}
-//
-//	//从json生成map
-//	void load(string jsonstr) {  
-//		savedBeatMap  smdread = JsonUtility.FromJson<savedBeatMap> (jsonstr);
-//		Debug.Log ("load smdread.md="+smdread.MD );
-//
-//		if (GameObjBeats!=null) {
-//			Debug.Log (BeatMapContainer.transform.childCount);
-//			for (int i = 0; i < GameObjBeats.Length; i++) {
-//				DestroyImmediate (GameObjBeats [i]);
-//			}
-//
-//		} else {
-//			BeatMapContainer = new GameObject ();
-//			GameObjBeats = new GameObject[smdread.MD.Length];
-//			BeatMapContainer.transform.position=new Vector3(0,0-speed/100,0);
-//		}	
-//		float [] beattimes=new float[smdread.MD.Length ] ;
-//		for (int i = 0; i < smdread.MD.Length; i++) {
-//			MusicData md = (MusicData )smdread.MD [i];
-//
-//			GameObject beat= Instantiate (BeatPfb) as GameObject ;
-//			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
-//			beat.transform.parent = BeatMapContainer.transform ;
-//
-//			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
-//			GameObjBeats[i]=beat;
-//			beattimes [i] = md.playtime;
-//		}
-//	}  
-//	//end从json生成map
-//
-//
-//	//测试用
-//	//beatmap下落
-//	void PlayBeatMap()
-//	{
-//		BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
-//	}
-//	//beatmap下落
-//	void PlayBeatMap2()
-//	{
-//		BeatMapContainer2.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
-//	}
-//	//按键
-//	public void CheckBeatMap()
-//	{
-//		Debug.Log(MusicArrayList.Count);
-
-//	}
-//	//测试用
-//	public void playmusicA()
-//	{
-//		playmap = false;
-//		playmap2 = false;
-//		MusicArrayList=new ArrayList() ;
-//		BeatArrayList = new ArrayList ();
-//		//		lastAverage=new float[bufferSize] ;//存前1024帧
-//		//		lastAverageInc=new float[bufferSize] ;//存前1024帧
-//		//_audio.PlayOneShot( musicA);
-//		_audio.clip= musicA;
-//	}
-//	public void playmusicB()
-//	{
-//		playmap = false;
-//		playmap2 = false;
-//		MusicArrayList=new ArrayList() ;
-//		BeatArrayList = new ArrayList ();
-//		//		lastAverage=new float[bufferSize] ;//存前1024帧
-//		//		lastAverageInc=new float[bufferSize] ;//存前1024帧
-//		_audio.clip= musicB;
-//	}
-//	public void playmusicC()
-//	{	
-//		playmap = false;
-//		playmap2 = false;
-//		MusicArrayList=new ArrayList() ;
-//		BeatArrayList = new ArrayList ();
-//		//		lastAverage=new float[bufferSize] ;//存前1024帧
-//		//		lastAverageInc=new float[bufferSize] ;//存前1024帧
-//		_audio.clip= musicC;		
-//	}
 
 }

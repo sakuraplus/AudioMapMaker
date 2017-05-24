@@ -69,7 +69,9 @@ public class ShowBeatRealtime : MonoBehaviour {
 	void Update () {
 		for (int i = 0; i < beatObj.Length; i++) {
 			beatObj [i].transform.localScale = new Vector3 (gameobjScale [i], gameobjScale [i], gameobjScale [i]);
-			gameobjScale [i] -= gameobjScale [i] / 5;
+			if (gameobjScale [i] > 5) {
+				gameobjScale [i] -= gameobjScale [i] / 5;
+			}
 		}
 	
 	}

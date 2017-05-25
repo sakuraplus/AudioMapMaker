@@ -27,7 +27,7 @@ public class ShowBeatRealtime : MonoBehaviour {
 
 	void Start () {
 
-		_audio = BeatAnalysisManager._audio;
+		_audio = BeatAnalysisManager ._audio;
 		BeatAnalysisRealtime  BAR = FindObjectOfType<BeatAnalysisRealtime > ();
 		BAR.onBeat.AddListener  (onOnbeatDetected);
 

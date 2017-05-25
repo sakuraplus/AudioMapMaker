@@ -22,6 +22,7 @@ public class savedBeatMap{
 public class BeatAnalysisManager : MonoBehaviour {
 	[HideInInspector ]
 	public static  AudioSource _audio;
+	public static BeatAnalysisManager BAM;
 
 	public static string AudioName="";
 	public static int SpecSize = 256;
@@ -98,8 +99,8 @@ public class BeatAnalysisManager : MonoBehaviour {
 
 
 	public  string strvariance="";//测试用
-	[TextArea ]
-	public string BeatMapDataJson;
+//	[TextArea ]
+//	public string BeatMapDataJson;
 	/// <summary>
 	/// ///////////////////////////////////
 	/// </summary>
@@ -115,6 +116,12 @@ public class BeatAnalysisManager : MonoBehaviour {
 		AudioName = _audio.name;
 		decay = _decay;
 		enegryaddup = _enegryaddup;
+		if (BAM  == null)
+		{
+			BAM = this.GetComponent<BeatAnalysisManager >();
+		}else{
+			print("awake BAM--"+BAM);
+		}
 		///////////////////////////////
 
 //		RecAvgInBandInc=new float[bufferSize ,numBands ]; 

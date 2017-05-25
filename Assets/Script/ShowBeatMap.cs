@@ -22,16 +22,15 @@ public class ShowBeatMap : MonoBehaviour {
 //	bool showBeatObj=false;
 	bool playmap=false;
 	bool beatmapauto=true;
-
-	ArrayList BeatArrayList=new ArrayList() ;//存beat信息
+	public  GameObject checkobject;
+	ArrayList BeatArrayList;//存beat信息
 	//ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
 
 
 	void Start () {
 
-		_audio = BeatAnalysisManager._audio;
-	
-		BeatArrayList = BeatAnalysisManager.BeatArrayList;
+		_audio = BeatAnalysisManager ._audio;
+
 	
 
 
@@ -84,7 +83,7 @@ public class ShowBeatMap : MonoBehaviour {
 	public GameObject BeatPfb;
 	public void DrawBeatMap()
 	{
-
+		ArrayList BeatArrayList= BeatAnalysisManager .BeatArrayList;
 		if (GameObjBeats!=null) {
 			Debug.Log (BeatMapContainer.transform.childCount);
 			for (int i = 0; i < GameObjBeats.Length; i++) {
@@ -136,7 +135,7 @@ public class ShowBeatMap : MonoBehaviour {
 		if(!Directory.Exists("Assets/save")) {  
 			Directory.CreateDirectory("Assets/save");  
 		}  
-		string filename="Assets/save/"+BeatAnalysisManager._audio.name   +System.DateTime.Now.ToString ("dd-hh-mm-ss")+".json";
+		string filename="Assets/save/"+BeatAnalysisManager ._audio.name   +System.DateTime.Now.ToString ("dd-hh-mm-ss")+".json";
 		FileStream file = new FileStream(filename, FileMode.Create);  
 		byte[] bts = System.Text.Encoding.UTF8.GetBytes(jsonstr);  
 		file.Write(bts,0,bts.Length);  
@@ -149,8 +148,10 @@ public class ShowBeatMap : MonoBehaviour {
 		beatmapauto = t.isOn;
 		if (beatmapauto) {
 			t.GetComponentInChildren <Text> ().text = "The beats will check auto";
+			checkobject.transform.position = new Vector3 (0,-2.5f,0);
 		} else {
 			t.GetComponentInChildren <Text> ().text = "click key 'A' to check beats";
+			checkobject.transform.position = new Vector3 (0,0,0);
 		}
 		Debug.Log (beatmapauto);
 	}

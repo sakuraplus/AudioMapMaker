@@ -51,8 +51,8 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	float betweenbeat;
 	int beatArrindex=0;//用于重复使用array中元素
 
-	[SerializeField ]
-	bool usethelastbeat=false;//true使用上一节拍比较，false比较是否为buffer中最大值
+	//[SerializeField ]
+	//bool usethelastbeat=false;//true使用上一节拍比较，false比较是否为buffer中最大值
 
 
 	//每帧更新的
@@ -326,7 +326,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 			float beatsincelast = CurrentIndex - lastbeatindexInBand[ic];//当前频段与上一节拍之间的帧数
 			if (beatsincelast > betweenbeat) {//与上一节拍之间的帧数不够大则不认为此处是节拍
 				//&& _bufferSize-largeindexF<4
-				if (RecAvgInBandInc [CurrentIndex - 1,ic]/Mathf.Abs( largeenergy  * enegryaddup*tempVarInc)>1 ) {//当前帧增量为buffersize中最大的，且远大于之前的最大值
+				if (RecAvgInBandInc [CurrentIndex - 1,ic]/Mathf.Abs( largeenergy  * enegryaddup*tempVarInc)>1 &&	RecAvgInBandInc [CurrentIndex - 1,ic]>0 ) {//当前帧增量为buffersize中最大的，且远大于之前的最大值
 					
 
 

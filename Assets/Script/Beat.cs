@@ -25,9 +25,9 @@ public class Beat : MonoBehaviour {
 	void OnTriggerEnter(Collider collider) 
 	{
 		
-		
 		if (collider.tag == "destoryzone") {
 			Destroy (gameObject);
+			Debug.Log ("kkkkkkkkk  "+collider.name );
 		}
 		if (collider.tag == "checkzone") {
 			CheckState = true;

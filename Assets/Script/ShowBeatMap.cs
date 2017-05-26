@@ -158,11 +158,19 @@ public class ShowBeatMap : MonoBehaviour {
 
 //		}
 //	}
-
+	int CountToSync=0;//
 	void PlayBeatMap()
 	{
-		BeatMapContainer.transform.position=new Vector3 ( 0, 0-speed * _audio.time ,0);
-		//BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
+		
+		if (CountToSync > 240) {
+			BeatMapContainer.transform.position=new Vector3 ( 0, 0-speed * _audio.time ,0);
+			CountToSync = 0;
+			Debug.LogWarning  ("sync");
+		} else {
+			BeatMapContainer.transform.position -= new Vector3 (0, speed * Time.deltaTime, 0);
+		}
+		Debug.Log (CountToSync);
+		CountToSync++;
 	}
 
 	//	//按键

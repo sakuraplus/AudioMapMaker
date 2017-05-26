@@ -270,7 +270,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	{  
 //		 strvariance="";
 
-		if (CurrentIndex < _bufferSize) {
+		if (CurrentIndex < _bufferSize/2) {
 			return;
 		}
 
@@ -352,6 +352,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 					//将频段分为高中低音，确定当前节拍属高中低音
 					onBeat.Invoke (ic);
+					Debug.LogWarning  ("onbeat time="+_audio.timeSamples +" ic=" + ic + " lastbeat=" + lastbeatindexInBand[ic] + ",largeindex=" + largeindex + "," + largeenergy + "---" + RecAvgInBandInc [CurrentIndex - 1,ic]);
 
 					lastbeatindexInBand[ic] = CurrentIndex;//记录当前频段的上一个节拍位置，每帧-1
 
@@ -360,8 +361,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 					timestep = _audio.timeSamples - timelast;
 					timelast = _audio.timeSamples;
 					//end测试用
-					Debug.LogWarning  ("onbeat time="+_audio.timeSamples +" ic=" + ic + " lastbeat=" + lastbeatindexInBand[ic] + ",largeindex=" + largeindex + "," + largeenergy + "---" + RecAvgInBandInc [CurrentIndex - 1,ic]);
-					//Debug.LogError ("on   AvgSuperhigh="+AvgSuperhigh);
+									//Debug.LogError ("on   AvgSuperhigh="+AvgSuperhigh);
 
 
 				} else {

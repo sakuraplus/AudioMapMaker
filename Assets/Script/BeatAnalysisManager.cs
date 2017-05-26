@@ -155,7 +155,7 @@ public class BeatAnalysisManager : MonoBehaviour {
 			sxs += " , " + DictBandlength [iii];
 		}
 		Debug.Log (">>length= "+sxs);
-		_audio.Stop ();
+		//_audio.Stop ();
 	}
 //	public void playmusic()
 //	{

@@ -25,7 +25,8 @@ public class ShowBeatMap : MonoBehaviour {
 	public  GameObject checkobject;
 	ArrayList BeatArrayList;//存beat信息
 	//ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
-
+	[SerializeField ]
+	float offset=0.5f;
 
 	void Start () {
 
@@ -98,19 +99,19 @@ public class ShowBeatMap : MonoBehaviour {
 			BeatMapContainer.name="nonrealtime";
 
 			//GameObjBeats = new GameObject[BeatArrayList.Count ];
-			BeatMapContainer.transform.position=new Vector3(50,0-speed/100,0);
+			BeatMapContainer.transform.position=new Vector3(50,0-speed*offset ,0);
 		}
 
 
-		savedBeatMap  sbm=new savedBeatMap();
-		sbm.MD=new MusicData[BeatArrayList.Count ] ;
+		//savedBeatMap  sbm=new savedBeatMap();
+		//sbm.MD=new MusicData[BeatArrayList.Count ] ;
 
 		GameObjBeats = new GameObject[BeatArrayList.Count ];
 		BeatMapContainer.transform.position = new Vector3 (0,0-speed/100,0);
 		float [] beattimes=new float[BeatArrayList.Count ] ;
 		for (int i = 0; i < BeatArrayList.Count; i++) {
 			MusicData md = (MusicData )BeatArrayList [i];
-			sbm.MD [i] = md;
+			//sbm.MD [i] = md;
 
 			GameObject beat= Instantiate (BeatPfb) as GameObject ;
 			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
@@ -123,32 +124,15 @@ public class ShowBeatMap : MonoBehaviour {
 		}
 
 
-		string ttt = JsonUtility.ToJson (sbm );
-		Debug.Log("ttt="+ttt);
 
-		Save (ttt);
 	}
 
-	//保存json格式化的map
-	void Save(string jsonstr) {  
-
-		if(!Directory.Exists("Assets/save")) {  
-			Directory.CreateDirectory("Assets/save");  
-		}  
-		string filename="Assets/save/"+BeatAnalysisManager ._audio.name   +System.DateTime.Now.ToString ("dd-hh-mm-ss")+".json";
-		FileStream file = new FileStream(filename, FileMode.Create);  
-		byte[] bts = System.Text.Encoding.UTF8.GetBytes(jsonstr);  
-		file.Write(bts,0,bts.Length);  
-		if(file != null) {  
-			file.Close();  
-		}  
-	} 
 	public void setbeatmapauto(Toggle  t){
 		
 		beatmapauto = t.isOn;
 		if (beatmapauto) {
 			t.GetComponentInChildren <Text> ().text = "The beats will check auto";
-			checkobject.transform.position = new Vector3 (0,-2.5f,0);
+			checkobject.transform.position = new Vector3 (0,-5f,0);
 		} else {
 			t.GetComponentInChildren <Text> ().text = "click key 'A' to check beats";
 			checkobject.transform.position = new Vector3 (0,0,0);

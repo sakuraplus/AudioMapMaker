@@ -22,83 +22,53 @@ public class savedBeatMap{
 public class BeatAnalysisManager : MonoBehaviour {
 	[HideInInspector ]
 	public static  AudioSource _audio;
-	public static BeatAnalysisManager BAM;
+
 
 	public static string AudioName="";
-	public static int SpecSize = 256;
-	public static int bufferSize = 256;
-	public static  int numBands =8;
+	public static int SpecSize = 256;//采样数量
+	public static int bufferSize = 256;//记录的帧数
+	public static  int numBands =8;//分频段数量
 	public static  float decay = 0.997f;//衰减?
 	public static float enegryaddup = 1.2f;
+
 	[SerializeField ]
 	int _SpecSize =256;
 	[SerializeField ]
 	int _bufferSize = 256;
 	[SerializeField ]
 	int _numBands =8;
-
-
-	public  static  ArrayList BeatArrayList=new ArrayList() ;//存beat信息
-//	int beatArrindex=0;
-	public  static  ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
 	[SerializeField ]
-	[Range (0.5f,3)]
-	//public 
+	[Range (0.5f,3)]	 
 	float _enegryaddup = 1.2f;
 	[SerializeField ]
 	float _decay = 0.997f;//衰减?
 
+	public static bool CheckWithInc;//使用增长值或能量值计算节拍
 	[SerializeField ]
-	int _bandlength = 32;//
-	public static int bandlength = 32;//
+	bool _checkwithInc =true;//使用增长值或能量值计算节拍
+	[SerializeField ]
+	  Vector2[] FreqRange;//使用的频率范围，x为低频y为高频
+
+	//Vector2[] _FreqRange;
+	[SerializeField ]
+	  bool useFreq=false;//是否根据频率范围分段，false则根据对数方式区分高频和低频
+	public static int[] DictBandRange;//dictionary存采样数组中每位对应的频段
+	public static int[] DictBandlength;//存每个频段的长度，计算平均值用
+
+	public  static  ArrayList BeatArrayList=new ArrayList() ;//存beat信息
+	public  static  ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
+
+
+//	[SerializeField ]
+//	int _bandlength = 32;//非实时计算时使用
+//	public static int bandlength = 32;//非实时计算时使用
 
 	public float speed=2000;
 
 
-//	GameObject BeatMapContainer;// = new GameObject ();
-//	GameObject BeatMapContainer2;// = new GameObject ();
-//	GameObject[] GameObjBeats;// = new GameObject[beatlist.Count ];
-//	public GameObject BeatPfb;
-
-	/// <summary>
-	/// /////////////////////////////////////////
-	/// </summary>
-	/// 
-	/// 
-	/// 
-//	[SerializeField]
-//	AudioClip musicA;
-//	[SerializeField]
-//	AudioClip musicB;
-//	[SerializeField]
-//	AudioClip musicC;
-//	public  GameObject cubelow;
-//	public  GameObject cubemid;
-//	public  GameObject cubehigh;
-
-//	public AudioClip[] beatsoundFX;
-//	public AudioClip beatsoundDefault;
-//	public AudioClip mmmhigh;
 
 
-//
-//
-//	//
-//
-//	float[] spectrum ;// new float[bufferSize ];//每帧采样64个
-//	float[] Bands;// = new float[8];//分成8个频段
-//	int[] lastbeatindexInBand;//存各个频段上一次节拍的位置 =new int[8];
-
-
-
-	//public  GameObject drawline;
-	public  float  lastAvgInc;
-
-	int timelast;
-	public int timestep;
-
-
-	public  string strvariance="";//测试用
+//	public  string strvariance="";//测试用
 //	[TextArea ]
 //	public string BeatMapDataJson;
 	/// <summary>
@@ -106,29 +76,25 @@ public class BeatAnalysisManager : MonoBehaviour {
 	/// </summary>
 	// Use this for initialization
 	void Awake () {
-		bandlength = _bandlength;
-		numBands = _numBands;
-		bufferSize = _bufferSize;
+		CheckWithInc  = _checkwithInc;
+		//bandlength = _bandlength;
+	
 		SpecSize = _SpecSize;
-//		spectrum =new float[SpecSize ];
-//		Bands=new float[numBands+1 ];//分8个频段,最后一位保存时间
+
 		_audio=GetComponent<AudioSource> ();
 		AudioName = _audio.name;
-		decay = _decay;
-		enegryaddup = _enegryaddup;
-		if (BAM  == null)
-		{
-			BAM = this.GetComponent<BeatAnalysisManager >();
-		}else{
-			print("awake BAM--"+BAM);
-		}
+
+		initDictOfBand ();
+	//	FreqRange = _FreqRange;
+//		if (BAM  == null)
+//		{
+//			BAM = this.GetComponent<BeatAnalysisManager >();
+//		}else{
+//			print("awake BAM--"+BAM);
+//		}
 		///////////////////////////////
 
-//		RecAvgInBandInc=new float[bufferSize ,numBands ]; 
-//		RecAvgInBand=new float[bufferSize ,numBands ]; 
-//
-//	
-//		lastbeatindexInBand=new int[numBands];//存各个频段上一次节拍的位置 
+
 
 		//_audio.pitch = 2;
 
@@ -137,23 +103,92 @@ public class BeatAnalysisManager : MonoBehaviour {
 
 
 	}
-	public void playmusic()
+
+	public   void initDictOfBand()
 	{
-	_audio.Play ();
-	}
-	public void StopAudio()
-	{
-//		bpmsetting = false;
-//		lastSetbpmframe=-1;
-//		Setbpmframe=-1;
+		if (!useFreq) {
+			numBands = _numBands;
+			//FreqRange.Initialize ();//=new Vector2[0];
+		} else {
+			numBands = FreqRange.Length;
+		}
+		bufferSize = _bufferSize;
+		decay = _decay;
+		enegryaddup = _enegryaddup;
+
+
+		Debug.Log (">>frequency= " + _audio.clip.frequency + "SampleRate=" + AudioSettings.outputSampleRate);//(int)Mathf.Floor (_SpecSize *_audio.clip.frequency/AudioSettings.outputSampleRate  
+		float freqlength= (SpecSize *_audio.clip.frequency/AudioSettings.outputSampleRate  );
+		Debug.Log (">> length=" + freqlength);
+		string ssss = "";
+		DictBandRange = new int[SpecSize ];
+		DictBandlength = new int[numBands ];
+		for (int i =0; i < SpecSize; i++)
+		{	int IndexInBand=-99;
+			if(!useFreq){
+				//musicenergy += spectrum [i];//总音量和，需要取平均数使用
+				IndexInBand =(int) Mathf.Floor (0.5f+Mathf.Log(i+2,SpecSize )*numBands) -1;//对数方式，将频率分为几段
+				IndexInBand=Mathf.Clamp(IndexInBand,0,numBands-1 );//限制频段编号范围
+				ssss += "/ " + IndexInBand;
+			}else{
+				for (int ir = 0; ir < FreqRange.Length ; ir++) {
+					int FreqToIndex = i * 24000 / SpecSize;
+					if (FreqToIndex >= FreqRange [ir].x && FreqToIndex < FreqRange [ir].y) {
+						IndexInBand = ir;
+						break;
+						//Debug.Log ("FreqToIndex= "+FreqToIndex+" ir="+ir);
+					}		
+				}	
+				ssss += "~ " + IndexInBand;
+			}
+			DictBandRange [i] = IndexInBand;
+			//if(IndexInBand<numBands && IndexInBand>=0  ){
+			if(IndexInBand<numBands && IndexInBand>=0 && i<freqlength )
+			{
+				DictBandlength [IndexInBand]++;//计数增加
+			}
+
+		}
+		Debug.Log (">>> " + ssss);
+		string sxs = "";
+		for (int iii = 0; iii < numBands; iii++) {
+			sxs += " , " + DictBandlength [iii];
+		}
+		Debug.Log (">>length= "+sxs);
 		_audio.Stop ();
 	}
+//	public void playmusic()
+//	{
+//	_audio.Play ();
+//	}
+//	public void StopAudio()
+//	{
+////		bpmsetting = false;
+////		lastSetbpmframe=-1;
+////		Setbpmframe=-1;
+//		_audio.Stop ();
+//	}
+//
 
 
 
 
 	//保存json格式化的map
-	void Save(string jsonstr) {  
+
+
+	//根据实时采集到数据 save map
+	public  void Save() {  
+		savedBeatMap  sbm=new savedBeatMap();
+		sbm.MD=new MusicData[BeatArrayList.Count ] ;
+
+
+		for (int i = 0; i < BeatArrayList.Count; i++) {
+			MusicData md = (MusicData )BeatArrayList [i];
+			sbm.MD [i] = md;
+		}
+
+		string jsonstr = JsonUtility.ToJson (sbm );
+		Debug.Log("ttt="+jsonstr);
 
 		if(!Directory.Exists("Assets/save")) {  
 			Directory.CreateDirectory("Assets/save");  

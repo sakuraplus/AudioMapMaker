@@ -36,6 +36,7 @@ public class ExampleHelp : MonoBehaviour {
 		showtext+="numBands = "+BeatAnalysisManager .numBands  +"\n";
 		showtext+="enegryaddup = "+BeatAnalysisManager .enegryaddup   +"\n";
 		T.text = showtext;
+		//BeatAnalysisManager.initDictOfBand ();
 	}
 	public void btnChangemusic(int i){
 
@@ -69,6 +70,11 @@ public class ExampleHelp : MonoBehaviour {
 		//ssize = Mathf.Pow (2, s.value);
 		//BeatAnalysisManager .enegryaddup  = s.value;//ssize;
 		refreshtext();
+	}
+	public void setUseInc(Toggle  t){
+		BeatAnalysisManager.CheckWithInc = t.isOn;
+	
+		Debug.Log (BeatAnalysisManager.CheckWithInc );
 	}
 
 }

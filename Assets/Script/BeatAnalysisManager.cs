@@ -157,10 +157,14 @@ public class BeatAnalysisManager : MonoBehaviour {
 		Debug.Log (">>length= "+sxs);
 		//_audio.Stop ();
 	}
-//	public void playmusic()
-//	{
-//	_audio.Play ();
-//	}
+	public void settodefault()
+	{
+		_bufferSize = 128;
+		_numBands = 3;
+		_enegryaddup = 1;
+		_decay = 0.998f;
+		initDictOfBand ();
+	}
 //	public void StopAudio()
 //	{
 ////		bpmsetting = false;

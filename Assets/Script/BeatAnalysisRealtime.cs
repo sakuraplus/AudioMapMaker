@@ -270,7 +270,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	{  
 //		 strvariance="";
 
-		if (CurrentIndex < _bufferSize/2) {
+		if (CurrentIndex < _bufferSize) {
 			return;
 		}
 

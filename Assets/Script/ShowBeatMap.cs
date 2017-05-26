@@ -107,7 +107,7 @@ public class ShowBeatMap : MonoBehaviour {
 		//sbm.MD=new MusicData[BeatArrayList.Count ] ;
 
 		GameObjBeats = new GameObject[BeatArrayList.Count ];
-		BeatMapContainer.transform.position = new Vector3 (0,0-speed/100,0);
+		BeatMapContainer.transform.position = new Vector3 (0,0-speed*offset,0);
 		float [] beattimes=new float[BeatArrayList.Count ] ;
 		for (int i = 0; i < BeatArrayList.Count; i++) {
 			MusicData md = (MusicData )BeatArrayList [i];
@@ -161,8 +161,8 @@ public class ShowBeatMap : MonoBehaviour {
 
 	void PlayBeatMap()
 	{
-		
-		BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
+		BeatMapContainer.transform.position=new Vector3 ( 0, 0-speed * _audio.time ,0);
+		//BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
 	}
 
 	//	//按键
@@ -174,7 +174,7 @@ public class ShowBeatMap : MonoBehaviour {
 			foreach(Beat b in beats){
 				if (b.CheckState) {
 					b.transform.localScale = new Vector3 (10, 1, 1);
-					Debug.Log (_audio.time +"///"+ b.Destorytime);
+				Debug.Log (_audio.time +"///"+ b.Destorytime+">  "+(_audio.time -b.Destorytime ));
 				//if (beatmapauto) {
 					_audio.PlayOneShot (b.AC);
 					Destroy (b);

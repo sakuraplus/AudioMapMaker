@@ -27,11 +27,8 @@ public class OnBeatrealtimeEventHandler : UnityEngine.Events.UnityEvent< int >
 public class BeatAnalysisRealtime : MonoBehaviour {
 	[HideInInspector ]
 	AudioSource _audio;
-//[SerializeField ]
-	//bool useFreq=false;//是否根据频率范围分段，false则根据对数方式区分高频和低频
-	//[SerializeField ]
-	//Vector2[] FreqRange;//使用的频率范围，x为低频y为高频
-	//public static string AudioName="";
+	//AudioListener _AL;
+
 	[SerializeField ]
 	//bool checkwithInc=true;//使用增长值或能量值计算节拍
 	public OnBeatrealtimeEventHandler onBeat;//节拍事件
@@ -82,11 +79,9 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	
 	}
 	void InitSetting(){
-		//if (!useFreq) {
+
 			_numBands = BeatAnalysisManager.numBands;//使用numband
-//		} else {
-//			_numBands = FreqRange.Length;//使用频率区间
-//		}
+
 		_bufferSize = BeatAnalysisManager .bufferSize ;
 		RecAvgInBandInc=new float[_bufferSize ,_numBands ]; 
 		RecAvgInBand=new float[_bufferSize ,_numBands ]; 
@@ -96,6 +91,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 		lastbeatindexInBand=new int[_numBands];//存各个频段上一次节拍的位置 
 		_audio=BeatAnalysisManager ._audio ;//GetComponent<AudioSource> ();
+		//_AL=BeatAnalysisManager._AL ;
 		freqlength=(int)Mathf.Floor (_SpecSize *_audio.clip.frequency/AudioSettings.outputSampleRate  );
 		betweenbeat=Mathf.Clamp (_bufferSize/4,10,256);
 		betweenbeat = Mathf.Min (betweenbeat, _bufferSize);
@@ -123,23 +119,33 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 			recordmusicdata ();
 			return;
 		} 
-
+		if (!_audio.isPlaying &&playRealtime==true) {
+			Debug.LogError  ("2-- "+Time.frameCount +">> "+Time.time+" >>> "+(Time.time-lasttime ) );
+		}
 		if (!_audio.isPlaying) {
 			playRealtime = false;
 		}
-	
+
 	}
+	float lasttime;
 	public void playmusic()
 	{
 		InitSetting ();
 		playRealtime = true;
 		_audio.Play ();
+		//_audio.pitch = 1.5f;
+		lasttime = Time.time;
+		Debug.LogError  ("0-- "+Time.frameCount +">> "+Time.time  );
+		Application.targetFrameRate =60;
+		Debug.LogError  ("1-- "+Time.frameCount +">> "+Application.targetFrameRate );
 	}
 
 	void recordmusicdata()
 	{
 	////////////////////////////////////////
 		_audio .GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
+	
+		//AudioListener.GetSpectrumData (spectrum, 0, FFTWindow.Rectangular);
 		//CurrentFrameAvg =
 		CalcCurrentFrameAvg (spectrum);// musicenergy;
 
@@ -191,24 +197,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 			if(ind>=0 && ind <_numBands){
 				Bands[ind]+=spectrum [i];//每个频段的音量和，可能需要求平均数再使用
 			}
-//			int IndexInBand=-1;
-//			if(!useFreq){
-//			//musicenergy += spectrum [i];//总音量和，需要取平均数使用
-//				IndexInBand =(int) Mathf.Floor (0.5f+Mathf.Log(i+2,freqlength )*_numBands) -1;//对数方式，将频率分为几段
-//				IndexInBand=Mathf.Clamp(IndexInBand,0,_numBands-1 );//限制频段编号范围
-//			}else{
-//				for (int ir = 0; ir < FreqRange.Length; ir++) {
-//					int FreqToIndex = i * 24000 / _SpecSize;
-//					if (FreqToIndex >= FreqRange [ir].x && FreqToIndex < FreqRange [ir].y) {
-//						IndexInBand = ir;
-//						//Debug.Log ("FreqToIndex= "+FreqToIndex+" ir="+ir);
-//					}		
-//				}	
-//			}
-//			if(IndexInBand<Bands.Length && IndexInBand>=0){
-//				Bands [IndexInBand] += spectrum [i];//每个频段的音量和，可能需要求平均数再使用
-//				ArrBandlength[IndexInBand]++;//计数增加
-//			}
+
 
 		}
 		for (int i = 0; i < _numBands ; i++) {

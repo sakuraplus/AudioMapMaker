@@ -22,7 +22,7 @@ public class savedBeatMap{
 public class BeatAnalysisManager : MonoBehaviour {
 	[HideInInspector ]
 	public static  AudioSource _audio;
-
+	public static 	AudioListener _AL;
 
 	public static string AudioName="";
 	public static int SpecSize = 256;//采样数量
@@ -83,6 +83,7 @@ public class BeatAnalysisManager : MonoBehaviour {
 
 		_audio=GetComponent<AudioSource> ();
 		AudioName = _audio.name;
+		_AL = GetComponent<AudioListener > ();
 
 		initDictOfBand ();
 	//	FreqRange = _FreqRange;

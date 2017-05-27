@@ -3,7 +3,7 @@ using System.Collections;
 using System.IO;
 
 public class BeatAnalysisNonRealtime : MonoBehaviour {
-
+	AudioSource _audio;
 	/// <summary>
 	/// ////////////////////////////////////////////
 	/// </summary>
@@ -36,6 +36,14 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 	/// <summary>
 	/// ///////////////////////////////////
 	/// </summary>
+
+
+
+
+
+
+
+
 
 	public  void StartAnaBeat () {
 		BufferSize = BeatAnalysisManager.bufferSize;
@@ -249,94 +257,97 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 
 
 
-//
-//	//根据实时采集到数据生成map
-//	GameObject BeatMapContainer;
-//	GameObject[] GameObjBeats;// = new GameObject[beatlist.Count ];
-//	public float speed=2000;
-//	public GameObject BeatPfb;
-//	public void DrawBeatMap()
-//	{
-//
-//		if (GameObjBeats!=null) {
-//			Debug.Log (BeatMapContainer.transform.childCount);
-//			for (int i = 0; i < GameObjBeats.Length; i++) {
-//				DestroyImmediate (GameObjBeats [i]);
-//			}
-//
-//		} else {
-//			if (BeatArrayList.Count <= 0) {
-//				return;
-//			}
-//			BeatMapContainer = new GameObject ();
-//			BeatMapContainer.name="nonrealtime";
-//
-//			//GameObjBeats = new GameObject[BeatArrayList.Count ];
-//			BeatMapContainer.transform.position=new Vector3(50,0-speed/100,0);
-//		}
-//
-//		//savedBeatMap sbm=new savedBeatMap();
-//		savedBeatMap  sbm=new savedBeatMap();
-//		sbm.MD=new MusicData[BeatArrayList.Count ] ;
-//
-//		GameObjBeats = new GameObject[BeatArrayList.Count ];
-//		BeatMapContainer.transform.position = new Vector3 (0,0-speed/100,0);
-//		float [] beattimes=new float[BeatArrayList.Count ] ;
-//		for (int i = 0; i < BeatArrayList.Count; i++) {
-//			MusicData md = (MusicData )BeatArrayList [i];
-//			sbm.MD [i] = md;
-//
-//			GameObject beat= Instantiate (BeatPfb) as GameObject ;
-//			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
-//			beat.transform.parent = BeatMapContainer.transform ;
-//
-//			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
-//			GameObjBeats[i]=beat;
-//			beattimes [i] = md.playtime;
-//
-//		}
-//
-//	
-//		string ttt = JsonUtility.ToJson (sbm );
-//		Debug.Log("ttt="+ttt);
-//
-//		Save (ttt);
-//	}
-//
-//	//保存json格式化的map
-//	void Save(string jsonstr) {  
-//
-//		if(!Directory.Exists("Assets/save")) {  
-//			Directory.CreateDirectory("Assets/save");  
-//		}  
-//		string filename="Assets/save/NonRT"+BeatAnalysisRealtime.AudioName  +System.DateTime.Now.ToString ("dd-hh-mm-ss")+".json";
-//		FileStream file = new FileStream(filename, FileMode.Create);  
-//		byte[] bts = System.Text.Encoding.UTF8.GetBytes(jsonstr);  
-//		file.Write(bts,0,bts.Length);  
-//		if(file != null) {  
-//			file.Close();  
-//		}  
-//	} 
-//
-//	public  void Btnload() {
-//		//load(BeatMapDataJson) ;
-//	}
+	float[] spectrum =new float[64 ];// 每帧采样数组
+	float[] output =new float[64 ];// 每帧采样数组
+	void Start () {
+		//	bandlength = _bandlength;
+		InitSetting ();
+		//_audio.pitch = 2;
+		Debug.Log("2"+Time.frameCount );
 
-	//从json生成map
+	}
+	void InitSetting(){
 
+		//		_numBands = BeatAnalysisManager.numBands;//使用numband
+		//
+		//		_bufferSize = BeatAnalysisManager .bufferSize ;
+		//		RecAvgInBandInc=new float[_bufferSize ,_numBands ]; 
+		//		RecAvgInBand=new float[_bufferSize ,_numBands ]; 
+		//		_SpecSize = BeatAnalysisManager .SpecSize;
+		//		spectrum =new float[64 ];
+		//		Bands=new float[_numBands+1 ];//频段
+		//
+		//		lastbeatindexInBand=new int[_numBands];//存各个频段上一次节拍的位置 
+		_audio=BeatAnalysisManager ._audio ;//GetComponent<AudioSource> ();
+		//		//_AL=BeatAnalysisManager._AL ;
+		//		freqlength=(int)Mathf.Floor (_SpecSize *_audio.clip.frequency/AudioSettings.outputSampleRate  );
+		//		betweenbeat=Mathf.Clamp (_bufferSize/4,10,256);
+		//		betweenbeat = Mathf.Min (betweenbeat, _bufferSize);
+		//		//	AudioName = _audio.name;
+		//		decay = BeatAnalysisManager .decay;
+		//		enegryaddup = BeatAnalysisManager .enegryaddup;
+		//
+		//		BeatAnalysisManager .BeatArrayList.Clear();
+		//		BeatAnalysisManager. MusicArrayList.Clear ();
+		//		beatArrindex=0;
+		//		CurrentIndex = 0;
+
+
+		///////////////////****
+		//		largeenergys=new float[_numBands ];
+		//Debug.Log ("xxxx"+largeenergys[1]);
+	}
 
 
 	//测试用
 	//beatmap下落
-	void PlayBeatMap()
+	public  void step()
 	{
+		//_audio.play
+		_audio .GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
+		//_audio .GetOutputData (output,0);
+
+		string testS = "";
+		//string testO="";
+		for (int i = 0; i < 64; i++) {
+			testS += ", " + spectrum [i].ToString ();
+		//	testO += ", " + output [i].ToString ();
+		}
+		Debug.Log (_audio.timeSamples + "S-- " + testS);
+		//Debug.Log ("O-- " + testO);
 	//	BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
 	}
 	//按键
 	public void CheckBeatMap()
 	{
-		Debug.Log(MusicArrayList.Count);
-		//DetectWavelength  ();
+		if (_audio.isPlaying) {
+			_audio .GetSpectrumData(output, 0, FFTWindow.Rectangular);
+			//string testS = "";
+			string testO="";
+			for (int i = 0; i < 64; i++) {
+				testO += ", " + output [i].ToString ();
+				//	testO += ", " + output [i].ToString ();
+			}
+			//Debug.Log ("S-- " + testS);
+			Debug.Log ("O-- " + testO);
+			//	BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
+			_audio.Pause  ();
+			_audio .GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
+			//_audio .GetOutputData (output,0);
+
+			string testS = "";
+			//string testO="";
+			for (int i = 0; i < 64; i++) {
+				testS += ", " + spectrum [i].ToString ();
+				//	testO += ", " + output [i].ToString ();
+			}
+			Debug.Log ("S-- " + testS);
+
+		} else {
+			Debug.Log ("p"+_audio.outputAudioMixerGroup);
+			_audio.Play ();
+			//_audio.outputAudioMixerGroup 
+		}
 
 	}
 	//测试用

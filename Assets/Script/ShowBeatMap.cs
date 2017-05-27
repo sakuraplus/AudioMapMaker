@@ -169,25 +169,37 @@ public class ShowBeatMap : MonoBehaviour {
 		} else {
 			BeatMapContainer.transform.position -= new Vector3 (0, speed * Time.deltaTime, 0);
 		}
-		Debug.Log (CountToSync);
+		//Debug.Log (CountToSync);
 		CountToSync++;
 	}
 
 	//	//按键
-		public void CheckBeatMap()
-		{
-			//Debug.Log(MusicArrayList.Count);
-			//DetectBeatMap  ();
-			Beat[] beats = BeatMapContainer.GetComponentsInChildren <Beat> ();
-			foreach(Beat b in beats){
-				if (b.CheckState) {
-					b.transform.localScale = new Vector3 (10, 1, 1);
-				Debug.Log (_audio.time +"///"+ b.Destorytime+">  "+(_audio.time -b.Destorytime ));
-				//if (beatmapauto) {
-					_audio.PlayOneShot (b.AC);
-					Destroy (b);
-				//}
-				}
+	public void CheckBeatMap()
+	{
+			
+//			Beat[] beats = BeatMapContainer.GetComponentsInChildren <Beat> ();
+//			foreach(Beat b in beats){
+//				if (b.CheckState) {
+//					b.transform.localScale = new Vector3 (10, 1, 1);
+//					Debug.Log (_audio.time +"///"+ b.Destorytime+">  "+(_audio.time -b.Destorytime ));
+//
+//					_audio.PlayOneShot (b.AC);
+//					b.CheckState = false;
+//					Destroy (b.transform );			
+//				}
+//			}
+		int ic=BeatMapContainer.transform.childCount ;
+		for (int i = 0; i < ic; i++) {
+			GameObject  b = BeatMapContainer.transform.GetChild (i).gameObject ; //<Beat> ();
+			if (b.GetComponent<Beat> ().CheckState) {
+				b.transform.localScale = new Vector3 (10, 1, 1);
+				Debug.Log (_audio.time +"///"+ b.GetComponent<Beat> ().Destorytime+">  "+(_audio.time -b.GetComponent<Beat> ().Destorytime ));
+				_audio.PlayOneShot (b.GetComponent<Beat> ().AC);
+				b.GetComponent<Beat> ().CheckState = false;
+				Destroy (b );		
 			}
 		}
+				
+
+	}
 }

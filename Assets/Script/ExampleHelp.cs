@@ -76,5 +76,8 @@ public class ExampleHelp : MonoBehaviour {
 	
 		Debug.Log (BeatAnalysisManager.CheckWithInc );
 	}
-
+	public void showframerate()
+	{
+		Debug.Log ("length= " + BeatAnalysisManager.MusicArrayList.Count );
+	}
 }

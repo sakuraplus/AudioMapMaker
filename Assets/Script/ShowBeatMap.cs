@@ -84,33 +84,15 @@ public class ShowBeatMap : MonoBehaviour {
 	public GameObject BeatPfb;
 	public void DrawBeatMap()
 	{
-		ArrayList BeatArrayList= BeatAnalysisManager .BeatArrayList;
-		if (GameObjBeats!=null) {
-			Debug.Log (BeatMapContainer.transform.childCount);
-			for (int i = 0; i < GameObjBeats.Length; i++) {
-				DestroyImmediate (GameObjBeats [i]);
-			}
-
-		} else {
-			if (BeatArrayList.Count <= 0) {
-				return;
-			}
-			BeatMapContainer = new GameObject ();
-			BeatMapContainer.name="nonrealtime";
-
-			//GameObjBeats = new GameObject[BeatArrayList.Count ];
-			BeatMapContainer.transform.position=new Vector3(50,0-speed*offset ,0);
+		if (BeatAnalysisManager .BeatArrayList.Count <= 0) {
+			return;
 		}
-
-
-		//savedBeatMap  sbm=new savedBeatMap();
-		//sbm.MD=new MusicData[BeatArrayList.Count ] ;
-
-		GameObjBeats = new GameObject[BeatArrayList.Count ];
-		BeatMapContainer.transform.position = new Vector3 (0,0-speed*offset,0);
-		float [] beattimes=new float[BeatArrayList.Count ] ;
-		for (int i = 0; i < BeatArrayList.Count; i++) {
-			MusicData md = (MusicData )BeatArrayList [i];
+		
+		initBeatMapContainer ();
+		GameObjBeats = new GameObject[BeatAnalysisManager .BeatArrayList.Count ];
+		float [] beattimes=new float[BeatAnalysisManager .BeatArrayList.Count ] ;
+		for (int i = 0; i < BeatAnalysisManager .BeatArrayList.Count; i++) {
+			MusicData md = (MusicData )BeatAnalysisManager .BeatArrayList [i];
 			//sbm.MD [i] = md;
 
 			GameObject beat= Instantiate (BeatPfb) as GameObject ;
@@ -126,6 +108,74 @@ public class ShowBeatMap : MonoBehaviour {
 
 
 	}
+
+
+	void initBeatMapContainer()
+	{
+		if (GameObjBeats!=null ) {
+			Debug.Log (BeatMapContainer.transform.childCount);
+			for (int i = 0; i < GameObjBeats.Length; i++) {
+				DestroyImmediate (GameObjBeats [i]);
+			}
+
+		} else {
+
+			BeatMapContainer = new GameObject ();
+			BeatMapContainer.name="nonrealtime";
+			Debug.Log ("new BeatMapContainer");
+			//GameObjBeats = new GameObject[BeatArrayList.Count ];
+
+		}
+
+
+		//savedBeatMap  sbm=new savedBeatMap();
+		//sbm.MD=new MusicData[BeatArrayList.Count ] ;
+
+
+		BeatMapContainer.transform.position = new Vector3 (0,0-speed*offset,0);
+
+	}
+
+
+
+	public TextAsset[] TAs;
+
+	string strmusic;
+
+	public void btnChangemusic(int i){
+		if (i < TAs .Length) {
+			if (TAs  [i] == null) {
+				Debug.LogError ("wrong music!");
+				return;
+			}
+			strmusic = TAs [i].text.ToString();
+			load (strmusic);
+		}
+	}
+	//从json生成map
+	void load(string jsonstr) {  
+		savedBeatMap  smdread = JsonUtility.FromJson<savedBeatMap> (jsonstr);
+		Debug.Log ("load smdread.md="+smdread.MD );
+		//GameObject GameObjBeats = GameObject.Find ("nonrealtime");
+		initBeatMapContainer();
+		GameObjBeats = new GameObject[smdread.MD.Length ];
+		float [] beattimes=new float[smdread.MD.Length ] ;
+		for (int i = 0; i < smdread.MD.Length; i++) {
+			MusicData md = (MusicData )smdread.MD [i];
+
+			GameObject beat= Instantiate (BeatPfb) as GameObject ;
+			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
+			beat.transform.parent = BeatMapContainer.transform ;
+
+			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
+			GameObjBeats[i]=beat;
+			beattimes [i] = md.playtime;
+		}
+	}  
+	//end从json生成map
+
+
+
 
 	public void setbeatmapauto(Toggle  t){
 		

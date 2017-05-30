@@ -23,6 +23,7 @@ public class ExampleHelp : MonoBehaviour {
 	//int ssize=0;
 
 
+
 	void Start () {
 		
 		_audio=BeatAnalysisManager ._audio ;
@@ -40,6 +41,8 @@ public class ExampleHelp : MonoBehaviour {
 	}
 	public void btnChangemusic(int i){
 
+
+
 		if (i < musics.Length) {
 			if (musics [i] == null) {
 				Debug.LogError ("wrong music!");
@@ -49,6 +52,17 @@ public class ExampleHelp : MonoBehaviour {
 			_audio.clip = musics [i];
 		}
 	}
+
+
+
+
+
+
+
+
+
+
+
 	public void changebuffersize(Slider s){
 		//ssize = Mathf.Pow (2, s.value);
 		BeatAnalysisManager .bufferSize  = (int)Mathf.Pow (2, s.value);//ssize;
@@ -76,8 +90,13 @@ public class ExampleHelp : MonoBehaviour {
 	
 		Debug.Log (BeatAnalysisManager.CheckWithInc );
 	}
+
 	public void showframerate()
 	{
 		Debug.Log ("length= " + BeatAnalysisManager.MusicArrayList.Count );
+		//JsonUtility 
+		//_texture = Resources.Load (EleDataToMeshTerrain.savefiledate+"/"+filenameMat) as Texture2D;
+//		string st=Resources.Load ("save/m01") as string;
+//		Debug.Log ("st=" + st);
 	}
 }

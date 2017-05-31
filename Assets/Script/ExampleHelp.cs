@@ -28,7 +28,7 @@ public class ExampleHelp : MonoBehaviour {
 		
 		_audio=BeatAnalysisManager ._audio ;
 	
-		refreshtext ();
+		//refreshtext ();
 
 	}
 	void refreshtext(){

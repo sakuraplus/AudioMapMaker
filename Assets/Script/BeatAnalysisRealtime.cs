@@ -30,42 +30,8 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	//AudioListener _AL;
 
 	[SerializeField ]
-<<<<<<< HEAD
-	float decay = 0.997f;//衰减?
-	[SerializeField ]
-	 int _bandlength = 32;//
-	public static int bandlength = 32;//
-
-	public float speed=2000;
-	GameObject BeatMapContainer;// = new GameObject ();
-	GameObject BeatMapContainer2;// = new GameObject ();
-	GameObject[] GameObjBeats;// = new GameObject[beatlist.Count ];
-	public GameObject BeatPfb;
-	public  string strvariance="";//测试用
-	[TextArea ]
-	public string BeatMapDataJson;
-	/// <summary>
-	/// ///////////////////////////////////
-	/// </summary>
-	// Use this for initialization
-	void Start () {
-		bandlength = _bandlength;
-		numBands = _numBands;
-		bufferSize = _bufferSize;
-		RecAvgInBandInc=new float[bufferSize ,numBands ]; 
-		RecAvgInBand=new float[bufferSize ,numBands ]; 
-	
-		spectrum =new float[SpecSize ];
-		Bands=new float[numBands+1 ];//分8个频段
-//		lastframeBandss =new float[numBands ];//分8个频段
-		lastbeatindexInBand=new int[numBands];//存各个频段上一次节拍的位置 
-		_audio=GetComponent<AudioSource> ();
-		AudioName = _audio.name;
-		//_audio.pitch = 2;
-=======
 	//bool checkwithInc=true;//使用增长值或能量值计算节拍
 	public OnBeatrealtimeEventHandler onBeat;//节拍事件
->>>>>>> refs/remotes/origin/example
 
 
 	//从manager读取的

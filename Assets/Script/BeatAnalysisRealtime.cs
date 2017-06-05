@@ -2,7 +2,7 @@
 using System.Collections;
 using System.IO;
 using UnityEngine.UI;
-
+using System.Collections.Generic;
 
 
 [System.Serializable]
@@ -42,8 +42,10 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 
 	//记录每帧增长值和能量值，需要初始化
-	float[,] RecAvgInBandInc;
-	float[,] RecAvgInBand;
+//	float[,] RecAvgInBandInc;
+//	float[,] RecAvgInBand;
+	List<float[]> RAinc;
+	List<float[]> RAeng;
 	[SerializeField ]
 	float betweenbeat;
 	int beatArrindex=0;//用于重复使用array中元素
@@ -65,8 +67,8 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	float decay = 0.997f;//衰减
 
 
-	int timelast;//测试用
-	public int timestep;//测试用
+	float timelast;//测试用
+	public float timestep;//测试用
 	int freqlength;//=(int)Mathf.Floor (_SpecSize *_audio.clip.frequency/AudioSettings.outputSampleRate  );
 
 
@@ -83,8 +85,10 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 			_numBands = BeatAnalysisManager.numBands;//使用numband
 
 		_bufferSize = BeatAnalysisManager .bufferSize ;
-		RecAvgInBandInc=new float[_bufferSize ,_numBands ]; 
-		RecAvgInBand=new float[_bufferSize ,_numBands ]; 
+//		RecAvgInBandInc=new float[_bufferSize ,_numBands ]; 
+//		RecAvgInBand=new float[_bufferSize ,_numBands ]; 
+		RAeng=new List<float[]>();
+		RAinc = new List<float[]> ();
 		_SpecSize = BeatAnalysisManager .SpecSize;
 		spectrum =new float[_SpecSize ];
 		Bands=new float[_numBands+1 ];//频段
@@ -99,8 +103,12 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 		decay = BeatAnalysisManager .decay;
 		enegryaddup = BeatAnalysisManager .enegryaddup;
 
-		BeatAnalysisManager .BeatArrayList.Clear();
-		BeatAnalysisManager. MusicArrayList.Clear ();
+	//	BeatAnalysisManager .BeatArrayList.Clear();
+
+	//	BeatAnalysisManager. MusicArrayList.Clear ();
+
+		BeatAnalysisManager.BAL.Clear ();
+		BeatAnalysisManager.MAL.Clear ();
 		beatArrindex=0;
 		CurrentIndex = 0;
 
@@ -139,7 +147,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 		Application.targetFrameRate =60;
 		Debug.LogError  ("1-- "+Time.frameCount +">> "+Application.targetFrameRate );
 	}
-
+	 
 	void recordmusicdata()
 	{
 	////////////////////////////////////////
@@ -153,8 +161,10 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 		//CheckBeat ();
 		if (BeatAnalysisManager.CheckWithInc  ) {
 			CheckBeatIncInBand ();
+			//CheckBeatIncInBandold ();
 		} else {
 			CheckBeatInBand ();
+
 		}
 		recordAllData();
 
@@ -163,7 +173,8 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	void recordAllData(){
 		float[] ff = new float[_numBands+1] ;//clips;
 		ff=Bands;
-		BeatAnalysisManager. MusicArrayList.Add (ff);
+		//BeatAnalysisManager. MusicArrayList.Add (ff);
+		BeatAnalysisManager. MAL .Add (ff);
 		//////////////
 //		string s="";
 //		float[] f = BeatAnalysisManager.MusicArrayList [BeatAnalysisManager.MusicArrayList.Count - 1] as float[];
@@ -213,35 +224,64 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	//记录各频段前时间段的平均值RecAvgInClip，及增长值RecAvgInClipInc
 	void  recordAvgInBand()
 	{
-		if (CurrentIndex < _bufferSize) {
-			//1024帧之前。直接存入数组
-			for (int i = 0; i < _numBands ; i++) {
-				//分频段存入，各频段记录平均值
-				RecAvgInBand [CurrentIndex,i] = Bands[i];
 
-				//分频段存，各频段平均值增长值
-				if (CurrentIndex == 0) {
-					RecAvgInBandInc [0, i] = 0;//第一次数据的增长值为0
-				} else {
-					RecAvgInBandInc [CurrentIndex, i] = Bands [i] - RecAvgInBand [CurrentIndex- 1,i];//根据前一帧各频段平均值计算增长值
-				}
-			}
+		if (RAeng.Count <= 0) {
+			RAeng.Add (Bands);
+			float[] firstband = new float[_numBands + 1 ];
+			RAinc.Add (firstband);
 
-		} else { 
-			//计数超过buffersize后，所有数据前移一位
-			for (int indroll = 0; indroll < _bufferSize-1; indroll++) {
-				for (int i = 0; i < _numBands ; i++) {
-					RecAvgInBand [indroll,i] =  RecAvgInBand [indroll + 1,i];
-					RecAvgInBandInc [indroll,i] =  RecAvgInBandInc [indroll + 1,i];
-				}
+		} else if (RAeng.Count < _bufferSize &&RAeng.Count>=1) {
+			RAeng.Add (Bands);
+			float[] bandinc = new float[_numBands+1 ];
+			for (int i = 0; i < _numBands; i++) {
+				bandinc [i] = Bands [i] - RAeng [RAeng.Count - 2] [i];
 			}
-			//最后一位为最新一帧的平均值及增长值
-			for (int i = 0; i < _numBands ; i++) {
-				RecAvgInBand [_bufferSize-1,i] =  Bands[i];
-				RecAvgInBandInc [_bufferSize - 1,i] = Bands [i] - RecAvgInBand [_bufferSize  -2,i];// 
+			bandinc [_numBands] = Bands [_numBands];
+			RAinc.Add (bandinc);
+
+		} else {
+			RAinc.RemoveAt (0);
+			RAeng.RemoveAt (0);
+			RAeng.Add (Bands);
+			float[] bandinc = new float[_numBands+1 ];
+			for (int i = 0; i < _numBands; i++) {
+				bandinc [i] = Bands [i] - RAeng [RAeng.Count - 2] [i];
 			}
-			//Debug.DrawLine(new Vector3 (1,0,0),new Vector3 (1,100*lastAverageInc [_bufferSize - 1],0));
+			bandinc [_numBands] = Bands [_numBands];
+			RAinc.Add (bandinc);
 		}
+
+		//////////////////////////////////////
+//		if (CurrentIndex < _bufferSize) {
+//			//1024帧之前。直接存入数组
+//			for (int i = 0; i < _numBands ; i++) {
+//				//分频段存入，各频段记录平均值
+//				RecAvgInBand [CurrentIndex,i] = Bands[i];
+//
+//				//分频段存，各频段平均值增长值
+//				if (CurrentIndex == 0) {
+//					RecAvgInBandInc [0, i] = 0;//第一次数据的增长值为0
+//				} else {
+//					RecAvgInBandInc [CurrentIndex, i] = Bands [i] - RecAvgInBand [CurrentIndex- 1,i];//根据前一帧各频段平均值计算增长值
+//				}
+//			}
+//
+//		} else { 
+//			//计数超过buffersize后，所有数据前移一位
+//			for (int indroll = 0; indroll < _bufferSize-1; indroll++) {
+//				for (int i = 0; i < _numBands ; i++) {
+//					RecAvgInBand [indroll,i] =  RecAvgInBand [indroll + 1,i];
+//					RecAvgInBandInc [indroll,i] =  RecAvgInBandInc [indroll + 1,i];
+//				}
+//			}
+//			//最后一位为最新一帧的平均值及增长值
+//			for (int i = 0; i < _numBands ; i++) {
+//				RecAvgInBand [_bufferSize-1,i] =  Bands[i];
+//				RecAvgInBandInc [_bufferSize - 1,i] = Bands [i] - RecAvgInBand [_bufferSize  -2,i];// 
+//			}
+//			//Debug.DrawLine(new Vector3 (1,0,0),new Vector3 (1,100*lastAverageInc [_bufferSize - 1],0));
+//		}
+//
 		//没填满buffersize则计数增加
 		if (CurrentIndex < _bufferSize) {
 			CurrentIndex++;
@@ -250,7 +290,24 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	//end记录各频段前时间段的平均值RecAvgInClip，及增长值RecAvgInClipInc
 
 
-
+	public void testlist()
+	{
+		//Debug.Log ("RAinc  "+RAinc.Count +"  RAeng  "+RAeng.Count +" length "+RecAvgInBandInc.Length +","+RecAvgInBand.Length  +" tempVarInc="+tempVarInc );
+		string TLrainc = "TLrainc  ";
+		string TLraeng = "TLraeng  ";
+		string Trainc = "Trainc  ";
+		string Traeng = "Traeng  ";
+		for (int i = 0; i < _numBands; i++) {
+			TLrainc+=RAinc[RAinc.Count-1][i]+",";
+			TLraeng+=RAeng[RAeng.Count-1][i]+",";
+//			Trainc+=RecAvgInBandInc[CurrentIndex -1,i]+",";
+//			Traeng+=RecAvgInBand[CurrentIndex -1,i]+",";
+		} 
+		Debug.Log (TLrainc);
+		Debug.Log (TLraeng);
+		Debug.Log (Trainc);
+		Debug.Log (Traeng);
+	}
 
 
 
@@ -268,72 +325,55 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 			int largeindex = 0;
 
 
-			float largeenergy = RecAvgInBandInc  [lastbeatindexInBand[ic],ic];//当前频段上一次节拍的位置
+			float largeenergy = RAinc  [lastbeatindexInBand[ic]][ic];//当前频段上一次节拍的位置
 
-			//////////////////////****
-//			if (usethelastbeat) {
-//				largeenergy = largeenergys [ic];
-//				largeenergys [ic] *= decay;
-//			}
-			//////////////////////****
 
 			float variance=0;//方差
+			//int vi=0;
 			for (int i = lastbeatindexInBand[ic]+1; i < CurrentIndex-2; i++) {
+				//vi++;
 				//遍历当前频段，上一节拍至当前帧的所有平均值增量
-				if (RecAvgInBandInc [i,ic] > largeenergy ) {
+				if (RAinc [i][ic] > largeenergy ) {
 					
 //					largeindexF = largeindex;
 					largeindex = i;//最大值在buffersize中所在的位置
-					largeenergy = RecAvgInBandInc [i,ic] ;//最大
-					//////////////////////****
-//					if (usethelastbeat) {
-//						largeenergys [ic] = largeenergy;
-//					}
+					largeenergy = RAinc [i][ic];//最大
 					//////////////////////****
 
 				}//获取平均数增量最大值，及最大值在buffersize中所在的位置
-				variance += Mathf.Pow (RecAvgInBandInc [i, ic], 2);
-				largeenergy *= decay;//衰减
-				variance /= CurrentIndex - lastbeatindexInBand [ic] - 1;//上一个节拍至当前节拍之前的节拍，当前频段，音量的方差
+				variance += Mathf.Pow (RAinc [i][ic], 2);
+				largeenergy *= decay;//衰减	
 
 			}//end遍历当前频段，上一节拍至当前帧的所有平均值增量，获取最大值及其序号
-
+			variance /= CurrentIndex - lastbeatindexInBand [ic] - 3;//上一个节拍至当前节拍之前的节拍，当前频段，音量的方差
+			//variance /= vi;//上一个节拍至当前节拍之前的节拍，当前频段，音量的方差
 			float tempVarInc;//计算之前帧的方差与当前帧平方的关系 
 			if (variance != 0) {
-				tempVarInc = Mathf.Pow (RecAvgInBandInc [CurrentIndex - 1, ic], 2) / variance;//当前帧增量的平方/当前之前的方差
+				tempVarInc = Mathf.Pow (RAinc [RAinc.Count-1][ic] , 2) / variance;//当前帧增量的平方/当前之前的方差
 
 			} else {
 				tempVarInc = 1.1f;//Mathf.Pow (AvgInClipInc [CurrentIndex - 1, ic], 2);
 			}
-			tempVarInc = 0.5f + tempVarInc / 5000;
-			tempVarInc = Mathf.Clamp (tempVarInc, 0.5f, 1.2f);
+			timestep = tempVarInc;
+//			tempVarInc = 0.5f + tempVarInc / 5000;
+			tempVarInc = Mathf.Clamp (tempVarInc, 0.9f, 1.1f);
 
 
-
+		//	tempVarInc = 1;
 
 			//判断节拍///////////////////////
 			float beatsincelast = CurrentIndex - lastbeatindexInBand[ic];//当前频段与上一节拍之间的帧数
 			if (beatsincelast > betweenbeat) {//与上一节拍之间的帧数不够大则不认为此处是节拍
 				//&& _bufferSize-largeindexF<4
-				if (RecAvgInBandInc [CurrentIndex - 1,ic]/Mathf.Abs( largeenergy  * enegryaddup*tempVarInc)>1 &&	RecAvgInBandInc [CurrentIndex - 1,ic]>0 ) {//当前帧增量为buffersize中最大的，且远大于之前的最大值
+				if (RAinc [RAinc.Count-1][ic]/Mathf.Abs( largeenergy  * enegryaddup*tempVarInc)>1 &&	RAinc [RAinc.Count-1][ic]>0 ) {//当前帧增量为buffersize中最大的，且远大于之前的最大值
 					
 
-
-
-					ArrayList BeatArrayList = BeatAnalysisManager .BeatArrayList;//存beat信息
-						//保存鼓点信息
-						if (beatArrindex < BeatArrayList.Count) {
-							((MusicData)BeatArrayList [beatArrindex]).playtime = _audio.time;
-							((MusicData)BeatArrayList [beatArrindex]).OnBeat = true;
-							((MusicData)BeatArrayList [beatArrindex]).BeatPos = ic;
-						} else {
 							MusicData md = new MusicData ();
 							md.playtime = _audio.time;
 							md.OnBeat = true;
 							md.BeatPos = ic;
-							BeatArrayList.Add (md);
-						}
-						beatArrindex++;
+						BeatAnalysisManager.BAL.Add (md);
+
 					//保存鼓点信息
 				
 					//end 保存鼓点信息
@@ -341,42 +381,153 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 					//将频段分为高中低音，确定当前节拍属高中低音
 					onBeat.Invoke (ic);
-					Debug.LogWarning  ("onbeat time="+_audio.timeSamples +" ic=" + ic + " lastbeat=" + lastbeatindexInBand[ic] + ",largeindex=" + largeindex + "," + largeenergy + "---" + RecAvgInBandInc [CurrentIndex - 1,ic]);
+					Debug.LogWarning  ("onbeat time="+_audio.timeSamples +" ic=" + ic + " lastbeat=" + lastbeatindexInBand[ic] + ",current=" + CurrentIndex   + "---" +RAinc[RAinc.Count -1][ic] +"tempVarInc="+tempVarInc);
 
 					lastbeatindexInBand[ic] = CurrentIndex;//记录当前频段的上一个节拍位置，每帧-1
 
 					//测试用
 				
-					timestep = _audio.timeSamples - timelast;
-					timelast = _audio.timeSamples;
+					//timestep = _audio.timeSamples - timelast;
+					//timelast = _audio.timeSamples;
 					//end测试用
 									//Debug.LogError ("on   AvgSuperhigh="+AvgSuperhigh);
 
 
-				} else {
-
-
-				}
+				} 
 				////end当前帧增量为buffersize中最大的，且远大于之前的最大值
 
 
 			}
-				
+			if (lastbeatindexInBand [ic] > 0) {
+				lastbeatindexInBand [ic]--;
+			}	
 		}//end 遍历所有频段
 		//Debug.Log (strvariance);
 		//Debug.LogError ("on");
 		//Debug.Log ("oncheck  time=" + _audio.timeSamples );
-		for (int icc = 0; icc < _numBands; icc++) {
-			lastbeatindexInBand [icc]--;
-			if (lastbeatindexInBand [icc] < 0) {
-				lastbeatindexInBand [icc] = 0;
-			}
-		}
+//		for (int icc = 0; icc < _numBands; icc++) {
+//			lastbeatindexInBand [icc]--;
+//			if (lastbeatindexInBand [icc] < 0) {
+//				lastbeatindexInBand [icc] = 0;
+//			}
+//		}
 
 
 	}
 
-
+//	//分频段，实时检测节拍
+//	void CheckBeatIncInBandold()
+//	{  
+////		 strvariance="";
+//
+//		if (CurrentIndex < _bufferSize) {
+//			return;
+//		}
+//
+//		for (int ic = 0; ic < _numBands; ic++) {
+//			//遍历所有频段
+//			int largeindex = 0;
+//
+//
+//			float largeenergy = RecAvgInBandInc  [lastbeatindexInBand[ic],ic];//当前频段上一次节拍的位置
+//
+//
+//			float variance=0;//方差
+//			for (int i = lastbeatindexInBand[ic]+1; i < CurrentIndex-2; i++) {
+//				//遍历当前频段，上一节拍至当前帧的所有平均值增量
+//				if (RecAvgInBandInc [i,ic] > largeenergy ) {
+//					
+////					largeindexF = largeindex;
+//					largeindex = i;//最大值在buffersize中所在的位置
+//					largeenergy = RecAvgInBandInc [i,ic] ;//最大
+//
+//
+//				}//获取平均数增量最大值，及最大值在buffersize中所在的位置
+//				variance += Mathf.Pow (RecAvgInBandInc [i, ic], 2);
+//				largeenergy *= decay;//衰减
+//
+//
+//			}//end遍历当前频段，上一节拍至当前帧的所有平均值增量，获取最大值及其序号
+//			variance /= CurrentIndex - lastbeatindexInBand [ic] - 3;//上一个节拍至当前节拍之前的节拍，当前频段，音量的方差
+//			float tempVarInc;//计算之前帧的方差与当前帧平方的关系 
+//			if (variance != 0) {
+//				tempVarInc = Mathf.Pow (RecAvgInBandInc [CurrentIndex - 1, ic], 2) / variance;//当前帧增量的平方/当前之前的方差
+//
+//			} else {
+//				tempVarInc = 1.1f;//Mathf.Pow (AvgInClipInc [CurrentIndex - 1, ic], 2);
+//			}
+//			timestep = tempVarInc;
+////			tempVarInc = 0.5f + tempVarInc / 5000;
+//			tempVarInc = Mathf.Clamp (tempVarInc, 0.5f, 1.2f);
+//
+//		//	tempVarInc = 1;
+//
+//
+//			//判断节拍///////////////////////
+//			float beatsincelast = CurrentIndex - lastbeatindexInBand[ic];//当前频段与上一节拍之间的帧数
+//			if (beatsincelast > betweenbeat) {//与上一节拍之间的帧数不够大则不认为此处是节拍
+//				//&& _bufferSize-largeindexF<4
+//				if (RecAvgInBandInc [CurrentIndex - 1,ic]/Mathf.Abs( largeenergy  * enegryaddup*tempVarInc)>1 &&	RecAvgInBandInc [CurrentIndex - 1,ic]>0 ) {//当前帧增量为buffersize中最大的，且远大于之前的最大值
+//					
+//
+//
+//
+//					//ArrayList BeatArrayList = BeatAnalysisManager .BAL;//存beat信息
+//						//保存鼓点信息
+//					if (beatArrindex < BeatAnalysisManager .BAL.Count) {
+//						((MusicData)BeatAnalysisManager .BAL [beatArrindex]).playtime = _audio.time;
+//						((MusicData)BeatAnalysisManager .BAL [beatArrindex]).OnBeat = true;
+//						((MusicData)BeatAnalysisManager .BAL [beatArrindex]).BeatPos = ic;
+//						} else {
+//							MusicData md = new MusicData ();
+//							md.playtime = _audio.time;
+//							md.OnBeat = true;
+//							md.BeatPos = ic;
+//						BeatAnalysisManager .BAL.Add (md);
+//						}
+//						beatArrindex++;
+//					//保存鼓点信息
+//				
+//					//end 保存鼓点信息
+//
+//
+//					//将频段分为高中低音，确定当前节拍属高中低音
+//					onBeat.Invoke (ic);
+//					Debug.LogWarning  ("onbeat time="+_audio.timeSamples +" ic=" + ic + " lastbeat=" + lastbeatindexInBand[ic] + ",curr=" + CurrentIndex  + ", vi="  + "---" + RecAvgInBandInc [CurrentIndex - 1,ic]+"tempVarInc old="+tempVarInc );
+//
+//					lastbeatindexInBand[ic] = CurrentIndex;//记录当前频段的上一个节拍位置，每帧-1
+//
+//					//测试用
+//				
+////					timestep = _audio.timeSamples - timelast;
+////					timelast = _audio.timeSamples;
+//					//end测试用
+//									//Debug.LogError ("on   AvgSuperhigh="+AvgSuperhigh);
+//
+//
+//				} else {
+//
+//
+//				}
+//				////end当前帧增量为buffersize中最大的，且远大于之前的最大值
+//
+//
+//			}
+//				
+//		}//end 遍历所有频段
+//		//Debug.Log (strvariance);
+//		//Debug.LogError ("on");
+//		//Debug.Log ("oncheck  time=" + _audio.timeSamples );
+//		for (int icc = 0; icc < _numBands; icc++) {
+//			lastbeatindexInBand [icc]--;
+//			if (lastbeatindexInBand [icc] < 0) {
+//				lastbeatindexInBand [icc] = 0;
+//			}
+//		}
+//
+//
+//	}
+//
 
 	//////////////////****
 //	float[] largeenergys ;
@@ -398,22 +549,18 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 			int largeindex = 0;
 
 			/////////////////////////****
-			float largeenergy = RecAvgInBand  [lastbeatindexInBand[ic],ic];//当前频段上一次节拍的位置
-			//////////////////////****
-//			if (usethelastbeat) {
-//				largeenergy = largeenergys [ic];
-//				largeenergys [ic] *= decay;
-//			}
-			//////////////////////****
+			//float largeenergy = RecAvgInBand  [lastbeatindexInBand[ic],ic];//当前频段上一次节拍的位置
+			float largeenergy = RAeng  [lastbeatindexInBand[ic]][ic];//当前频段上一次节拍的位置
+
 
 			float variance=0;//方差
 			for (int i = lastbeatindexInBand[ic]+1; i < CurrentIndex-2; i++) {
 				//遍历当前频段，上一节拍至当前帧的所有平均值
-				if (RecAvgInBand [i,ic] > largeenergy ) {
+				if (RAeng  [i][ic] > largeenergy ) {
 
 
 					largeindex = i;//最大值在buffersize中所在的位置
-					largeenergy = RecAvgInBand [i,ic] ;//最大
+					largeenergy = RAeng  [i][ic] ;//最大
 
 					//////////////////////****
 //					if (usethelastbeat) {
@@ -423,21 +570,21 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 
 				}//获取平均数增量最大值，及最大值在buffersize中所在的位置
-				variance += Mathf.Pow (RecAvgInBand [i, ic], 2);
+				variance += Mathf.Pow (RAeng  [i][ic], 2);
 				largeenergy *= decay;//衰减
-				variance /= CurrentIndex - lastbeatindexInBand [ic] - 1;//上一个节拍至当前节拍之前的节拍，当前频段，音量的方差
 
 			}//end遍历当前频段，上一节拍至当前帧的所有平均值增量，获取最大值及其序号
+			variance /= CurrentIndex - lastbeatindexInBand [ic] - 3;//上一个节拍至当前节拍之前的节拍，当前频段，音量的方差
 
 			float tempVarInc;//计算之前帧的方差与当前帧平方的关系 
 			if (variance != 0) {
-				tempVarInc = Mathf.Pow (RecAvgInBandInc [CurrentIndex - 1, ic], 2) / variance;//当前帧增量的平方/当前之前的方差
+				tempVarInc = Mathf.Pow (RAinc [RAinc.Count-1][ic], 2) / variance;//当前帧增量的平方/当前之前的方差
 
 			} else {
 				tempVarInc = 1.1f;//Mathf.Pow (AvgInClipInc [CurrentIndex - 1, ic], 2);
 			}
-			tempVarInc = 0.5f + tempVarInc / 5000;
-			tempVarInc = Mathf.Clamp (tempVarInc, 0.5f, 1.2f);
+			//tempVarInc = 0.5f + tempVarInc / 5000;
+			tempVarInc = Mathf.Clamp (tempVarInc, 0.9f, 1.1f);
 
 			//			strvariance+=variance+",";//显示方差
 
@@ -447,20 +594,25 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 			if (beatsincelast > 2* betweenbeat) {//与上一节拍之间的帧数不够大则不认为此处是节拍
 				//&& _bufferSize-largeindexF<4
-				if (RecAvgInBand [CurrentIndex - 1,ic]/Mathf.Abs( largeenergy  * enegryaddup*tempVarInc)>1 ) {//当前帧增量为buffersize中最大的，且远大于之前的最大值
+				if (RAeng  [RAeng.Count-1][ic]/Mathf.Abs( largeenergy  * enegryaddup*tempVarInc)>1 ) {//当前帧增量为buffersize中最大的，且远大于之前的最大值
 
-					ArrayList BeatArrayList = BeatAnalysisManager .BeatArrayList;//存beat信息
+				//	ArrayList BeatArrayList = BeatAnalysisManager .BeatArrayList;//存beat信息
 					//保存鼓点信息
-					if (beatArrindex < BeatArrayList.Count) {
-						((MusicData)BeatArrayList [beatArrindex]).playtime = _audio.time;
-						((MusicData)BeatArrayList [beatArrindex]).OnBeat = true;
-						((MusicData)BeatArrayList [beatArrindex]).BeatPos = ic;
+					if (beatArrindex < BeatAnalysisManager. BAL.Count) {
+//						((MusicData)BeatArrayList [beatArrindex]).playtime = _audio.time;
+//						((MusicData)BeatArrayList [beatArrindex]).OnBeat = true;
+//						((MusicData)BeatArrayList [beatArrindex]).BeatPos = ic;
+
+						BeatAnalysisManager. BAL [beatArrindex].playtime = _audio.time;
+						BeatAnalysisManager. BAL [beatArrindex].OnBeat = true;
+						BeatAnalysisManager. BAL [beatArrindex].BeatPos = ic;
 					} else {
 						MusicData md = new MusicData ();
 						md.playtime = _audio.time;
 						md.OnBeat = true;
 						md.BeatPos = ic;
-						BeatArrayList.Add (md);
+					//	BeatArrayList.Add (md);
+						BeatAnalysisManager.BAL.Add (md);
 					}
 					beatArrindex++;
 					//保存鼓点信息
@@ -475,32 +627,34 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 					//测试用
 
-					timestep = _audio.timeSamples - timelast;
-					timelast = _audio.timeSamples;
+//					timestep = _audio.timeSamples - timelast;
+//					timelast = _audio.timeSamples;
 					//end测试用
-					Debug.LogWarning  ("onbeat time="+_audio.timeSamples +" ic=" + ic + " lastbeat=" + lastbeatindexInBand[ic] + ",largeindex=" + largeindex + "," + largeenergy + "---" + RecAvgInBandInc [CurrentIndex - 1,ic]);
+				//	Debug.LogWarning  ("onbeat time="+_audio.timeSamples +" ic=" + ic + " lastbeat=" + lastbeatindexInBand[ic] + ",largeindex=" + largeindex + "," + largeenergy + "---"+ +RAeng[RAeng.count-1][ic]);
 					//Debug.LogError ("on   AvgSuperhigh="+AvgSuperhigh);
 
 
-				} else {
-
-
-				}
+				} 
 				////end当前帧增量为buffersize中最大的，且远大于之前的最大值
 
 
 			}
 
+
+				if (lastbeatindexInBand [ic] > 0) {
+					lastbeatindexInBand [ic]--;
+				}
+
 		}//end 遍历所有频段
 		//Debug.Log (strvariance);
 		//Debug.LogError ("on");
 		//Debug.Log ("oncheck  time=" + _audio.timeSamples );
-		for (int icc = 0; icc < _numBands; icc++) {
-			lastbeatindexInBand [icc]--;
-			if (lastbeatindexInBand [icc] < 0) {
-				lastbeatindexInBand [icc] = 0;
-			}
-		}
+//		for (int icc = 0; icc < _numBands; icc++) {
+//			lastbeatindexInBand [icc]--;
+//			if (lastbeatindexInBand [icc] < 0) {
+//				lastbeatindexInBand [icc] = 0;
+//			}
+//		}
 
 
 	}

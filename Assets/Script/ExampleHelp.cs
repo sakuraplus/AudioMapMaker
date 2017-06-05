@@ -93,7 +93,7 @@ public class ExampleHelp : MonoBehaviour {
 
 	public void showframerate()
 	{
-		Debug.Log ("length= " + BeatAnalysisManager.MusicArrayList.Count );
+		Debug.Log ("length= " + BeatAnalysisManager.MAL.Count );
 		//JsonUtility 
 		//_texture = Resources.Load (EleDataToMeshTerrain.savefiledate+"/"+filenameMat) as Texture2D;
 //		string st=Resources.Load ("save/m01") as string;

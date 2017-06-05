@@ -18,6 +18,13 @@ public class ShowBeatMap : MonoBehaviour {
 	AudioSource _audio;
 	public GameObject[] beatObj;
 	public  GameObject beatObjDefault;
+
+	//根据实时采集到数据生成map
+	GameObject BeatMapContainer;
+	GameObject[] GameObjBeats;// = new GameObject[beatlist.Count ];
+	public float speed=2000;
+	public GameObject BeatPfb;
+
 //	bool playSFX=false;
 //	bool showBeatObj=false;
 	bool playmap=false;
@@ -25,6 +32,7 @@ public class ShowBeatMap : MonoBehaviour {
 	public  GameObject checkobject;
 	ArrayList BeatArrayList;//存beat信息
 	//ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
+	public TextAsset[] jsonfileAsset;
 	[SerializeField ]
 	float offset=0.5f;
 
@@ -35,26 +43,7 @@ public class ShowBeatMap : MonoBehaviour {
 	
 
 
-		if (beatObj.Length > 0) {
-			//showBeatObj = true;
-			for (int i = 0; i < beatObj.Length; i++) {
-
-				if (beatObj [i] == null) {
-					beatObj [i] = beatObjDefault;
-				}
-			}
-		}
-		if (beatsoundFX .Length > 0) {
-			//playSFX  = true;
-			for (int i = 0; i < beatsoundFX.Length; i++) {
-				if (beatsoundFX [i] == null) {
-					beatsoundFX [i] = beatsoundDefault;
-				}
-			}
-		}
-//		Debug.Log("2"+Time.frameCount );
-//		Debug.Log("2"+Time.captureFramerate );
-
+	
 
 	}
 
@@ -77,34 +66,40 @@ public class ShowBeatMap : MonoBehaviour {
 	}
 
 
-	//根据实时采集到数据生成map
-	GameObject BeatMapContainer;
-	GameObject[] GameObjBeats;// = new GameObject[beatlist.Count ];
-	public float speed=2000;
-	public GameObject BeatPfb;
+
 	public void DrawBeatMap()
 	{
-		if (BeatAnalysisManager .BeatArrayList.Count <= 0) {
+		if (BeatAnalysisManager .BAL.Count <= 0) {
 			return;
 		}
 		
 		initBeatMapContainer ();
-		GameObjBeats = new GameObject[BeatAnalysisManager .BeatArrayList.Count ];
-		float [] beattimes=new float[BeatAnalysisManager .BeatArrayList.Count ] ;
-		for (int i = 0; i < BeatAnalysisManager .BeatArrayList.Count; i++) {
-			MusicData md = (MusicData )BeatAnalysisManager .BeatArrayList [i];
-			//sbm.MD [i] = md;
 
-			GameObject beat= Instantiate (BeatPfb) as GameObject ;
-			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
+
+
+		GameObjBeats = new GameObject[BeatAnalysisManager .BAL.Count ];
+		float [] beattimes=new float[BeatAnalysisManager .BAL.Count ] ;
+		for (int i = 0; i < BeatAnalysisManager .BAL.Count; i++) {
+
+			if (beatObj [BeatAnalysisManager.BAL [i].BeatPos] == null) {
+				Debug.LogError ("no game obj is default");
+				return;
+			}
+			GameObject beat= Instantiate (beatObj[BeatAnalysisManager .BAL[i].BeatPos]) as GameObject ;
+			if (!beat.GetComponent <Beat > ()) {
+				beat.AddComponent <Beat> ();
+			}
+			beat.GetComponent<Beat> ().Destorytime  = BeatAnalysisManager .BAL[i].playtime;
+			if (beat.GetComponent<Beat> ().AC == null) {
+				beat.GetComponent<Beat> ().AC = beatsoundFX [BeatAnalysisManager.BAL [i].BeatPos];
+			}
 			beat.transform.parent = BeatMapContainer.transform ;
+			beat.transform.position=new Vector3 (BeatAnalysisManager .BAL[i].BeatPos*10,BeatAnalysisManager .BAL[i].playtime*speed,0);
 
-			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
+		
 			GameObjBeats[i]=beat;
-			beattimes [i] = md.playtime;
-
+			beattimes [i] = BeatAnalysisManager .BAL[i].playtime;
 		}
-
 
 
 	}
@@ -126,10 +121,35 @@ public class ShowBeatMap : MonoBehaviour {
 			//GameObjBeats = new GameObject[BeatArrayList.Count ];
 
 		}
+		if (beatObj.Length < BeatAnalysisManager.numBands) {
+			GameObject[] beattemp = new GameObject[BeatAnalysisManager.numBands ];//= beatObj;
+			beatObj.CopyTo(beattemp ,0);
+			beatObj = beattemp;
+			//Beat//beat
+		}
+		if (beatObj.Length > 0) {
+			//showBeatObj = true;
+			for (int i = 0; i < beatObj.Length; i++) {
 
-
-		//savedBeatMap  sbm=new savedBeatMap();
-		//sbm.MD=new MusicData[BeatArrayList.Count ] ;
+				if (beatObj [i] == null) {
+					beatObj [i] = beatObjDefault;
+				}
+			}
+		}
+		if (beatsoundFX.Length < BeatAnalysisManager.numBands) {
+			AudioClip [] beatsfxtemp = new AudioClip[BeatAnalysisManager.numBands ];//= beatObj;
+			beatsoundFX.CopyTo(beatsfxtemp ,0);
+			beatsoundFX = beatsfxtemp;
+			//Beat//beat
+		}
+		if (beatsoundFX .Length > 0) {
+			//playSFX  = true;
+			for (int i = 0; i < beatsoundFX.Length; i++) {
+				if (beatsoundFX [i] == null) {
+					beatsoundFX [i] = beatsoundDefault;
+				}
+			}
+		}
 
 
 		BeatMapContainer.transform.position = new Vector3 (0,0-speed*offset,0);
@@ -138,18 +158,16 @@ public class ShowBeatMap : MonoBehaviour {
 
 
 
-	public TextAsset[] TAs;
 
-	string strmusic;
+
 
 	public void btnChangemusic(int i){
-		if (i < TAs .Length) {
-			if (TAs  [i] == null) {
+		if (i < jsonfileAsset .Length) {
+			if (jsonfileAsset  [i] == null) {
 				Debug.LogError ("wrong music!");
 				return;
 			}
-			strmusic = TAs [i].text.ToString();
-			load (strmusic);
+			load (jsonfileAsset [i].text.ToString());
 		}
 	}
 	//从json生成map
@@ -163,13 +181,24 @@ public class ShowBeatMap : MonoBehaviour {
 		for (int i = 0; i < smdread.MD.Length; i++) {
 			MusicData md = (MusicData )smdread.MD [i];
 
-			GameObject beat= Instantiate (BeatPfb) as GameObject ;
+			if (beatObj [md.BeatPos] == null) {
+				Debug.LogError ("no game obj is default");
+				return;
+			}
+			GameObject beat= Instantiate (beatObj[md.BeatPos]) as GameObject ;
+			if (!beat.GetComponent <Beat > ()) {
+				beat.AddComponent <Beat> ();
+			}
 			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
+			if (beat.GetComponent<Beat> ().AC == null) {
+				beat.GetComponent<Beat> ().AC = beatsoundFX [md.BeatPos];
+			}
 			beat.transform.parent = BeatMapContainer.transform ;
-
 			beat.transform.position=new Vector3 (md.BeatPos*10,md.playtime*speed,0);
 			GameObjBeats[i]=beat;
 			beattimes [i] = md.playtime;
+
+
 		}
 	}  
 	//end从json生成map

@@ -2,6 +2,9 @@
 using System.Collections;
 using System.IO;
 using UnityEngine.UI;
+using System.Collections.Generic;
+
+
 [System. Serializable]
 public class MusicData
 {
@@ -55,10 +58,11 @@ public class BeatAnalysisManager : MonoBehaviour {
 	public static int[] DictBandRange;//dictionary存采样数组中每位对应的频段
 	public static int[] DictBandlength;//存每个频段的长度，计算平均值用
 
-	public  static  ArrayList BeatArrayList=new ArrayList() ;//存beat信息
-	public  static  ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
+	//public  static  ArrayList BeatArrayList=new ArrayList() ;//存beat信息
+	//public  static  ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
 
-
+	public  static	List<MusicData > BAL;
+	public  static	List<float[]  > MAL;
 //	[SerializeField ]
 //	int _bandlength = 32;//非实时计算时使用
 //	public static int bandlength = 32;//非实时计算时使用
@@ -85,6 +89,8 @@ public class BeatAnalysisManager : MonoBehaviour {
 		AudioName = _audio.name;
 		_AL = GetComponent<AudioListener > ();
 
+		BAL=new List<MusicData>();
+		MAL=new List<float[]>();
 		initDictOfBand ();
 	//	FreqRange = _FreqRange;
 //		if (BAM  == null)
@@ -184,12 +190,12 @@ public class BeatAnalysisManager : MonoBehaviour {
 	//根据实时采集到数据 save map
 	public  void Save() {  
 		savedBeatMap  sbm=new savedBeatMap();
-		sbm.MD=new MusicData[BeatArrayList.Count ] ;
+		sbm.MD=new MusicData[BeatAnalysisManager.BAL.Count ] ;
 
 
-		for (int i = 0; i < BeatArrayList.Count; i++) {
-			MusicData md = (MusicData )BeatArrayList [i];
-			sbm.MD [i] = md;
+		for (int i = 0; i < BeatAnalysisManager.BAL.Count; i++) {
+			//MusicData md =BeatAnalysisManager.BAL [i];
+			sbm.MD [i] = BeatAnalysisManager.BAL [i];
 		}
 
 		string jsonstr = JsonUtility.ToJson (sbm );

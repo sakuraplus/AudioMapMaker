@@ -47,10 +47,10 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 
 	public  void StartAnaBeat () {
 		BufferSize = BeatAnalysisManager.bufferSize;
-		MusicArrayList=BeatAnalysisManager.MusicArrayList ;
+//		MusicArrayList=BeatAnalysisManager.MusicArrayList ;
 		numBands = BeatAnalysisManager .numBands;
-		RecAvgInBandInc=new float[MusicArrayList.Count  ,numBands*2+1 ]; 
-		RecAvgInBand=new float[MusicArrayList.Count  ,numBands *2+1]; 
+		RecAvgInBandInc=new float[BeatAnalysisManager.MAL .Count  ,numBands*2+1 ]; 
+		RecAvgInBand=new float[BeatAnalysisManager.MAL .Count  ,numBands *2+1]; 
 
 
 	
@@ -59,7 +59,7 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 		bandlength =(int)Mathf.Floor( BufferSize * 1.5f);
 		BeatArrayList.Clear ();
 		beatArrindex=0;
-		Debug.Log (BufferSize+",,"+MusicArrayList.Count +",,,"+numBands);
+		Debug.Log (BufferSize+",,"+BeatAnalysisManager.MAL .Count +",,,"+numBands);
 		CalcIncrement ();
 		CalcWavelength ();
 		for (int j = 0; j < numBands; j++) {
@@ -76,8 +76,8 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 	void CalcIncrement()
 	{//计算并保存增长值，将arraylist存为数组
 		for (int j = 0; j <= numBands; j++) {
-			for (int i = 0; i < MusicArrayList.Count; i++) {
-				RecAvgInBand[i,j]=((float[])MusicArrayList[i])[j];
+			for (int i = 0; i < BeatAnalysisManager.MAL .Count; i++) {
+				RecAvgInBand[i,j]=BeatAnalysisManager.MAL [i][j];
 				if (i > 0 &&j<numBands ) {
 					//计算每帧增加值，j=numbands位存储时间，不计算增加值
 					RecAvgInBandInc [i, j] = RecAvgInBand [i, j] - RecAvgInBand [i - 1, j];
@@ -88,12 +88,12 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 
 	void CalcWavelength()
 	{		//将完整音乐细分，计算每段波长
-		int numS = (int)Mathf.Floor (MusicArrayList.Count / (bandlength  * 4f));
+		int numS = (int)Mathf.Floor (BeatAnalysisManager.MAL .Count / (bandlength  * 4f));
 		numSubdivide = (int)Mathf.Min (numSubdivide, numS);
 		Debug.LogError ("bandlength="+bandlength);
 		wavelengths = new float[numSubdivide ];
 		for (int inddivide = 0; inddivide < numSubdivide; inddivide++) {
-			wavelengths [inddivide] = DetectWavelength (inddivide * MusicArrayList.Count / numSubdivide);//将完整音乐细分，计算每段波长
+			wavelengths [inddivide] = DetectWavelength (inddivide * BeatAnalysisManager.MAL .Count / numSubdivide);//将完整音乐细分，计算每段波长
 			Debug.Log ("wavelengths[ ]  " + inddivide + " // " + wavelengths [inddivide]);
 
 		}
@@ -105,7 +105,7 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 	int DetectWavelength(int index)
 	{
 
-		Debug.LogError ("DetectBeatMap     bandlength=buffersize*1.5="+bandlength +"/"+MusicArrayList.Count+ "index="+index);
+		Debug.LogError ("DetectBeatMap     bandlength=buffersize*1.5="+bandlength +"/"+BeatAnalysisManager.MAL .Count+ "index="+index);
 		int avgWavelength = 0;//全部频段的平均波长
 		int[] avgwavelengths=new int[numBands ];
 		for (int i = 0; i < numBands ; i++) {
@@ -186,15 +186,15 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 		int startindex = -1;
 		int endindex = -1;
 		int _wavelength = -1;
-		for (int i =5; i < MusicArrayList.Count-5; i++) {
-			float _wavelengthindex=i/(MusicArrayList.Count/numSubdivide*1f) ;
+		for (int i =5; i < BeatAnalysisManager.MAL .Count-5; i++) {
+			float _wavelengthindex=i/(BeatAnalysisManager.MAL .Count/numSubdivide*1f) ;
 			_wavelengthindex = Mathf.Clamp (_wavelengthindex, 0, (numSubdivide - 1));
 			_wavelength =(int) wavelengths [(int)Mathf.Floor (_wavelengthindex)];
 
 
 			startindex = (int)Mathf.Max (0,( _wavelength/8+peaktimeindexlast), (i - _wavelength / 2));
-			startindex = (int)Mathf.Min (startindex, MusicArrayList.Count - 1);
-			endindex = (int)Mathf.Min ((startindex+_wavelength ),MusicArrayList.Count );
+			startindex = (int)Mathf.Min (startindex, BeatAnalysisManager.MAL .Count - 1);
+			endindex = (int)Mathf.Min ((startindex+_wavelength ),BeatAnalysisManager.MAL .Count );
 
 
 			int finallength = endindex - startindex;
@@ -203,7 +203,7 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 
 			//peakvalue=RecAvgInBandInc[startindex ,indBand ];
 			peakvalue=RecAvgInBand[startindex ,indBand ];
-			for (int ind = 0; (ind < finallength && ind+startindex<MusicArrayList.Count ); ind++) {
+			for (int ind = 0; (ind < finallength && ind+startindex<BeatAnalysisManager.MAL .Count ); ind++) {
 				//float newvalue=RecAvgInBandInc[startindex +ind,indBand ];
 				float newvalue=RecAvgInBand[startindex +ind,indBand ];
 				if (peakvalue < newvalue) {
@@ -316,6 +316,15 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 		Debug.Log (_audio.timeSamples + "S-- " + testS);
 		//Debug.Log ("O-- " + testO);
 	//	BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
+
+		string[] st1 = { "A","B","C"};
+		string[] st2 = { "1","2","3","",""};
+		st1.CopyTo (st2, -1);
+		string t = "";
+		for (int i = 0; i < st2.Length; i++) {
+			t += st2 [i];
+		}
+		Debug.Log ("-/-/-   " + t);
 	}
 	//按键
 	public void CheckBeatMap()

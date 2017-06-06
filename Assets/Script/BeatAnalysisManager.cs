@@ -91,6 +91,17 @@ public class BeatAnalysisManager : MonoBehaviour {
 
 		BAL=new List<MusicData>();
 		MAL=new List<float[]>();
+
+		if (!useFreq) {
+			numBands = _numBands;
+			//FreqRange.Initialize ();//=new Vector2[0];
+		} else {
+			numBands = FreqRange.Length;
+		}
+		bufferSize = _bufferSize;
+		decay = _decay;
+		enegryaddup = _enegryaddup;
+
 		initDictOfBand ();
 	//	FreqRange = _FreqRange;
 //		if (BAM  == null)
@@ -113,15 +124,7 @@ public class BeatAnalysisManager : MonoBehaviour {
 
 	public   void initDictOfBand()
 	{
-		if (!useFreq) {
-			numBands = _numBands;
-			//FreqRange.Initialize ();//=new Vector2[0];
-		} else {
-			numBands = FreqRange.Length;
-		}
-		bufferSize = _bufferSize;
-		decay = _decay;
-		enegryaddup = _enegryaddup;
+		
 
 
 		Debug.Log (">>frequency= " + _audio.clip.frequency + "SampleRate=" + AudioSettings.outputSampleRate);//(int)Mathf.Floor (_SpecSize *_audio.clip.frequency/AudioSettings.outputSampleRate  
@@ -172,12 +175,9 @@ public class BeatAnalysisManager : MonoBehaviour {
 		_decay = 0.998f;
 		initDictOfBand ();
 	}
-//	public void StopAudio()
+//	public void changesetting()
 //	{
-////		bpmsetting = false;
-////		lastSetbpmframe=-1;
-////		Setbpmframe=-1;
-//		_audio.Stop ();
+//		initDictOfBand ();
 //	}
 //
 

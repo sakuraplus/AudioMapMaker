@@ -82,7 +82,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	}
 	void InitSetting(){
 
-			_numBands = BeatAnalysisManager.numBands;//使用numband
+		_numBands = BeatAnalysisManager.numBands;//使用numband
 
 		_bufferSize = BeatAnalysisManager .bufferSize ;
 //		RecAvgInBandInc=new float[_bufferSize ,_numBands ]; 
@@ -109,6 +109,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 		BeatAnalysisManager.BAL.Clear ();
 		BeatAnalysisManager.MAL.Clear ();
+		//BeatAnalysisManager.DictBandlength.
 		beatArrindex=0;
 		CurrentIndex = 0;
 

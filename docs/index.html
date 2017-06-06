@@ -1,34 +1,32 @@
-<!doctype html>
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | New Unity Project</title>
-    <link rel="stylesheet" href="TemplateData/style.css">
-    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
-    <script src="TemplateData/UnityProgress.js"></script>
-  </head>
-  <body class="template">
-    <p class="header"><span>Unity WebGL Player | </span>New Unity Project</p>
-    <div class="template-wrap clear">
-      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" height="600px" width="800px"></canvas>
-      <br>
-      <div class="logo"></div>
-      <div class="fullscreen"><img src="TemplateData/fullscreen.png" width="38" height="38" alt="Fullscreen" title="Fullscreen" onclick="SetFullscreen(1);" /></div>
-      <div class="title">New Unity Project</div>
-    </div>
-    <p class="footer">&laquo; created with <a href="http://unity3d.com/" title="Go to unity3d.com">Unity</a> &raquo;</p>
-    <script type='text/javascript'>
-  var Module = {
-    TOTAL_MEMORY: 268435456,
-    errorhandler: null,			// arguments: err, url, line. This function must return 'true' if the error is handled, otherwise 'false'
-    compatibilitycheck: null,
-    dataUrl: "Release/webgl.data",
-    codeUrl: "Release/webgl.js",
-    memUrl: "Release/webgl.mem",
-  };
-</script>
-<script src="Release/UnityLoader.js"></script>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+  <title> Audio Map Maker</title>
+  <meta name="Generator" content="EditPlus">
+  <meta name="Author" content="saku">
+  <meta name="Keywords" content="audio,analysis,beat,detecte">
+  <meta name="Description" content="example of audio beat analysis">
+  <STYLE TYPE="text/css">
+	#divmenu{border: 2px solid #006600;background-color: #009933;color: #ffffff;width:400px }
+	a:link {color: #ccffff} 
+  </STYLE>
+ </head>
 
-  </body>
+ <body style=" background-color: #000000" >
+ <CENTER>
+	<div id="divmenu" class="">
+	<a href="webGL\index.html">BeatMap Example</a>
+	<br>
+	show the analysised beatmap data in a waterfall style.
+	</div>
+
+	<div id="divmenu" class="">
+	<a href="webplayer\webplayer.html">Realtime Beat Analysis Example</a>
+	<br>
+	the audio is separated into 3 bands by logarithm.
+	</div> 
+ 
+ </CENTER>
+
+ </body>
 </html>

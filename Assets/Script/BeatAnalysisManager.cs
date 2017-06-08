@@ -116,8 +116,8 @@ public class BeatAnalysisManager : MonoBehaviour {
 
 		//_audio.pitch = 2;
 
-		Debug.Log("1"+Time.frameCount );
-		Debug.Log("1"+Time.captureFramerate );
+//		Debug.Log("1"+Time.frameCount );
+	//	Debug.Log("1"+Time.captureFramerate );
 
 
 	}

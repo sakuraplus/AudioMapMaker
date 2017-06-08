@@ -29,7 +29,7 @@ public class Example : MonoBehaviour
 		//Select the instance of AudioProcessor and pass a reference
 		//to this object
 //		AudioProcessor processor = FindObjectOfType<AudioProcessor> ();
-		maintest3ap processor = FindObjectOfType<maintest3ap > ();
+		AudioProcessor processor = FindObjectOfType<AudioProcessor  > ();
 		processor.onBeat.AddListener (onOnbeatDetected);
 		processor.onSpectrum.AddListener (onSpectrum);
 	}

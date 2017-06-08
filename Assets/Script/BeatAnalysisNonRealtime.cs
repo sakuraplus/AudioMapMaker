@@ -317,14 +317,7 @@ public class BeatAnalysisNonRealtime : MonoBehaviour {
 		//Debug.Log ("O-- " + testO);
 	//	BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
 
-		string[] st1 = { "A","B","C"};
-		string[] st2 = { "1","2","3","",""};
-		st1.CopyTo (st2, -1);
-		string t = "";
-		for (int i = 0; i < st2.Length; i++) {
-			t += st2 [i];
-		}
-		Debug.Log ("-/-/-   " + t);
+	
 	}
 	//按键
 	public void CheckBeatMap()

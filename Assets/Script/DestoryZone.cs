@@ -9,7 +9,7 @@ public class DestoryZone : MonoBehaviour {
 	float rate;
 	// Use this for initialization
 	void Start () {
-		Debug.Log (Application.targetFrameRate );
+		//Debug.Log (Application.targetFrameRate );
 	}
 	float timelast=0;
 	// Update is called once per frame

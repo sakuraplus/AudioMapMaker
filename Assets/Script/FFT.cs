@@ -62,23 +62,34 @@ public   class FFT
 		}
 	}
 
-	public void FFTManagerinit(int Nx)
+	public void FFTManagerinit(int Nx,datafilter df)
 	{
-		length = Nx;
+		if (Nx < 128) {
+			Console.Write ("not enough data length");
+		}
+		if (Nx % 2 == 0) {
+			length = Nx;
+		} else {
+			length = Nx - 1;
+		}
+		DF = df;
 		NFFT = (int)Math .Pow(2.0f, Math .Ceiling (Math.Log10 ((float )Nx) / Math.Log10 (2.0f)));
 		//NFFT=Mathf.NextPowerOfTwo(Nx );
 		fftdata = new double[2*NFFT+1];
 	}
 
-	public void CalNFFT(double[] data)
+	public float [] CalNFFT(float[] data)
 	{
-		if (data.Length < length) {
-			return;
+		
+		if (Math.Abs ( data.Length- length)>1) {
+			FFTManagerinit(data.Length,datafilter.none  );
 		}
+
+
 		int i = 0;
 		for (i = 0; i < length ; i++)
 		{
-			fftdata[2*i+1] = data[i];
+			fftdata[2*i+1] =(double ) data[i];
 			fftdata[2*i+2] = 0.0f;
 		}
 		/* pad the remainder of the array with zeros (0 + 0 j) */
@@ -89,15 +100,51 @@ public   class FFT
 		}
 
 		CalFFT(1);
-
-		for (i = 0; i < length; i++)
+		float[] resultdata=new float [length /2];
+		for (i = 0; i < length/2; i++)
 		{
-			data[i] = fftdata[2*i+1];
+
+			switch (DF) {
+			case datafilter.unityspec:
+				resultdata [i] = (float)Math.Abs( fftdata [2 * i + 1]);
+				break;
+			case datafilter.none:
+				resultdata[i] = (float)fftdata[2*i+1];
+				break;
+			}
+
+			//resultdata[i] = (float)fftdata[2*i];
 		}
+		return resultdata;
 	}
 
+	public  enum datafilter{
+		unityspec,none
+	}
 
+	datafilter DF;
+	public  float[] windowRect(float[] data){
+		int N = data.Length;
+		float[] newdata=new float[N] ;
+		for (int i = 0; i < (N+ 1) / 2; i++) {
+			newdata [i] = data [i];
+			newdata [N - 1 - i] = data [i];
+		}
+		return newdata;
+	}
 
+	public float[] windowBlackman(float[] data){
+		int N = data.Length;
+		float[] newdata=new float[N] ;
+		for (int i = 0; i < (N+ 1) / 2; i++) {
+
+			double  result=data [i]*(0.42-0.5*Math.Cos(Math.PI *2 *i/(N-1))+0.08*Math.Cos(Math.PI *4 *i/(N-1)));
+			newdata [i] =(float)result;//data [i]*(0.42-0.5*Math.Cos(Math.PI *2 *i/(N-1))+0.08*Math.Cos(Math.PI *4 *i/(N-1)));
+			newdata [N - 1 - i] =(float)result;// newdata [i];
+		}
+		//Debug.Log (teststr);
+		return newdata;
+	}
 
 }
 

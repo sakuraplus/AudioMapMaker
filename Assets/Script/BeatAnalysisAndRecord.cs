@@ -133,23 +133,40 @@ public class BeatAnalysisAndRecord : MonoBehaviour {
 		//aud.clip.SetData(samples, 0);
 	}
 
-
+	float[] spem;//=new float[length] ;
 
 	public void getdatawhileplay()
 	{
 		int length = 128;
-		float[] spem=new float[length] ;
-		_audio.GetSpectrumData (spem, 0, FFTWindow.Rectangular);
-		string str="getdatawhileplay spem=";
+		spem=new float[length] ;
+		_audio.GetSpectrumData (spem, 0, FFTWindow.Blackman);
+		string str="spem=";
 		for (int i = 0; i < length; i++) {
 			str +=">>"+ spem [i];
 		}
 		Debug.Log (str);
 
+		spem=new float[length*2] ;
 		_audio.GetOutputData (spem, 0);
-		str="getdatawhileplay output=";
+		str="output=";
 		for (int i = 0; i < length; i++) {
 			str +=">>"+ spem [i];
+		}
+		Debug.Log (str);
+	}
+
+
+	FFT fft=new FFT ();
+	public void testfftclass()
+	{
+	//	FFT.datafilter df=new FFT.datafilter();
+
+		fft.FFTManagerinit (256,FFT.datafilter.unityspec);
+
+		float [] result = fft.CalNFFT (fft.windowBlackman ( spem));
+		string  str="testfft=";
+		for (int i = 0; i < result.Length ; i++) {
+			str +=">>"+ result [i];
 		}
 		Debug.Log (str);
 	}

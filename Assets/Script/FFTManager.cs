@@ -12,7 +12,7 @@ public class FFTManager : MonoBehaviour {
 //{
 	int NFFT;
 	float[] fftdata;
-	int length = 256;
+	int length = 128;
 
 
 	void CalFFT(int isign)
@@ -88,7 +88,7 @@ public class FFTManager : MonoBehaviour {
 			fftdata[2 * i + 2] = 0.0f;
 		}
 
-		CalFFT(1);
+		CalFFT(-1);
 
 		for (i = 0; i < Nx; i++)
 		{
@@ -101,7 +101,7 @@ public class FFTManager : MonoBehaviour {
 	{
 		//结果与getspem最接近
 		//int test = 128;
-		FFTManagerinit (length);
+		FFTManagerinit (length*2);
 		//float[] data={-0.4671015f,-0.4489561f,-0.3506886f,-0.2940752f,-0.3443512f,-0.4261942f,-0.4216127f,-0.3579025f,-0.3367245f,-0.3881326f,-0.4468037f,-0.4519297f,-0.4175656f,-0.4057757f,-0.4490566f,-0.507338f,-0.499439f,-0.4025084f,-0.3418621f,-0.391583f,-0.4290631f,-0.3686579f,-0.2874111f,-0.2791567f,-0.3333546f,-0.3771489f,-0.3679349f,-0.3115831f,-0.2361692f,-0.205928f,-0.2674995f,-0.3523813f,-0.4108945f,-0.4480685f,-0.45561f,-0.4329845f,-0.3998931f,-0.3648664f,-0.326448f,-0.3084148f,-0.3359526f,-0.33668f,-0.2227335f,-0.1375056f,-0.2047283f,-0.2817824f,-0.2117366f,-0.03067099f,0.1325354f,0.2251397f,0.2866853f,0.3419436f,0.3563427f,0.3396175f,0.4052128f,0.5655062f,0.6076923f,0.4897988f,0.3881745f,0.4003267f,0.4486199f,0.4566019f,0.4570129f,0.5007881f,0.5452156f,0.5369127f,0.5236734f,0.535898f,0.5251644f,0.5212737f,0.5734285f,0.6484504f,0.6725816f,0.6145085f,0.5170207f,0.4608375f,0.4909478f,0.5601056f,0.5599791f,0.4437896f,0.3080614f,0.2813075f,0.3916111f,0.5352585f,0.590978f,0.5650865f,0.5587434f,0.6163322f,0.667022f,0.6452882f,0.5881106f,0.5290624f,0.4674966f,0.4610982f,0.4935057f,0.4774015f,0.4313717f,0.4537602f,0.5604827f,0.659514f,0.6754787f,0.6291142f,0.5559838f,0.4669501f,0.4266595f,0.4407771f,0.4143518f,0.3279061f,0.2440245f,0.2008781f,0.1926336f,0.2014508f,0.2089205f,0.1989259f,0.1982872f,0.2744169f,0.387326f,0.3910131f,0.3256539f,0.3157545f,0.3592375f,0.3694392f,0.3150217f,0.2463091f,0.2212083f,0.2382626f,0.2424251f,0.1793114f};
 
 		//float[] data=windowRect (spem);//spem;//new float[test] ;//
@@ -171,12 +171,12 @@ public class FFTManager : MonoBehaviour {
 	{
 		_audio = GetComponent<AudioSource> ();
 
-		spem=new float[length] ;
+		spem=new float[length*2] ;
 		spem2=new float[length] ;
-		_audio.GetSpectrumData (spem, 0, FFTWindow.Blackman  );
+		_audio.GetSpectrumData (spem2, 0, FFTWindow.Blackman  );
 		string str="getdatawhileplay spem1=";
 		for (int i = 0; i < length; i++) {
-			str +=">>"+ spem [i];
+			str +=">>"+ spem2 [i];
 		}
 		Debug.Log (str);
 
@@ -192,7 +192,7 @@ public class FFTManager : MonoBehaviour {
 
 		_audio.GetOutputData (spem, 0);
 		str="getdatawhileplay output1=";
-		for (int i = 0; i < length; i++) {
+		for (int i = 0; i < length*2; i++) {
 			str +=">>"+ spem [i];
 		}
 		Debug.LogWarning  (str);

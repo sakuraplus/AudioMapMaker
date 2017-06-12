@@ -106,6 +106,7 @@ public   class FFT
 
 			switch (DF) {
 			case datafilter.unityspec:
+				Console.Write ("ududud");
 				resultdata [i] = (float)Math.Abs( fftdata [2 * i + 1]);
 				break;
 			case datafilter.none:

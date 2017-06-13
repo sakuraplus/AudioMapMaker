@@ -69,6 +69,7 @@ public class ShowBeatMap : MonoBehaviour {
 
 	public void DrawBeatMap()
 	{
+		Debug.Log ("BeatAnalysisManager .BAL.Count" + BeatAnalysisManager.BAL.Count);
 		if (BeatAnalysisManager .BAL.Count <= 0) {
 			return;
 		}
@@ -242,7 +243,7 @@ public class ShowBeatMap : MonoBehaviour {
 	{
 		
 		if (CountToSync > 240) {
-			BeatMapContainer.transform.position=new Vector3 ( 0, 0-speed * _audio.time ,0);
+			BeatMapContainer.transform.position=new Vector3 ( 0, 0-speed * _audio.time -speed*offset,0);
 			CountToSync = 0;
 			Debug.LogWarning  ("sync");
 		} else {

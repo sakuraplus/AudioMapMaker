@@ -2,7 +2,7 @@
 using System.Collections;
 using System.IO;
 
-public class BeatAnalysisNonRealtime : MonoBehaviour {
+public class BeatAnalysisNonRealtimeOLD: MonoBehaviour {
 	AudioSource _audio;
 	/// <summary>
 	/// ////////////////////////////////////////////

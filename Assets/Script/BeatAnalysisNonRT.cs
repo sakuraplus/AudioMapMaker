@@ -12,9 +12,12 @@ using AForge.Math ;
 /// </summary>
 /// 
 public class BeatAnalysisNonRT : MonoBehaviour {
-	
+	[SerializeField]
+	Text TxTProcess;
+
 	AudioSource _audio;
 	public  int sampletime=15;
+	public int channel = 0;
 	int _bufferSize = 256;//每节拍之间的帧数
 	int _numBands =1;//分频段的数量
 	int numSubdivide=1;//细分的段数，针对变化bpm的音乐
@@ -95,14 +98,9 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 	public void Btnseparatedata()
 	{
 		BeatAnalysisManager.MAL.Clear ();//初始化mal
-		GetMusicData (1);//获取——audiosource，声道1
+		GetMusicData (channel);//获取——audiosource，声道1
 
-		string st="sample = ";//测试
-		for (int ii = 0; ii < 50; ii++) {
-			st += ">>" + samples  [ii];
-		}
-		Debug.LogError  (st);//测试
-
+	
 		DataProcess (sampletime,_SpecSize);
 		Debug.Log (BeatAnalysisManager.MAL.Count);
 
@@ -131,11 +129,12 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 			}
 		}
 	}
-
+	int processbar=0;
 	public void DataProcess(int time=100,int samplesize=128 )
 	{	
+		processbar=10;
 		//拆分数据，time即采样间隔时间，单位毫秒，samplesize为fft结果的数据数量=_spec，采样数据数量为sanplesize*2，取每个间隔分段的钱samplesize位
-		int SamplePerFrame = (int )Mathf.Floor ( time*_audio.clip.frequency / 1000);//每帧间隔的数据数量
+		int SamplePerFrame = Mathf.FloorToInt ( time*_audio.clip.frequency / 1000);//每帧间隔的数据数量
 
 		//从第一个非0数据开始
 		int si=0;
@@ -146,13 +145,17 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 				offsetfound = true;
 			}
 		}
+
+		if (TxTProcess != null) {
+			TxTProcess.text="processing  10 %";
+		}
 		float offset = si * _audio.clip.frequency;/////////////////第一个非0数据所在的时间
 
-		int NumOfFrame = (int)Mathf.Floor ((samples.Length-si) / SamplePerFrame);//拆分出的数据数量，相当于帧数
+		int NumOfFrame =Mathf.FloorToInt ((samples.Length-si) / SamplePerFrame);//拆分出的数据数量，相当于帧数
 
-		freqlength=(int)Mathf.Floor (samplesize *_audio.clip.frequency/AudioSettings.outputSampleRate  );//有效频率数量
+		freqlength=Mathf.FloorToInt (samplesize *_audio.clip.frequency/AudioSettings.outputSampleRate  );//有效频率数量
 		fft.FFTManagerinit (samplesize*2,FFT.datafilter.unityspec);//初始化fft
-		Debug.LogError ("offset="+si+"  =  "+offset +"SamplePerFrame= "+SamplePerFrame);
+		Debug.LogError ("offset="+si+"  =  "+offset +"SamplePerFrame= "+SamplePerFrame+"--systemtime="+Time.realtimeSinceStartup);
 		for (int i = 0; i < NumOfFrame; i++) {
 			//帧数
 			float[] separatedData = new float[ samplesize*2];//每次采样的数据数量，为了保证fft结果数量为samplesize，数量取两倍
@@ -170,39 +173,22 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 	
 			float [] result = fft.CalNFFT (fft.windowBlackman ( separatedData));//将采样数据做fft，长度为samplesize
 
-			//测试
-			if (i < 3) {
-				string st = "result = ";
-				for (int ii = 0; ii < result.Length; ii++) {
-					st += ">>" + result [ii];
-				}
-
-				Debug.Log (st);
-
-			}//测试
-
 
 			float[] bands =new float[_numBands +1];
 			bands =CalcCurrentFrameAvg (result);//按频段拆分，计算当前帧平均值，存入band		
 			bands [_numBands] = (float)startindex / _audio.clip.frequency;//startindex所在时间，单位为秒	
 
-			//测试
-			if (i < 120 &&i>115) {
-				string stt = "startindex = "+startindex+"//";
-				for (int ii = 0; ii < result.Length; ii++) {
-					stt += ">>" +bands [_numBands];
-				}
 
-				Debug.Log (stt);
-
-			}//测试
 			BeatAnalysisManager.MAL.Add (bands);//存入MAL
-
+			if (TxTProcess != null) {
+				
+				processbar= Mathf.Min ( Mathf.RoundToInt  ( 90f*i / NumOfFrame)+ 10, 100);
+				TxTProcess.text="processing  "+processbar+" %";
+			}
 
 		}//end 采样samplesize*2次	
+		Debug.LogError ("end process--systemtime="+Time.realtimeSinceStartup );
 	}//end dataprocess ，band存入MAL
-
-
 
 
 
@@ -237,19 +223,19 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 
 
 	int beatArrindex=0;
-	void ParaInit()
+	public void ParaInit()
 	{
 		BeatAnalysisManager.BAL.Clear ();
-		_audio=_audio=BeatAnalysisManager ._audio ;//GetComponent<AudioSource> ();
+		_audio=BeatAnalysisManager ._audio ;//GetComponent<AudioSource> ();
 
 		decay = BeatAnalysisManager .decay;//衰减
 		_SpecSize = BeatAnalysisManager .SpecSize;//fft后数据数量
 
 		_bufferSize = BeatAnalysisManager.bufferSize;
 		_numBands = BeatAnalysisManager .numBands;
-		RecAvgInBandInc=new float[BeatAnalysisManager.MAL .Count  ,_numBands*2+1 ]; 
-		RecAvgInBand=new float[BeatAnalysisManager.MAL .Count  ,_numBands *2+1]; 
-		bandlength =(int)Mathf.Floor( _bufferSize * 1.5f);//节拍检测时，实际字啊MAL中取出的数据量
+		RecAvgInBandInc=new float[BeatAnalysisManager.MAL .Count  ,_numBands+1 ]; 
+		RecAvgInBand=new float[BeatAnalysisManager.MAL .Count  ,_numBands+1]; 
+		bandlength =Mathf.FloorToInt( _bufferSize * 1.5f);//节拍检测时，实际字啊MAL中取出的数据量
 
 	}
 	public  void StartAnaBeat () {
@@ -264,7 +250,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 		Debug.Log ("Buffer="+_bufferSize+",,MAl.count="+BeatAnalysisManager.MAL .Count +",,,numBands="+_numBands+"  numSub="+numSubdivide);
 
 		for (int j = 0; j < _numBands; j++) {
-			Debug.LogError (j);
+		//	Debug.LogError (j);
 			CheckBeatInClip (j);///////单频段检测节拍
 		}
 
@@ -288,15 +274,15 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 
 	void CalcWavelength()
 	{		//将完整音乐细分，计算每段波长wavelengths
-		int numS = (int)Mathf.Floor (BeatAnalysisManager.MAL .Count / (bandlength  * 4f));
+		int numS = Mathf.FloorToInt (BeatAnalysisManager.MAL .Count / (bandlength  * 4f));
 		//numS = Mathf.Min (1, numS);
 		numSubdivide = (int)Mathf.Max  (numSubdivide, numS);//至少为1
-		Debug.LogError ("bandlength="+bandlength);
+		//Debug.LogError ("bandlength="+bandlength);
 		wavelengths = new float[numSubdivide ];
 		for (int inddivide = 0; inddivide < numSubdivide; inddivide++) {
 			//计算每段波长
 			wavelengths [inddivide] = DetectWavelength (inddivide * BeatAnalysisManager.MAL .Count / numSubdivide);//将完整音乐细分，计算每段波长
-			Debug.Log ("wavelengths[ ]  " + inddivide + " // " + wavelengths [inddivide]);
+			//Debug.Log ("wavelengths[ ]  " + inddivide + " // " + wavelengths [inddivide]);
 
 		}
 	}	//end//将完整音乐细分，计算每段波长
@@ -305,9 +291,9 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 	//
 
 	int DetectWavelength(int index)
-	{//计算每段波长
+	{//计算每段波长，使用绝对值计算
 
-		Debug.LogError ("DetectBeatMap     bandlength=buffersize*1.5="+bandlength +"/"+BeatAnalysisManager.MAL .Count+ "index="+index);
+		//Debug.LogError ("DetectBeatMap     bandlength=buffersize*1.5="+bandlength +"/"+BeatAnalysisManager.MAL .Count+ "index="+index);
 		int avgWavelength = 0;//全部频段的平均波长
 		int[] avgwavelengths=new int[_numBands ];
 		for (int i = 0; i < _numBands ; i++) {
@@ -321,16 +307,14 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 			int peaktimelast =index;// 0;//上一个峰值的位置
 			do {
 				//取4个峰值
-				float peakvalue=RecAvgInBand [peaktimelast+1,i];
-				peaktimes[numPeak ]=peaktimelast+1;//RecAvgInBand [peaktimelast+1,numBands ];
+				float peakvalue=RecAvgInBand [peaktimelast+1,i];//使用绝对值计算
+				peaktimes[numPeak ]=peaktimelast+1;//
 			
 				for (int ind = peaktimelast; ind <( bandlength+peaktimelast) ; ind++) {
 					if(ind <BeatAnalysisManager.MAL.Count ){
 						//在bandlength中找最高值
 						//Debug.Log("ind="+ind+" i="+i);
-						if(ind>=BeatAnalysisManager.MAL.Count ||i>=_numBands ){
-							Debug.Log("`````ind="+ind+" i="+i);
-						}
+				
 						float Avginclipframe =RecAvgInBand [ind,i];// as float[];
 
 						if(peakvalue<Avginclipframe)
@@ -350,21 +334,21 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 
 				}
 
-				Debug.LogError ("peaktimes index="+numPeak +" time="+peaktimes[numPeak ]+" value="+peakvalue+" peaktimeindex="+peaktimeindex );
-				peaktimelast=peaktimeindex+(int)Mathf.Floor (bandlength/8) ;
+			//	Debug.LogError ("peaktimes index="+numPeak +" time="+peaktimes[numPeak ]+" value="+peakvalue+" peaktimeindex="+peaktimeindex );
+				peaktimelast=peaktimeindex+Mathf.FloorToInt (bandlength/8) ;
 
 					numPeak++;
 			} while(numPeak < 4);
 
 
-			int avgWavelengthInclip =(int)Mathf.Round ( (peaktimes [3] -  peaktimes [0])/3);
+			int avgWavelengthInclip =Mathf.RoundToInt  ( (peaktimes [3] -  peaktimes [0])/3);
 			//avgWavelengthInclip /= 3;//单个频段波长
 			avgWavelength += avgWavelengthInclip;//计算全部频段平均波长
 			avgwavelengths [i] = avgWavelength;//存所有频段的波长
 			//	Debug.LogError ("avgWavelengthInclip="+avgWavelengthInclip);
 		}
 
-		avgWavelength=(int)Mathf.Round(avgWavelength / _numBands);//全部频段平均波长
+		avgWavelength=Mathf.RoundToInt(avgWavelength / _numBands);//全部频段平均波长
 		//Debug.LogError ("avgWavelength="+avgWavelength);
 		if (_numBands >= 2) {
 			//如果频段较多，则取与平均最接近的频段的波长
@@ -378,9 +362,9 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 			}
 			avgWavelength = avgwavelengths [avgind];//如果频段较多，则取与平均最接近的频段的波长
 		}
-		Debug.LogError ("avgWavelength final "+index+" >>> "+avgWavelength);
+		//Debug.LogError ("avgWavelength final "+index+" >>> "+avgWavelength);
 		//	
-		return (int)Mathf.Floor ( avgWavelength) ;
+		return  Mathf.FloorToInt ( avgWavelength) ;
 	}//end计算每段波长
 
 
@@ -394,13 +378,18 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 	//单频段检测节拍
 	void CheckBeatInClip(int indBand)
 	{  
-		Debug.LogError  ("band start="+indBand );
+		//Debug.LogError  ("band start="+indBand );
 		string temp="";//测试
 
 		int peaktimeindex = 0;//当前峰值位置
 		int peaktimeindexlast = 0;//上一个峰值的位置
-		//float peakvalue=RecAvgInBandInc  [0,indBand];//第一个用来比较的值
-		float peakvalue=RecAvgInBand  [0,indBand];//第一个用来比较的值
+		float peakvalue;
+		if(BeatAnalysisManager.CheckWithInc ){
+			 peakvalue=RecAvgInBandInc  [0,indBand];//第一个用来比较的值
+		}else{
+			 peakvalue=RecAvgInBand  [0,indBand];//第一个用来比较的值
+		}
+
 		int startindex = -1;
 		int endindex = -1;
 		int _wavelength = -1;
@@ -408,7 +397,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 		for (int i =5; i < BeatAnalysisManager.MAL .Count-5; i++) {
 			float _wavelengthindex=i/(BeatAnalysisManager.MAL .Count/numSubdivide*1f) ;//当前区域所在的范围，获取波长
 			_wavelengthindex = Mathf.Clamp (_wavelengthindex, 0, (numSubdivide - 1));
-			_wavelength =(int) wavelengths [(int)Mathf.Floor (_wavelengthindex)];//当前区域波长，即每次采样数量
+			_wavelength =(int) wavelengths [Mathf.FloorToInt (_wavelengthindex)];//当前区域波长，即每次采样数量
 
 
 			startindex = (int)Mathf.Max (0,( _wavelength/8+peaktimeindexlast), (i - _wavelength / 2));
@@ -419,12 +408,20 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 			int finallength = endindex - startindex;//实际采样的数量
 
 			temp += i + " ,start=" + startindex + " ,end=" + endindex+" length="+finallength+" wavelength="+_wavelength ;//测试
-
-			//peakvalue=RecAvgInBandInc[startindex ,indBand ];//根据每帧增长值判断
-			peakvalue=RecAvgInBand[startindex ,indBand ];//根据每帧绝对值判断
+			if(BeatAnalysisManager.CheckWithInc ){
+				peakvalue=RecAvgInBandInc[startindex ,indBand ];//根据每帧增长值判断
+			}else{
+				peakvalue=RecAvgInBand[startindex ,indBand ];//根据每帧绝对值判断
+			}
 			for (int ind = 0; (ind < finallength && ind+startindex<BeatAnalysisManager.MAL .Count ); ind++) {
-				//float newvalue=RecAvgInBandInc[startindex +ind,indBand ];//根据每帧增长值判断
-				float newvalue=RecAvgInBand[startindex +ind,indBand ];//根据每帧绝对值判断
+				float newvalue;
+				if (BeatAnalysisManager.CheckWithInc) {
+					newvalue=RecAvgInBandInc[startindex +ind,indBand ];//根据每帧增长值判断
+				} else {
+					newvalue=RecAvgInBand[startindex +ind,indBand ];//根据每帧绝对值判断
+				}
+
+
 				if (peakvalue < newvalue) {
 					peakvalue = newvalue;
 					peaktimeindex = startindex + ind;
@@ -439,7 +436,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 				//保存鼓点信息
 				if (beatArrindex < BeatAnalysisManager. BAL.Count) {
 
-					BeatAnalysisManager. BAL [beatArrindex].playtime =RecAvgInBand [peaktimeindex, _numBands ];
+					BeatAnalysisManager. BAL [beatArrindex].playtime =RecAvgInBand [peaktimeindex, _numBands ];//时间保存在绝对值数组中
 					BeatAnalysisManager. BAL [beatArrindex].OnBeat = true;
 					BeatAnalysisManager. BAL [beatArrindex].BeatPos = indBand;
 				} else {
@@ -468,7 +465,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 			}
 
 		}
-		Debug.LogError  ("band end="+indBand+" ///"+temp);
+		//Debug.LogError  ("band end="+indBand+" ///"+temp);
 
 	}
 	//end单频段检测节拍

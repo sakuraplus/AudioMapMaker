@@ -25,8 +25,7 @@ public class savedBeatMap{
 public class BeatAnalysisManager : MonoBehaviour {
 	[HideInInspector ]
 	public static  AudioSource _audio;
-	public static 	AudioListener _AL;
-
+	//public AudioClip AC;
 	public static string AudioName="";
 	public static int SpecSize = 256;//采样数量
 	public static int bufferSize = 256;//记录的帧数
@@ -70,27 +69,35 @@ public class BeatAnalysisManager : MonoBehaviour {
 	public float speed=2000;
 
 
-
-
-//	public  string strvariance="";//测试用
-//	[TextArea ]
-//	public string BeatMapDataJson;
 	/// <summary>
 	/// ///////////////////////////////////
 	/// </summary>
 	// Use this for initialization
-	void Awake () {
+ 	public void Awake () {
+		 initPara();
+		BAL=new List<MusicData>();
+		MAL=new List<float[]>();
+		///////////////////////////////
+
+
+
+		//_audio.pitch = 2;
+
+//		Debug.Log("1"+Time.frameCount );
+	//	Debug.Log("1"+Time.captureFramerate );
+
+
+	}	
+	public   void initPara()
+	{
 		CheckWithInc  = _checkwithInc;
 		//bandlength = _bandlength;
-	
+
 		SpecSize = _SpecSize;
 
 		_audio=GetComponent<AudioSource> ();
 		AudioName = _audio.name;
-		_AL = GetComponent<AudioListener > ();
 
-		BAL=new List<MusicData>();
-		MAL=new List<float[]>();
 
 		if (!useFreq) {
 			numBands = _numBands;
@@ -103,23 +110,6 @@ public class BeatAnalysisManager : MonoBehaviour {
 		enegryaddup = _enegryaddup;
 
 		initDictOfBand ();
-	//	FreqRange = _FreqRange;
-//		if (BAM  == null)
-//		{
-//			BAM = this.GetComponent<BeatAnalysisManager >();
-//		}else{
-//			print("awake BAM--"+BAM);
-//		}
-		///////////////////////////////
-
-
-
-		//_audio.pitch = 2;
-
-//		Debug.Log("1"+Time.frameCount );
-	//	Debug.Log("1"+Time.captureFramerate );
-
-
 	}
 
 	public   void initDictOfBand()
@@ -214,5 +204,6 @@ public class BeatAnalysisManager : MonoBehaviour {
 	}  
 	//end保存json格式化的map
 //
+
 
 }

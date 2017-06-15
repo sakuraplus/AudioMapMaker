@@ -14,25 +14,29 @@ public class BeatAnalysisNonRTEditor : Editor { // extend the Editor class
 		// get a reference to the GameManager script on this target gameObject
 		BeatAnalysisNonRT  BAnonRT = (BeatAnalysisNonRT )target;
 
-		// add a custom button to the Inspector component
-		if(GUILayout.Button("start data process"))
-		{
-			Debug.Log ("---"+BeatAnalysisManager._audio);
-			BAnonRT.Btnseparatedata ();
-			// if button pressed, then call function in script
-		}
 
-		// add a custom button to the Inspector component
-		if(GUILayout.Button("start beat analysis"))
-		{
-			BAnonRT.StartAnaBeat ();
-		}
+	
+		if (BeatAnalysisManager._audio == null) {
+			GUILayout.Label ("*need enable the beatanalysismanager \n editor tool first*" );
+		}else{
+			GUILayout.Space (30);
+			// add a custom button to the Inspector component
+			GUILayout.Label ("the data process will take\n plenty of time,please wait" );
+			if (GUILayout.Button ("start data process")) {
+				Debug.Log ("---" + BeatAnalysisManager._audio);
+				BAnonRT.ParaInit ();
+				BAnonRT.Btnseparatedata ();
+				// if button pressed, then call function in script
+			}
 
-		// add a custom button to the Inspector component
-		if(GUILayout.Button("init"))
-		{
-			BAnonRT.ParaInit ();
+			// add a custom button to the Inspector component
+			if (BeatAnalysisManager.MAL.Count > 1) {
+				if (GUILayout.Button ("start beat analysis")) {
+					BAnonRT.StartAnaBeat ();
+				}
+			}
 		}
+	
 
 
 		// //////////////////////////

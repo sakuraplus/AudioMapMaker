@@ -26,7 +26,7 @@ public class BeatAnalysisManager : MonoBehaviour {
 	[HideInInspector ]
 	public static  AudioSource _audio;
 	//public AudioClip AC;
-	public static string AudioName="";
+	//public static string AudioName="";
 	public static int SpecSize = 256;//采样数量
 	public static int bufferSize = 256;//记录的帧数
 	public static  int numBands =8;//分频段数量
@@ -44,6 +44,9 @@ public class BeatAnalysisManager : MonoBehaviour {
 	float _enegryaddup = 1.2f;
 	[SerializeField ]
 	float _decay = 0.997f;//衰减?
+	[SerializeField ]
+	int _samplePerSecond = 60;//fps
+
 
 	public static bool CheckWithInc;//使用增长值或能量值计算节拍
 	[SerializeField ]
@@ -66,7 +69,7 @@ public class BeatAnalysisManager : MonoBehaviour {
 //	int _bandlength = 32;//非实时计算时使用
 //	public static int bandlength = 32;//非实时计算时使用
 
-	public float speed=2000;
+	public static int samplePerSecond=60;
 
 
 	/// <summary>
@@ -96,9 +99,10 @@ public class BeatAnalysisManager : MonoBehaviour {
 		SpecSize = _SpecSize;
 
 		_audio=GetComponent<AudioSource> ();
-		AudioName = _audio.name;
+		//AudioName = _audio.name;
 
-
+		samplePerSecond = _samplePerSecond;
+		Application.targetFrameRate = samplePerSecond;
 		if (!useFreq) {
 			numBands = _numBands;
 			//FreqRange.Initialize ();//=new Vector2[0];
@@ -203,7 +207,8 @@ public class BeatAnalysisManager : MonoBehaviour {
 		}  
 	}  
 	//end保存json格式化的map
-//
+
+
 
 
 }

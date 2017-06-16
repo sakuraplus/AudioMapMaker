@@ -23,7 +23,7 @@ public class OnBeatrealtimeEventHandler : UnityEngine.Events.UnityEvent< int >
 /// <summary>
 /// 检测音量变化幅度
 /// 
-/// </summary>
+[RequireComponent (typeof (BeatAnalysisManager ) )]///// </summary>
 public class BeatAnalysisRealtime : MonoBehaviour {
 	[HideInInspector ]
 	AudioSource _audio;
@@ -268,7 +268,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 		for (int ic = 0; ic < _numBands; ic++) {
 			//遍历所有频段
-			int largeindex = 0;
+		//	int largeindex = 0;
 
 
 			float largeenergy = RAinc  [lastbeatindexInBand[ic]][ic];//当前频段上一次节拍的位置
@@ -282,7 +282,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 				if (RAinc [i][ic] > largeenergy ) {
 					
 //					largeindexF = largeindex;
-					largeindex = i;//最大值在buffersize中所在的位置
+				//	largeindex = i;//最大值在buffersize中所在的位置
 					largeenergy = RAinc [i][ic];//最大
 					//////////////////////****
 
@@ -492,7 +492,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 		for (int ic = 0; ic < _numBands; ic++) {
 			//遍历所有频段
-			int largeindex = 0;
+		//	int largeindex = 0;
 
 			/////////////////////////****
 			//float largeenergy = RecAvgInBand  [lastbeatindexInBand[ic],ic];//当前频段上一次节拍的位置
@@ -505,7 +505,7 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 				if (RAeng  [i][ic] > largeenergy ) {
 
 
-					largeindex = i;//最大值在buffersize中所在的位置
+				//	largeindex = i;//最大值在buffersize中所在的位置
 					largeenergy = RAeng  [i][ic] ;//最大
 
 					//////////////////////****

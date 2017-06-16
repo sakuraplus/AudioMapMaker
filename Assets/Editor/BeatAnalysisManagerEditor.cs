@@ -29,7 +29,7 @@ public class BeatAnalysisManagerEditor : Editor { // extend the Editor class
 		if (BeatAnalysisManager._audio != null) {
 
 			//play/stop
-			GUILayout.Label ("*buffersize setting helpper*\nplay the default music and tap bpm" );
+			GUILayout.Label ("*buffersize setting helpper*\nplay the default music and tap bpm",GUILayout.Width(220) );
 			string playingstate = "play";
 			if (BeatAnalysisManager._audio.isPlaying) {
 				playingstate = "stop";
@@ -50,7 +50,7 @@ public class BeatAnalysisManagerEditor : Editor { // extend the Editor class
 			if (GUILayout.Button ("tap to set bpm")) {
 				setBPM ();
 			}
-			GUILayout.Label (bpmframe + " frames between beats ,\nrecommend buffersize \n" + recbuffersize);
+			GUILayout.Label (bpmframe + " frames between beats ,\nrecommend buffersize \n" + recbuffersize,GUILayout.Width(200));
 			//end bpm helpper
 
 

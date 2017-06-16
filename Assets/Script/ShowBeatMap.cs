@@ -11,6 +11,7 @@ using UnityEngine.UI;
 ///实时显示节拍
 /// 
 /// </summary>
+[RequireComponent (typeof (BeatAnalysisManager ) )]//
 public class ShowBeatMap : MonoBehaviour {
 	
 	public AudioClip[] beatsoundFX;
@@ -39,12 +40,6 @@ public class ShowBeatMap : MonoBehaviour {
 	void Start () {
 
 		_audio = BeatAnalysisManager ._audio;
-
-	
-
-
-	
-
 	}
 
 	// Update is called once per frame
@@ -69,6 +64,7 @@ public class ShowBeatMap : MonoBehaviour {
 
 	public void DrawBeatMap()
 	{
+		BeatAnalysisManager.BeatmapOffset=offset ;
 		Debug.Log ("BeatAnalysisManager .BAL.Count" + BeatAnalysisManager.BAL.Count);
 		if (BeatAnalysisManager .BAL.Count <= 0) {
 			return;
@@ -108,7 +104,8 @@ public class ShowBeatMap : MonoBehaviour {
 
 	void initBeatMapContainer()
 	{
-		if (GameObjBeats!=null ) {
+		if (GameObjBeats.Length>0 ) {
+			Debug.Log (GameObjBeats);
 			Debug.Log (BeatMapContainer.transform.childCount);
 			for (int i = 0; i < GameObjBeats.Length; i++) {
 				DestroyImmediate (GameObjBeats [i]);
@@ -175,6 +172,7 @@ public class ShowBeatMap : MonoBehaviour {
 	void load(string jsonstr) {  
 		savedBeatMap  smdread = JsonUtility.FromJson<savedBeatMap> (jsonstr);
 		Debug.Log ("load smdread.md="+smdread.MD );
+		offset = smdread.offset;
 		//GameObject GameObjBeats = GameObject.Find ("nonrealtime");
 		initBeatMapContainer();
 		GameObjBeats = new GameObject[smdread.MD.Length ];

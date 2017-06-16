@@ -55,7 +55,15 @@ public class ExampleHelp : MonoBehaviour {
 
 
 
+	public void btnstopmusic(){
 
+		_audio.Stop ();
+	}
+
+	public void btnplaymusic(){
+
+		_audio.Play  ();
+	}
 
 
 

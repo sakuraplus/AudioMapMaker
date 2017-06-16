@@ -17,8 +17,8 @@ public class BeatAnalysisNonRealtimeOLD: MonoBehaviour {
 	float[,] RecAvgInBandInc;//存分频段每帧增长值
 	float[,] RecAvgInBand;//存musicarraylist
 	float[] wavelengths;
-	ArrayList BeatArrayList=new ArrayList() ;//存beat信息
-	ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
+//	ArrayList BeatArrayList=new ArrayList() ;//存beat信息
+//	ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
 	//
 
 
@@ -57,7 +57,7 @@ public class BeatAnalysisNonRealtimeOLD: MonoBehaviour {
 
 	
 		bandlength =(int)Mathf.Floor( BufferSize * 1.5f);
-		BeatArrayList.Clear ();
+		BeatAnalysisManager.BAL .Clear ();
 		beatArrindex=0;
 		Debug.Log (BufferSize+",,"+BeatAnalysisManager.MAL .Count +",,,"+numBands);
 		CalcIncrement ();
@@ -66,9 +66,9 @@ public class BeatAnalysisNonRealtimeOLD: MonoBehaviour {
 			Debug.LogError (j);
 			CheckBeatInClip (j);/////////////////////////
 		}
-		if(beatArrindex < BeatArrayList.Count-1)
+		if(beatArrindex < BeatAnalysisManager.BAL.Count-1)
 		{
-			BeatArrayList.RemoveRange (beatArrindex + 1, BeatArrayList.Count - beatArrindex-1);
+			BeatAnalysisManager.BAL.RemoveRange (beatArrindex + 1, BeatAnalysisManager.BAL.Count - beatArrindex-1);
 		}
 
 	}
@@ -176,7 +176,7 @@ public class BeatAnalysisNonRealtimeOLD: MonoBehaviour {
 	//单频段检测节拍
 	void CheckBeatInClip(int indBand)
 	{  
-		Debug.LogError  ("band start="+indBand+"  BeatArrayList count "+BeatArrayList.Count );
+		Debug.LogError  ("band start="+indBand+"  BeatArrayList count "+BeatAnalysisManager.BAL .Count );
 		string temp="";
 
 		int peaktimeindex = 0;
@@ -223,14 +223,14 @@ public class BeatAnalysisNonRealtimeOLD: MonoBehaviour {
 				md.playtime = RecAvgInBand [peaktimeindex, numBands];//_audio.time;
 				md.OnBeat = true;
 				md.BeatPos = indBand;
-				if (beatArrindex < BeatArrayList.Count) {
+				if (beatArrindex < BeatAnalysisManager.BAL.Count) {
 					
-					(BeatArrayList [beatArrindex]) = md;//.playtime = RecAvgInBand [peaktimeindex, numBands];//_audio.time;
+					(BeatAnalysisManager.BAL [beatArrindex]) = md;//.playtime = RecAvgInBand [peaktimeindex, numBands];//_audio.time;
 			
 				} else {
 					//MusicData 
 				
-					BeatArrayList.Add (md);
+					BeatAnalysisManager.BAL.Add (md);
 				}
 				beatArrindex++;
 				temp += "   beat";
@@ -248,7 +248,7 @@ public class BeatAnalysisNonRealtimeOLD: MonoBehaviour {
 			}
 		
 		}
-		Debug.LogError  ("band end="+indBand+"  BeatArrayList count "+BeatArrayList.Count +" ////"+temp);
+		Debug.LogError  ("band end="+indBand+"  BeatArrayList count "+BeatAnalysisManager.BAL.Count +" ////"+temp);
 	}
 	//end单频段检测节拍
 

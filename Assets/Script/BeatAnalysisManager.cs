@@ -15,6 +15,7 @@ public class MusicData
 }
 [System.Serializable]
 public class savedBeatMap{
+	public float offset;
 	public  MusicData[] MD;
 
 }
@@ -22,17 +23,18 @@ public class savedBeatMap{
 /// 检测音量变化幅度
 /// 
 /// </summary>
+[RequireComponent(typeof (AudioSource )) ]
 public class BeatAnalysisManager : MonoBehaviour {
 	[HideInInspector ]
 	public static  AudioSource _audio;
-	//public AudioClip AC;
+	public AudioClip defaultAudioclip;
 	//public static string AudioName="";
 	public static int SpecSize = 256;//采样数量
 	public static int bufferSize = 256;//记录的帧数
 	public static  int numBands =8;//分频段数量
 	public static  float decay = 0.997f;//衰减?
 	public static float enegryaddup = 1.2f;
-
+	public static float BeatmapOffset = 0;
 	[SerializeField ]
 	int _SpecSize =256;
 	[SerializeField ]
@@ -46,7 +48,8 @@ public class BeatAnalysisManager : MonoBehaviour {
 	float _decay = 0.997f;//衰减?
 	[SerializeField ]
 	int _samplePerSecond = 60;//fps
-
+//	[SerializeField ]
+//	int _BeatmapOffset = 1.2f;//fps
 
 	public static bool CheckWithInc;//使用增长值或能量值计算节拍
 	[SerializeField ]
@@ -93,32 +96,35 @@ public class BeatAnalysisManager : MonoBehaviour {
 	}	
 	public   void initPara()
 	{
-		CheckWithInc  = _checkwithInc;
-		//bandlength = _bandlength;
-
-		SpecSize = _SpecSize;
-
-		_audio=GetComponent<AudioSource> ();
-		//AudioName = _audio.name;
-
-		samplePerSecond = _samplePerSecond;
-		Application.targetFrameRate = samplePerSecond;
+		CheckWithInc  = _checkwithInc;//使用绝对值/增长值检测
+		//使用分段数或频率划分频段
 		if (!useFreq) {
 			numBands = _numBands;
-			//FreqRange.Initialize ();//=new Vector2[0];
 		} else {
 			numBands = FreqRange.Length;
 		}
-		bufferSize = _bufferSize;
-		decay = _decay;
-		enegryaddup = _enegryaddup;
+	
+		SpecSize = _SpecSize;//获取频谱或fft的结果数量
 
-		initDictOfBand ();
+		_audio=GetComponent<AudioSource> ();
+		if (_audio.clip == null) {
+			_audio.clip = defaultAudioclip;
+		}
+		_audio.playOnAwake = false;
+
+		samplePerSecond = _samplePerSecond;//采样次数，实时监测时的帧率
+		Application.targetFrameRate = samplePerSecond;
+	
+		bufferSize = _bufferSize;//分析时使用的采样数量
+		decay = _decay;//衰减
+		enegryaddup = _enegryaddup;//判断鼓点时使用的能量加成
+//		BeatmapOffset=_BeatmapOffset;
+	
+		initDictOfBand ();//计算各频谱数据所在的频段
 	}
 
 	public   void initDictOfBand()
-	{
-		
+	{	
 
 
 		Debug.Log (">>frequency= " + _audio.clip.frequency + "SampleRate=" + AudioSettings.outputSampleRate);//(int)Mathf.Floor (_SpecSize *_audio.clip.frequency/AudioSettings.outputSampleRate  
@@ -169,11 +175,7 @@ public class BeatAnalysisManager : MonoBehaviour {
 		_decay = 0.998f;
 		initDictOfBand ();
 	}
-//	public void changesetting()
-//	{
-//		initDictOfBand ();
-//	}
-//
+
 
 
 
@@ -184,6 +186,7 @@ public class BeatAnalysisManager : MonoBehaviour {
 	//根据实时采集到数据 save map
 	public  void Save() {  
 		savedBeatMap  sbm=new savedBeatMap();
+		sbm.offset = BeatmapOffset;
 		sbm.MD=new MusicData[BeatAnalysisManager.BAL.Count ] ;
 
 

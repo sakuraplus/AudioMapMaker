@@ -10,7 +10,7 @@ using AForge.Math ;
 /// 检测音量变化幅度
 /// 
 /// </summary>
-/// 
+[RequireComponent (typeof (BeatAnalysisManager ) )]/// 
 public class BeatAnalysisNonRT : MonoBehaviour {
 	[SerializeField]
 	Text TxTProcess;
@@ -18,7 +18,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 	AudioSource _audio;
 	int _sampletime=15;
 	public int channel = 0;
-	public bool isinited=false;
+	//public bool isinited=false;
 	int _bufferSize = 256;//每节拍之间的帧数
 	int _numBands =1;//分频段的数量
 	int numSubdivide=1;//细分的段数，针对变化bpm的音乐
@@ -41,7 +41,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 
 
 
-	int outputindex=0;//测试
+	//int outputindex=0;//测试
 	void Start () {
 		ParaInit();
 	}
@@ -219,7 +219,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 	int beatArrindex=0;
 	public void ParaInit()
 	{
-		isinited = true;
+	//	isinited = true;
 		BeatAnalysisManager.BAL.Clear ();
 		_audio=BeatAnalysisManager ._audio ;//GetComponent<AudioSource> ();
 		_sampletime=_audio.clip.frequency/ BeatAnalysisManager.samplePerSecond ;

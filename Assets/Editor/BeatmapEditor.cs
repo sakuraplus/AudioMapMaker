@@ -14,7 +14,7 @@ public class BeatmapEditor : Editor { // extend the Editor class
 	
 		if (BeatAnalysisManager.BAL  != null) {
 			// add a custom button to the Inspector component
-			GUILayout.Label ("the data process will take plenty of time,please wait" );
+			GUILayout.Label ("test the beatmap in waterfall mode" ,GUILayout.Width(200) );
 			if (GUILayout.Button ("show beatmap")) {
 				SBM.DrawBeatMap ();
 				// if button pressed, then call function in script

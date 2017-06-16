@@ -17,11 +17,11 @@ public class BeatAnalysisNonRTEditor : Editor { // extend the Editor class
 
 	
 		if (BeatAnalysisManager._audio == null) {
-			GUILayout.Label ("*need enable the beatanalysismanager \n editor tool first*" );
+			GUILayout.Label ("*need enable the beatanalysismanager \n editor tool first*",GUILayout.Width(200)  );
 		}else{
 			GUILayout.Space (30);
 			// add a custom button to the Inspector component
-			GUILayout.Label ("the data process will take\n plenty of time,please wait" );
+			GUILayout.Label ("the data process will take\n plenty of time,please wait" ,GUILayout.Width(200) );
 			if (GUILayout.Button ("start data process")) {
 				Debug.Log ("---" + BeatAnalysisManager._audio);
 				BAnonRT.ParaInit ();

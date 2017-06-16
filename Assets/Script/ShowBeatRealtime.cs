@@ -11,6 +11,7 @@ using UnityEngine.UI;
 ///实时显示节拍
 /// 
 /// </summary>
+[RequireComponent (typeof (BeatAnalysisRealtime  ) )]//
 public class ShowBeatRealtime : MonoBehaviour {
 	
 	public AudioClip[] beatsoundFX;

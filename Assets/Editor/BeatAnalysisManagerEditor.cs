@@ -142,8 +142,8 @@ public class BeatAnalysisManagerEditor : Editor { // extend the Editor class
 	public  void EditorSave(string filepath) {  
 		savedBeatMap  sbm=new savedBeatMap();
 		sbm.MD=new MusicData[BeatAnalysisManager.BAL.Count ] ;
-
-
+		sbm.numband = BeatAnalysisManager.numBands;//new MusicData[BeatAnalysisManager.BAL.Count ] ;
+		sbm.offset =BeatAnalysisManager.BeatmapOffset ;
 		for (int i = 0; i < BeatAnalysisManager.BAL.Count; i++) {
 			//MusicData md =BeatAnalysisManager.BAL [i];
 			sbm.MD [i] = BeatAnalysisManager.BAL [i];

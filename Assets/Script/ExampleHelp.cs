@@ -14,8 +14,10 @@ using UnityEngine.UI;
 public class ExampleHelp : MonoBehaviour {
 	
 	AudioSource _audio;
-	[SerializeField]
-	AudioClip[] musics;
+	//[SerializeField]
+	public AudioClip[] musics;
+	//[SerializeField ]
+	public  TextAsset[] jsonfileAsset;
 	[SerializeField]
 	Text T;
 	string showtext="";
@@ -52,8 +54,30 @@ public class ExampleHelp : MonoBehaviour {
 			_audio.clip = musics [i];
 		}
 	}
-
-
+	public void btnloadjson(int i){
+		if (i < jsonfileAsset.Length) {
+			if (jsonfileAsset [i] == null) {
+				Debug.LogError ("wrong jsonfile!");
+				return;
+			}
+			load (jsonfileAsset [i].text.ToString());
+		}
+	}
+	void load(string jsonstr) {  
+		savedBeatMap  smdread = JsonUtility.FromJson<savedBeatMap> (jsonstr);
+		Debug.Log ("load smdread.md="+smdread.MD );
+		BeatAnalysisManager.BeatmapOffset  = smdread.offset;
+		BeatAnalysisManager.numBands   = smdread.numband ;
+		BeatAnalysisManager.BAL.Clear ();
+		//GameObject GameObjBeats = GameObject.Find ("nonrealtime");
+		//initBeatMapContainer();
+		//GameObjBeats = new GameObject[smdread.MD.Length ];
+		//float [] beattimes=new float[smdread.MD.Length ] ;
+		for (int i = 0; i < smdread.MD.Length; i++) {
+			BeatAnalysisManager.BAL .Add ( (MusicData )smdread.MD [i]);
+		}
+	}  
+	//end从json生成map
 
 	public void btnstopmusic(){
 

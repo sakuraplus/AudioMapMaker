@@ -15,7 +15,8 @@ public class MusicData
 }
 [System.Serializable]
 public class savedBeatMap{
-	public float offset;
+	public float offset=0;
+	public int numband=1;
 	public  MusicData[] MD;
 
 }
@@ -187,6 +188,7 @@ public class BeatAnalysisManager : MonoBehaviour {
 	public  void Save() {  
 		savedBeatMap  sbm=new savedBeatMap();
 		sbm.offset = BeatmapOffset;
+		sbm.numband = numBands;
 		sbm.MD=new MusicData[BeatAnalysisManager.BAL.Count ] ;
 
 

@@ -13,33 +13,44 @@ using UnityEngine.UI;
 /// </summary>
 [RequireComponent (typeof (BeatAnalysisManager ) )]//
 public class ShowBeatMap : MonoBehaviour {
-	
-	public AudioClip[] beatsoundFX;
-	public AudioClip beatsoundDefault;
+	[HideInInspector ]
+	public bool readytoplay=false ;
+	[SerializeField ]
+	 AudioClip[] beatsoundFX;
+	[SerializeField ]
+	 AudioClip beatsoundDefault;
 	AudioSource _audio;
-	public GameObject[] beatObj;
-	public  GameObject beatObjDefault;
+	[SerializeField ]
+	 GameObject[] beatObj;
+	[SerializeField ]
+	GameObject beatObjDefault;
 
 	//根据实时采集到数据生成map
 	GameObject BeatMapContainer;
 	GameObject[] GameObjBeats;// = new GameObject[beatlist.Count ];
-	public float speed=2000;
-	public GameObject BeatPfb;
+	[SerializeField ]
+	 float speed=2000;
+//	[SerializeField ]
+//	GameObject BeatPfb;
 
 //	bool playSFX=false;
 //	bool showBeatObj=false;
 	bool playmap=false;
 	bool beatmapauto=true;
-	public  GameObject checkobject;
+	[SerializeField ]
+	GameObject checkobject;
 	ArrayList BeatArrayList;//存beat信息
 	//ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
-	public TextAsset[] jsonfileAsset;
+//	[SerializeField ]
+//	TextAsset[] jsonfileAsset;
+
 	[SerializeField ]
 	float offset=0.5f;
 
 	void Start () {
 
 		_audio = BeatAnalysisManager ._audio;
+		readytoplay = true;
 	}
 
 	// Update is called once per frame
@@ -58,6 +69,7 @@ public class ShowBeatMap : MonoBehaviour {
 		if (!_audio.isPlaying) {
 			playmap = false;
 		}
+
 	}
 
 
@@ -91,9 +103,9 @@ public class ShowBeatMap : MonoBehaviour {
 				beat.GetComponent<Beat> ().AC = beatsoundFX [BeatAnalysisManager.BAL [i].BeatPos];
 			}
 			beat.transform.parent = BeatMapContainer.transform ;
-			beat.transform.position=new Vector3 (BeatAnalysisManager .BAL[i].BeatPos*10,BeatAnalysisManager .BAL[i].playtime*speed,0);
+			beat.transform.localPosition =new Vector3 (BeatAnalysisManager .BAL[i].BeatPos*10,BeatAnalysisManager .BAL[i].playtime*speed,0);
 
-		
+
 			GameObjBeats[i]=beat;
 			beattimes [i] = BeatAnalysisManager .BAL[i].playtime;
 		}
@@ -104,21 +116,25 @@ public class ShowBeatMap : MonoBehaviour {
 
 	void initBeatMapContainer()
 	{
-		if (GameObjBeats.Length>0 ) {
-			Debug.Log (GameObjBeats);
-			Debug.Log (BeatMapContainer.transform.childCount);
-			for (int i = 0; i < GameObjBeats.Length; i++) {
-				DestroyImmediate (GameObjBeats [i]);
+		if (GameObjBeats != null) {
+			if (GameObjBeats.Length > 0) {
+				Debug.Log (GameObjBeats);
+				Debug.Log (BeatMapContainer.transform.childCount);
+				for (int i = 0; i < GameObjBeats.Length; i++) {
+					DestroyImmediate (GameObjBeats [i]);
+				}
 			}
 
-		} else {
+		} 
+		if (BeatMapContainer == null) {
 
 			BeatMapContainer = new GameObject ();
-			BeatMapContainer.name="nonrealtime";
+			BeatMapContainer.name = "nonrealtime";
 			Debug.Log ("new BeatMapContainer");
 			//GameObjBeats = new GameObject[BeatArrayList.Count ];
 
 		}
+		
 		if (beatObj.Length < BeatAnalysisManager.numBands) {
 			GameObject[] beattemp = new GameObject[BeatAnalysisManager.numBands ];//= beatObj;
 			beatObj.CopyTo(beattemp ,0);
@@ -157,15 +173,20 @@ public class ShowBeatMap : MonoBehaviour {
 
 
 
-
-
-	public void btnChangemusic(int i){
-		if (i < jsonfileAsset .Length) {
-			if (jsonfileAsset  [i] == null) {
-				Debug.LogError ("wrong music!");
-				return;
-			}
-			load (jsonfileAsset [i].text.ToString());
+//
+//
+//	public void btnChangemusic(int i){
+//		if (i < jsonfileAsset .Length) {
+//			if (jsonfileAsset  [i] == null) {
+//				Debug.LogError ("wrong music!");
+//				return;
+//			}
+//			load (jsonfileAsset [i].text.ToString());
+//		}
+//	}
+	public void LoadJsonMap(TextAsset ta ){
+		if (ta!= null) {
+			load (ta.text.ToString ());
 		}
 	}
 	//从json生成map
@@ -220,11 +241,13 @@ public class ShowBeatMap : MonoBehaviour {
 	//beatmap下落
 	public  void btnPlaymap()
 	{
-		if(BeatMapContainer!=null){
-		//	beatmapauto = true;
-		_audio.Play ();
-		playmap = true;
+		if (BeatMapContainer != null) {
+			//	beatmapauto = true;
+			_audio.Play ();
+			playmap = true;
 		
+		} else {
+			Debug.Log ("playmap error"+BeatMapContainer);
 		}
 	}
 //	public  void btnPlaymapCheck()

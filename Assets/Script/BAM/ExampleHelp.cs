@@ -65,7 +65,7 @@ public class ExampleHelp : MonoBehaviour {
 	}
 	void load(string jsonstr) {  
 		savedBeatMap  smdread = JsonUtility.FromJson<savedBeatMap> (jsonstr);
-		Debug.Log ("load smdread.md="+smdread.MD );
+		Debug.Log ("load smdread.numband="+smdread.numband +" offset= "+ smdread.offset );
 		BeatAnalysisManager.BeatmapOffset  = smdread.offset;
 		BeatAnalysisManager.numBands   = smdread.numband ;
 		BeatAnalysisManager.BAL.Clear ();

@@ -16,7 +16,9 @@ public class BeatAnalysisManagerEditor : Editor { // extend the Editor class
 
 		// show the default inspector stuff for this component
 		DrawDefaultInspector();
-
+//		if (GUILayout.Button ("test")) {
+//			
+//		}
 		//apply all setting
 		GUILayout.Space (30);
 		GUILayout.Label ("Apply all setting if you \n want to run in editor mode",GUILayout.Width(200) );

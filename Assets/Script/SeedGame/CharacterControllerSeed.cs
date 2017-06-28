@@ -28,16 +28,16 @@ public class CharacterControllerSeed : MonoBehaviour {
 		distanceH = TargetObj.position.z - followCamera.position.z;
 		distanceV = followCamera.position.y-TargetObj.position.y ;
 
-		TargetObj = gameObject.transform;
+		//TargetObj = gameObject.transform;
 		m_CharacterTargetRot = TargetObj.localRotation;
 		//cc = GetComponent<CharacterController> ();
 	}
 	
 	void Update() {
 
-		if (Input.GetKey (KeyCode.A )) {
+	//	if (Input.GetKey (KeyCode.A )) {
 			targetMove();
-		}
+	//	}
 
 
 		LookRotation ();
@@ -48,21 +48,24 @@ public class CharacterControllerSeed : MonoBehaviour {
 	{
 		Vector3 nextpos = TargetObj.forward * -1 * distanceH + TargetObj.up * distanceV + TargetObj.position;
 		if (cameragroundlimit) {
-			groundLimit (nextpos);
+			nextpos=groundLimit (nextpos);
 		}
 		followCamera.transform.position = nextpos;
 
 		followCamera.transform.LookAt(TargetObj);
 	}
-	void groundLimit(Vector3 _nextpos){
+	Vector3 groundLimit(Vector3 _nextpos){
 		RaycastHit hit;
-		if(Physics.Raycast (followCamera.position ,Vector3.down ,out hit ,LayerMask.NameToLayer("Ground")))
+		if(Physics.Raycast (followCamera.position ,Vector3.down ,out hit ,Mathf.Infinity ,LayerMask.NameToLayer("Ground")))
 		{
-			//Debug.Log("r "+hit.distance+"//"+hit.point+"//"+_nextpos );
+			//if(hit.collider.tag !="Ground"
 			if (_nextpos.y-1 <hit.point.y ) {
-				_nextpos.y = hit.point.y + 1f;
+				Vector3 oldpos = new Vector3 (_nextpos.x, _nextpos.y, _nextpos.z);
+				_nextpos.y = hit.point.y + 1f;//方法需要根据体验效果调整****
+				Debug.Log("r "+hit.distance+"//hitp= "+hit.point+"//old= "+oldpos+"//new= "+_nextpos+"//"+hit.collider.name  );
 			}
 		}
+		return _nextpos;
 
 	}
 

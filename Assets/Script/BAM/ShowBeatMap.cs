@@ -39,7 +39,7 @@ public class ShowBeatMap : MonoBehaviour {
 	bool beatmapauto=true;
 	[SerializeField ]
 	GameObject checkobject;
-	ArrayList BeatArrayList;//存beat信息
+
 	//ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
 //	[SerializeField ]
 //	TextAsset[] jsonfileAsset;
@@ -131,7 +131,7 @@ public class ShowBeatMap : MonoBehaviour {
 			BeatMapContainer = new GameObject ();
 			BeatMapContainer.name = "nonrealtime";
 			Debug.Log ("new BeatMapContainer");
-			//GameObjBeats = new GameObject[BeatArrayList.Count ];
+		
 
 		}
 		

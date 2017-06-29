@@ -56,13 +56,15 @@ public class CharacterControllerSeed : MonoBehaviour {
 	}
 	Vector3 groundLimit(Vector3 _nextpos){
 		RaycastHit hit;
-		if(Physics.Raycast (followCamera.position ,Vector3.down ,out hit ,Mathf.Infinity ,LayerMask.NameToLayer("Ground")))
+		if(Physics.Raycast (followCamera.position ,Vector3.down ,out hit ))
 		{
-			//if(hit.collider.tag !="Ground"
-			if (_nextpos.y-1 <hit.point.y ) {
-				Vector3 oldpos = new Vector3 (_nextpos.x, _nextpos.y, _nextpos.z);
-				_nextpos.y = hit.point.y + 1f;//方法需要根据体验效果调整****
-				Debug.Log("r "+hit.distance+"//hitp= "+hit.point+"//old= "+oldpos+"//new= "+_nextpos+"//"+hit.collider.name  );
+			//LayerMask.NameToLayer("Ground")
+			if(hit.collider.tag =="Ground"){
+				if (_nextpos.y-1 <hit.point.y ) {
+					Vector3 oldpos = new Vector3 (_nextpos.x, _nextpos.y, _nextpos.z);
+					_nextpos.y = hit.point.y + 1f;//方法需要根据体验效果调整****
+					//Debug.Log("r "+hit.distance+"//hitp= "+hit.point+"//old= "+oldpos+"//new= "+_nextpos+"//"+hit.collider.name  );
+				}
 			}
 		}
 		return _nextpos;
@@ -135,6 +137,10 @@ public class CharacterControllerSeed : MonoBehaviour {
 		{
 			TargetObj.localRotation = m_CharacterTargetRot;
 		}
+		float ff=0; //= m_CharacterTargetRot.ToAngleAxis ();
+		Vector3 vv=Vector3.forward;// m_CharacterTargetRot.ToAngleAxis ();
+		m_CharacterTargetRot.ToAngleAxis(out ff,out vv);
+		ttt =ff+"/"+vv;
 	}
 	
 

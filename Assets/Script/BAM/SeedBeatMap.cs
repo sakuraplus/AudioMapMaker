@@ -30,19 +30,15 @@ public class SeedBeatMap : MonoBehaviour {
 	GameObject[] GameObjBeats;// = new GameObject[beatlist.Count ];
 	[SerializeField ]
 	 float speed=0.01f;
-//	[SerializeField ]
-//	GameObject BeatPfb;
 
-//	bool playSFX=false;
-//	bool showBeatObj=false;
 	bool playmap=false;
 	//bool beatmapauto=false;
 	[SerializeField ]
 	GameObject checkobject;
 	List<MusicData >  BeatArrayList;//存beat信息
 	//ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
-//	[SerializeField ]
-//	TextAsset[] jsonfileAsset;
+	[SerializeField ]
+	TextAsset jsonfileAsset;
 
 	[SerializeField ]
 	float offset=0.5f;
@@ -55,6 +51,12 @@ public class SeedBeatMap : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+		if (Input.GetKey (KeyCode.Q)) {
+			Debug.Log ("qq" );
+			load (jsonfileAsset.text.ToString());
+			beatmapToseedMode ();
+			btnPlaymap ();
+		}
 		if (!playmap) {
 			return;
 		}
@@ -167,6 +169,7 @@ public class SeedBeatMap : MonoBehaviour {
 			_audio.Play ();
 			playmap = true;
 		initBeatMapContainer ();
+		speed = GetComponent<CharacterControllerSeed> ().moveSpeed;
 	//	} else {
 			Debug.Log ("playmap ");
 	//	}
@@ -192,25 +195,27 @@ public class SeedBeatMap : MonoBehaviour {
 	[SerializeField ]
 	float killtime=1;
 	[SerializeField ]
-	float showtime=5;
-
+	float showtimeMax=5;
+	[SerializeField ]
+	float showtimeMin=5;
 	void PlayBeatMap()
 	{
 		//foreach(MusicData md in  BeatAnalysisManager.BAL) {
 
 		for(int i=0;i<BeatAnalysisManager.BAL.Count ;i++){
 			MusicData md = BeatAnalysisManager.BAL [i];
-			if (md.playtime <_audio.time -killtime) {
-				BeatAnalysisManager.BAL.Remove (md);
-				i--;
-			} else if (md.playtime > _audio.time+showtime/2 && md.playtime < _audio.time + showtime  ) {
+			if (md.playtime > _audio.time+showtimeMin && md.playtime < _audio.time + showtimeMax  ) {
 				//md.OnBeat = true;
-				Debug.Log("make seed"+md.playtime+" // "+_audio.time );
+
 				DrawBeatMapSeed(md);
 				BeatAnalysisManager.BAL.Remove (md);
 				//Debug.Log ("4");
 				i--;
-			}
+			}else if (md.playtime <_audio.time -killtime) {
+				BeatAnalysisManager.BAL.Remove (md);
+				Debug.Log ("kill one beat"+i+"//"+md.playtime +"<"+_audio.time +"-"+killtime );
+				i--;
+			} 
 		}
 		//}
 	
@@ -234,20 +239,21 @@ public class SeedBeatMap : MonoBehaviour {
 	{
 		BeatAnalysisManager.BeatmapOffset=offset ;
 	//	Debug.Log ("BeatAnalysisManager .BAL.Count" + BeatAnalysisManager.BAL.Count);
-		GameObject tarpos = Instantiate (beatObj [MD.BeatPos]) as GameObject;
-		tarpos.transform.position = charPos.position ;
-		tarpos.transform.localScale = new Vector3 (2, 1, 2);//.y = 10;
-		tarpos.transform.parent = BeatMapContainer.transform;
+//		GameObject tarpos = Instantiate (beatObj [MD.BeatPos]) as GameObject;
+//		tarpos.transform.position = charPos.position ;
+//		tarpos.transform.localScale = new Vector3 (2, 1, 2);//.y = 10;
+//		tarpos.transform.parent = BeatMapContainer.transform;
 	//	GameObjBeats = new GameObject[BeatAnalysisManager .BAL.Count ];
 	//	float [] beattimes=new float[BeatAnalysisManager .BAL.Count ] ;
 		for (int i = 0; i < showNum; i++) {
-			for (int j = 0; j < MD.Average; j++) {
+		//	for (int j = 0; j < MD.Average; j++) {
 				GameObject beat = Instantiate (beatObj [MD.BeatPos]) as GameObject;
 				if (!beat.GetComponent <Beat > ()) {
 					beat.AddComponent <Beat> ();
 				}
 
-				beat.GetComponent<Beat> ().Destorytime = MD.playtime+killtime ;
+				beat.GetComponent<Beat> ().Destorytime = MD.playtime ;
+				beat.GetComponent<Beat> ().Borntime  = _audio.time  ;
 				if (beat.GetComponent<Beat> ().AC == null) {
 					beat.GetComponent<Beat> ().AC = beatsoundFX [MD.BeatPos];
 				}
@@ -257,7 +263,7 @@ public class SeedBeatMap : MonoBehaviour {
 			//	beat.transform.localPosition = nextSeedPos (MD,j);
 				// new Vector3 (BeatAnalysisManager.BAL [i].BeatPos * 10, BeatAnalysisManager.BAL [i].playtime * speed, 0);
 		
-			}
+		//	}
 		}
 
 		//GameObjBeats[i]=beat;
@@ -279,15 +285,25 @@ public class SeedBeatMap : MonoBehaviour {
 		if (offset > 0) {
 			R += speed * offset / 100;
 		}
-		testtt = "R=" + R + "(" + offset + ")  ";
-		float A = angleWind + Random.Range (0,angleRange )-angleRange/2;
-		testtt += "A= " + A;
+		//testtt = "R=" + R + "(" + offset + ")  ";
+		float charA = 0;
+		Vector3 charAxis = Vector3.forward;
+		charPos.localRotation.ToAngleAxis (out charA, out charAxis);
+		float A=(angleWind + charA) / 2;
+		if (Mathf.Abs (angleWind - charA) > 180) {
+			A = (A + 180) % 360;
+		}
+		A+= Random.Range (0,angleRange )-angleRange/2;//风向范围
+		testtt = "A=" + A+"C="+charA ;
 		float newPosX = R * Mathf.Sin (Mathf.Deg2Rad *A);
-		float newPosZ = R * Mathf.Sin (Mathf.Deg2Rad * A);
+		float newPosZ = R * Mathf.Cos  (Mathf.Deg2Rad * A);
 		newPosX += charPos.position.x;
 		newPosZ += charPos.position.z;
 		float newPosY = charPos.position.y + Random.Range (0, yRange) - yRange / 2;
-		testtt += "A= " + A+" Y= "+newPosY ;
+		//testtt += "A= " + A+" Y= "+newPosY ;'
+		Debug.LogWarning ("make seed time="+MD.playtime+" // "+_audio.time +"pos="+new Vector3 (newPosX, newPosY, newPosZ)
+			+"//"+charPos .position +" A="+A+"//"+charA+"R="+R );
+
 		return new Vector3 (newPosX, newPosY, newPosZ);
 	}
 
@@ -299,12 +315,16 @@ public class SeedBeatMap : MonoBehaviour {
 		int ic=BeatMapContainer.transform.childCount ;
 		for (int i = 0; i < ic; i++) {
 			GameObject  b = BeatMapContainer.transform.GetChild (i).gameObject ; //<Beat> ();
-			if (b.GetComponent<Beat> ().CheckState||(b.GetComponent<Beat> ().Destorytime<_audio.time )) {
-				b.transform.localScale = new Vector3 (10, 1, 1);
+			if (b.GetComponent<Beat> ().Destorytime<_audio.time) {
+				b.transform.localScale = new Vector3 (4, 4, 4);
+					
+			}
+			if (b.GetComponent<Beat> ().CheckState||(b.GetComponent<Beat> ().Destorytime<_audio.time-killtime )) {
+				//b.transform.localScale = new Vector3 (4, 4, 4);
 			//	Debug.Log (_audio.time +"///"+ b.GetComponent<Beat> ().Destorytime+">  "+(_audio.time -b.GetComponent<Beat> ().Destorytime ));
 			//	_audio.PlayOneShot (b.GetComponent<Beat> ().AC);
 				b.GetComponent<Beat> ().CheckState = false;
-			//	Destroy (b );		
+				Destroy (b );		
 			}
 		}
 				

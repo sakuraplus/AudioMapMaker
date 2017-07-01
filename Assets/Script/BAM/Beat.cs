@@ -35,7 +35,7 @@ public class Beat : MonoBehaviour {
 			//AudioClip ac = GameObject.Find ("MCamera").GetComponent<BeatAnalysisManager > ().beatsoundDefault  as AudioClip;
 			_audio.PlayOneShot  (AC);
 			Destroy (gameObject);
-			Debug.Log ("ttt  "+collider.name );
+		//	Debug.Log ("ttt  "+collider.name );
 		}
 
 		//Debug.Log ("ttt  "+collider.name );

@@ -16,9 +16,26 @@ public class BeatAnalysisManagerEditor : Editor { // extend the Editor class
 
 		// show the default inspector stuff for this component
 		DrawDefaultInspector();
-//		if (GUILayout.Button ("test")) {
-//			
-//		}
+		if (GUILayout.Button ("test")) {
+			float angleWind = 200;
+			float charA = 60;
+			float angleRange = 10;
+			float A = angleWind - charA;
+			if (A > 180) {
+				A = A-360;
+			} else if (A < -180) {
+				A = A + 360;
+			}
+			float ClampA = Mathf.Clamp (A / 5, -5, 5);
+			//		float A = (angleWind - charA);// / 2;
+			//		if (Mathf.Abs (angleWind - charA) > 180) {
+			//			A = (A + 180) % 360;
+			//		}
+
+			float Rd= Random.Range (0,angleRange )-angleRange/2;//风向范围
+			float FF=ClampA+charA+Rd;
+			Debug.Log("AW="+angleWind+" AC="+charA+" Rd="+Rd+" A="+A+" ->clp="+ClampA+"   F="+FF );
+		}
 		//apply all setting
 		GUILayout.Space (30);
 		GUILayout.Label ("Apply all setting if you \n want to run in editor mode",GUILayout.Width(200) );

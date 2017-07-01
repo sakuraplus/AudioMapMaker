@@ -21,24 +21,32 @@ public class CharacterControllerSeed : MonoBehaviour {
 	public  Transform Character;//显示的
 
 	// internal private variables
+	[SerializeField ]
 	private Quaternion m_CharacterTargetRot;
-
-
+	private Quaternion m_CameraTargetRot;
+	//Quaternion 	L_CharacterTargetRot;
+	private bool canmove=false;
 	void Start() {
 		distanceH = TargetObj.position.z - followCamera.position.z;
 		distanceV = followCamera.position.y-TargetObj.position.y ;
 
 		//TargetObj = gameObject.transform;
 		m_CharacterTargetRot = TargetObj.localRotation;
+	//	L_CharacterTargetRot = TargetObj.rotation ;//.localRotation;
+		m_CameraTargetRot = followCamera.localRotation;
 		//cc = GetComponent<CharacterController> ();
 	}
 	
 	void Update() {
 
 	//	if (Input.GetKey (KeyCode.A )) {
+			canmove = true ;
 			targetMove();
 	//	}
 
+//		if (canmove) {
+//		targetMove();
+//		}
 
 		LookRotation ();
 		CharSmoothRotation ();
@@ -63,7 +71,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 				if (_nextpos.y-1 <hit.point.y ) {
 					Vector3 oldpos = new Vector3 (_nextpos.x, _nextpos.y, _nextpos.z);
 					_nextpos.y = hit.point.y + 1f;//方法需要根据体验效果调整****
-					//Debug.Log("r "+hit.distance+"//hitp= "+hit.point+"//old= "+oldpos+"//new= "+_nextpos+"//"+hit.collider.name  );
+				//	Debug.Log("r "+hit.distance+"//hitp= "+hit.point+"//old= "+oldpos+"//new= "+_nextpos+"//"+hit.collider.name  );
 				}
 			}
 		}
@@ -79,21 +87,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 		Character.position=TargetObj.position;
 
 
-//		Vector3 movementZ = Input.GetAxis("Vertical") * Vector3.forward * moveSpeed * Time.deltaTime;
-//
-//		// Determine how much should move in the x-direction
-//		Vector3 movementX = Input.GetAxis("Horizontal") * Vector3.right * moveSpeed * Time.deltaTime;
-//
-//		// Convert combined Vector3 from local space to world space based on the position of the current gameobject (player)
-//		Vector3 movement = transform.TransformDirection(movementZ+movementX);
-//		
-//		// Apply gravity (so the object will fall if not grounded)
-//		movement.y -= gravity * Time.deltaTime;
-//
-//		Debug.Log ("Movement Vector = " + movement);
-//
-//		// Actually move the character controller in the movement direction
-//		myController.Move(movement);
+
 	}
 
 
@@ -115,30 +109,38 @@ public class CharacterControllerSeed : MonoBehaviour {
 		Character.localRotation = Quaternion.Slerp (Character.localRotation, TargetObj.localRotation ,smoothTime * Time.deltaTime);//smoothTime * Time.deltaTime
 	}
 
+	[SerializeField ]
+	float yRot ;
+	[SerializeField ]
+	float xRot ;
 	public void LookRotation()
 	{
 		//get the y and x rotation based on the Input manager
-		float yRot = Input.GetAxis("Mouse X") * XSensitivity;
-		float xRot = Input.GetAxis("Mouse Y") * YSensitivity;
+		 yRot = Input.GetAxis("Mouse X") * XSensitivity;
+		 xRot += Input.GetAxis("Mouse Y") * YSensitivity;
 
-		m_CharacterTargetRot *= Quaternion.Euler (-xRot, yRot, 0f);
+//		 yRot = Input.GetAxis("Horizontal") * XSensitivity;
+//		 xRot += Input.GetAxis("Vertical") * YSensitivity;
 
+		xRot = Mathf.Clamp (xRot, MinimumX, MaximumX);
+	//	m_CharacterTargetRot *= Quaternion.Euler (-xRot, yRot, 0f);
+		m_CharacterTargetRot *= Quaternion.Euler (0, yRot, 0f);
+	//	L_CharacterTargetRot *= Quaternion.Euler (-xRot , 0, 0f);
+	
 		if(clampVerticalRotation)
 		{
 			m_CharacterTargetRot = ClampRotationAroundXAxis (m_CharacterTargetRot);
+	
 		}
 
-		if(smooth) // if smooth, then slerp over time
-		{
-			TargetObj.localRotation = Quaternion.Slerp (TargetObj.localRotation, m_CharacterTargetRot,
-			                                            smoothTime * Time.deltaTime);
-		}
-		else // not smooth, so just jump
-		{
-			TargetObj.localRotation = m_CharacterTargetRot;
-		}
+		TargetObj.localRotation  = m_CharacterTargetRot;
+		//TargetObj.RotateAround (TargetObj.position, Vector3.up , yRot);// ;
+		TargetObj.RotateAround (TargetObj.position, TargetObj.right, -xRot);// ;
+	
+
 		float ff=0; //= m_CharacterTargetRot.ToAngleAxis ();
 		Vector3 vv=Vector3.forward;// m_CharacterTargetRot.ToAngleAxis ();
+		Quaternion cc=Quaternion.Euler(m_CharacterTargetRot.x,m_CharacterTargetRot.y,0);
 		m_CharacterTargetRot.ToAngleAxis(out ff,out vv);
 		ttt =ff+"/"+vv;
 	}
@@ -165,7 +167,9 @@ public class CharacterControllerSeed : MonoBehaviour {
 		angleX = Mathf.Clamp (angleX, MinimumX, MaximumX);
 		
 		q.x = Mathf.Tan (0.5f * Mathf.Deg2Rad * angleX);
-		
+
+	
+
 		return q;
 	}
 }

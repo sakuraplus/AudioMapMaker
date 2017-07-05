@@ -3,7 +3,7 @@ using System.Collections;
 using System.IO;
 using UnityEngine.UI;
 using System.Collections.Generic;
-
+using PlayFab ;
 
 
 
@@ -47,6 +47,14 @@ public class SeedBeatMap : MonoBehaviour {
 
 		_audio = BeatAnalysisManager ._audio;
 		readytoplay = true;
+//		PlayFab.ClientModels.GetTitleNewsRequest gtn=new PlayFab.ClientModels.GetTitleNewsRequest() ; 
+// 		gtn="POST https://E7D7.playfabapi.com/Client/GetTitleNews Content-Type: application/json X-Authentication: <user_session_ticket_value>
+//			{
+//  "Count": 25
+//}
+//
+//
+//		PlayFabClientAPI.GetTitleNews ( );
 	}
 
 	// Update is called once per frame
@@ -231,16 +239,6 @@ public class SeedBeatMap : MonoBehaviour {
 	
 
 
-//		//同步
-//		if (CountToSync > 240) {
-//			BeatMapContainer.transform.position=new Vector3 ( 0, 0-speed * _audio.time -speed*offset,0);
-//			CountToSync = 0;
-//			Debug.LogWarning  ("sync");
-//		} else {
-//			BeatMapContainer.transform.position -= new Vector3 (0, speed * Time.deltaTime, 0);
-//		}
-//		//Debug.Log (CountToSync);
-//		CountToSync++;
 	}
 	[SerializeField ]
 	float showNum=1;
@@ -283,25 +281,25 @@ public class SeedBeatMap : MonoBehaviour {
 	public string testtt;
 	[SerializeField ]
 	Transform  charPos;
+//	[SerializeField ]
+//	float angleWind=120;
+//	[SerializeField ]
+//	float angleRange=45;
 	[SerializeField ]
-	float angleWind=120;
-	[SerializeField ]
-	float angleRange=45;
-	[SerializeField ]
-	float yRange=2;
+	float yRange=0.2f;
 	Vector3  nextSeedPos(MusicData MD,float offset)
 	{
 		float R = speed*(MD.playtime - _audio.time + BeatAnalysisManager.BeatmapOffset-0.5f);
 		if (offset > 0) {
 			R += speed * offset / 100;
 		}
-		//testtt = "R=" + R + "(" + offset + ")  ";
-		float charA = 0;
+
+	//	float charA = 0;
 		Vector3 charAxis = charPos.forward;
 
 		/////////////////////////
 		float newX=charAxis.x* Random.Range (0.7f,1.2f);
-		float newY= Random.Range (-0.1f,0.1f);
+		float newY= Random.Range (0-yRange,yRange);
 		float newZ=charAxis.z* Random.Range (0.7f,1.2f);
 		float r = Mathf.Sqrt (newX*newX+newZ*newZ+newY*newY);
 		if (r != 0) {
@@ -326,13 +324,13 @@ public class SeedBeatMap : MonoBehaviour {
 //		A = Mathf.Clamp (A / 5, -1, 1);
 //
 //		A+=charA+ Random.Range (0,angleRange )-angleRange/2;//风向范围
-//		testtt = "A=" + A+"C="+charA ;
+//		
 //		float newlengthX = R * Mathf.Sin (Mathf.Deg2Rad *A);
 //		float newlengthZ = R * Mathf.Cos  (Mathf.Deg2Rad * A);
 //		float	newPosX = newlengthX +charPos.position.x;
 //		float	newPosZ=newlengthZ+ charPos.position.z;
 //		float newPosY = charPos.position.y + Random.Range (0, yRange) - yRange / 2;
-//		//testtt += "A= " + A+" Y= "+newPosY ;'
+//		
 //		Debug.LogWarning ("make seed time="+MD.playtime+" // "+_audio.time +"pos="+new Vector3 (newPosX, newPosY, newPosZ)
 //			+"//"+charPos .position +" A="+A+"//CA="+charA+"R="+R );
 		///////////////////////////////////////////////////

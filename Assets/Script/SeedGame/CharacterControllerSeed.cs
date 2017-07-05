@@ -23,7 +23,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 	// internal private variables
 	[SerializeField ]
 	private Quaternion m_CharacterTargetRot;
-	private Quaternion m_CameraTargetRot;
+	//private Quaternion m_CameraTargetRot;
 	//Quaternion 	L_CharacterTargetRot;
 	private bool canmove=false;
 	void Start() {
@@ -33,7 +33,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 		//TargetObj = gameObject.transform;
 		m_CharacterTargetRot = TargetObj.localRotation;
 	//	L_CharacterTargetRot = TargetObj.rotation ;//.localRotation;
-		m_CameraTargetRot = followCamera.localRotation;
+	//	m_CameraTargetRot = followCamera.localRotation;
 		//cc = GetComponent<CharacterController> ();
 	}
 	
@@ -44,9 +44,9 @@ public class CharacterControllerSeed : MonoBehaviour {
 			targetMove();
 	//	}
 
-//		if (canmove) {
-//		targetMove();
-//		}
+		if (canmove) {
+		//targetMove();
+		}
 
 		LookRotation ();
 		CharSmoothRotation ();
@@ -69,7 +69,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 			//LayerMask.NameToLayer("Ground")
 			if(hit.collider.tag =="Ground"){
 				if (_nextpos.y-1 <hit.point.y ) {
-					Vector3 oldpos = new Vector3 (_nextpos.x, _nextpos.y, _nextpos.z);
+//					Vector3 oldpos = new Vector3 (_nextpos.x, _nextpos.y, _nextpos.z);
 					_nextpos.y = hit.point.y + 1f;//方法需要根据体验效果调整****
 				//	Debug.Log("r "+hit.distance+"//hitp= "+hit.point+"//old= "+oldpos+"//new= "+_nextpos+"//"+hit.collider.name  );
 				}
@@ -138,11 +138,11 @@ public class CharacterControllerSeed : MonoBehaviour {
 		TargetObj.RotateAround (TargetObj.position, TargetObj.right, -xRot);// ;
 	
 
-		float ff=0; //= m_CharacterTargetRot.ToAngleAxis ();
-		Vector3 vv=Vector3.forward;// m_CharacterTargetRot.ToAngleAxis ();
-		Quaternion cc=Quaternion.Euler(m_CharacterTargetRot.x,m_CharacterTargetRot.y,0);
-		m_CharacterTargetRot.ToAngleAxis(out ff,out vv);
-		ttt =ff+"/"+vv;
+//		float ff=0; //= m_CharacterTargetRot.ToAngleAxis ();
+//		Vector3 vv=Vector3.forward;// m_CharacterTargetRot.ToAngleAxis ();
+//		Quaternion cc=Quaternion.Euler(m_CharacterTargetRot.x,m_CharacterTargetRot.y,0);
+//		m_CharacterTargetRot.ToAngleAxis(out ff,out vv);
+//		ttt =ff+"/"+vv;
 	}
 	
 

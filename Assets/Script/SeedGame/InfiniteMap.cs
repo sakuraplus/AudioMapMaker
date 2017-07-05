@@ -39,7 +39,7 @@ public class InfiniteMap : MonoBehaviour {
 			//LayerMask.NameToLayer("Ground")
 			if(hit.collider.tag =="Ground"){
 				if (_nextpos.y-1 <hit.point.y ) {
-					Vector3 oldpos = new Vector3 (_nextpos.x, _nextpos.y, _nextpos.z);
+				//	Vector3 oldpos = new Vector3 (_nextpos.x, _nextpos.y, _nextpos.z);
 					_nextpos.y = hit.point.y + 1f;//方法需要根据体验效果调整****
 					//Debug.Log("r "+hit.distance+"//hitp= "+hit.point+"//old= "+oldpos+"//new= "+_nextpos+"//"+hit.collider.name  );
 				}

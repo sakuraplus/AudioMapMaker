@@ -5,7 +5,7 @@ using UnityEditor; // this is needed since this script references the Unity Edit
 [CustomEditor(typeof(ExampleHelp  ))]
 public class ExampleHelperEditor : Editor { // extend the Editor class
 	int indjson=0;
-	int indmus=0;
+	//int indmus=0;
 	// called when Unity Editor Inspector is updated
 	public override void OnInspectorGUI()
 	{

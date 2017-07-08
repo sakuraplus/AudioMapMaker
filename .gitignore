@@ -85,3 +85,5 @@ $RECYCLE.BIN/
 /Assets/Resources/song
 *.pk
 ~$*.*
+Assets/Photon Unity Networking/Demos/
+*.meta

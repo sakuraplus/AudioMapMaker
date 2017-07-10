@@ -2,6 +2,7 @@
 using PlayFab.ClientModels;
 using UnityEngine;
 using UnityEngine.UI ;
+using System.Collections.Generic;
 public class pfa : MonoBehaviour
 {
 	[SerializeField ]
@@ -16,10 +17,15 @@ public class pfa : MonoBehaviour
 	//Run the entire thing on awake
 	public void Awake()
 	{
-		//AuthenticateWithPlayFab();
+
 		t.text=customId;
 	}
-
+	public void testloginbtn()
+	{
+		   AuthenticateWithPlayFab();
+        DontDestroyOnLoad(gameObject);
+		
+	}
 
 	/*
      * Step 1
@@ -30,18 +36,23 @@ public class pfa : MonoBehaviour
      * We pass RequestPhotonToken as a callback to be our next step, if 
      * authentication was successful.
      */
-	public  void AuthenticateWithPlayFab()
+	private  void AuthenticateWithPlayFab()
 	{
 		LogMessage ("PlayFab authenticating using Custom ID..."+PlayFabSettings.DeviceUniqueIdentifier);
 		Debug.Log ("PlayFab authenticating using Custom ID..."+PlayFabSettings.DeviceUniqueIdentifier);
 //		LoginWithCustomIDRequest LWCrequest = new LoginWithCustomIDRequest
 //		{ CreateAccount=true,CustomId= PlayFabSettings.DeviceUniqueIdentifier};
 //		PlayFabClientAPI.LoginWithCustomID(LWCrequest , RequestPhotonToken, OnPlayFabError);
-		PlayFabClientAPI.LoginWithCustomID(new LoginWithCustomIDRequest()
-			{
-				CreateAccount = true,
-				CustomId =customId 
-			}, RequestPhotonToken, OnPlayFabError);
+//		PlayFabClientAPI.LoginWithCustomID(new LoginWithCustomIDRequest()
+//			{
+//				CreateAccount = true,
+//				CustomId =customId 
+//			}, RequestPhotonToken, OnPlayFabError);
+        PlayFabClientAPI.LoginWithCustomID(new LoginWithCustomIDRequest()
+        {
+            CreateAccount = true,
+            CustomId = PlayFabSettings.DeviceUniqueIdentifier+"EDITOR"
+        }, RequestPhotonToken, OnPlayFabError);
 	}
 	//CustomId =customId ;// PlayFabSettings.DeviceUniqueIdentifier
 	/*
@@ -65,6 +76,7 @@ public class pfa : MonoBehaviour
 			}, AuthenticateWithPhoton, OnPlayFabError);
 	}
 
+
 	/*
      * Step 3
      * This is the final and the simplest step. We create new AuthenticationValues instance.
@@ -86,7 +98,35 @@ public class pfa : MonoBehaviour
 
 		//We finally tell Photon to use this authentication parameters throughout the entire application.
 		PhotonNetwork.AuthValues = customAuth;
+		PhotonNetwork.autoJoinLobby = true;
 	}
+	
+
+    // Add small button to launch our example code 
+    public void OnGUI()
+    {
+        if (GUILayout.Button("Execute Example ")) ExecuteExample(); 
+    }
+
+
+    // Example code which raises custom room event, then sets custom room property
+    private void ExecuteExample()
+    {
+
+        // Raise custom room event
+        var data = new Dictionary<string, object>() { {"Hello","World"} };
+        var result = PhotonNetwork.RaiseEvent(15, data, true, new RaiseEventOptions()
+        {
+            ForwardToWebhook = true,
+        });
+        LogMessage("New Room Event Post: "+result);
+
+        // Set custom room property
+        var properties = new ExitGames.Client.Photon.Hashtable() { { "CustomProperty", "It's Value" } };
+        var expectedProperties = new ExitGames.Client.Photon.Hashtable();
+        PhotonNetwork.room.SetCustomProperties(properties, expectedProperties, true);
+        LogMessage("New Room Properties Set");
+    }
 	////////////////////////////////////////////////////////
 	public void test()
 	{
@@ -133,11 +173,27 @@ public class pfa : MonoBehaviour
 
 
 	}
-	public void testJoinRandom()
+	public void testConnect()
 	{
-		
-		
-	//	ConnectAndJoinRandom ();
+		if (!PhotonNetwork.connected && PhotonNetwork.connectionState != ConnectionState.Connecting) {
+			PhotonNetwork.ConnectUsingSettings ("1");//.ConnectToMaster
+			Debug.Log ("connect!"+PhotonNetwork.connecting );
+			t.text += "connect!";
+		}
+		if (PhotonNetwork.connectionState==ConnectionState.Connecting) {
+			Debug.Log ("is Connecting");
+			t.text += "connecting!";
+		} else if (PhotonNetwork.connected) {
+			Debug.Log ("connected!"+PhotonNetwork.connecting );
+			t.text += "connected!";
+		}else{
+			Debug.Log ("unconnect!"+PhotonNetwork.connecting );
+			t.text += "uncon!";
+		}
+
+	}
+	public void testJoinRandom()
+	{	
 		if (PhotonNetwork.connected) {
 			Debug.Log ("is connected");
 			t.text += "con!";
@@ -152,14 +208,10 @@ public class pfa : MonoBehaviour
 				Debug.Log ("CreateRoom");
 				PhotonNetwork.CreateRoom (roomname);
 			}
-
-		} else if (PhotonNetwork.connecting) {
-			Debug.Log ("connecting!"+PhotonNetwork.connecting );
-			t.text += "connecting!";
+				
 		}else{
-			Debug.Log ("unconnect!"+PhotonNetwork.connecting );
-			t.text += "uncon!";
-			PhotonNetwork.ConnectUsingSettings ("1");//.ConnectToMaster
+			Debug.Log ("unconnect! can not join"+PhotonNetwork.connecting );
+			t.text += "unconnect! can not join!\n";
 		}
 
 	}

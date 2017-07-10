@@ -6,13 +6,18 @@ public class pfa : MonoBehaviour
 {
 	[SerializeField ]
 	private string _playFabPlayerIdCache;
+	[SerializeField ]
+	string customId;
+	[SerializeField ]
+	string roomname;
 	[SerializeField]
 	Text  t;
 
 	//Run the entire thing on awake
 	public void Awake()
 	{
-		AuthenticateWithPlayFab();
+		//AuthenticateWithPlayFab();
+		t.text=customId;
 	}
 
 
@@ -25,7 +30,7 @@ public class pfa : MonoBehaviour
      * We pass RequestPhotonToken as a callback to be our next step, if 
      * authentication was successful.
      */
-	private void AuthenticateWithPlayFab()
+	public  void AuthenticateWithPlayFab()
 	{
 		LogMessage ("PlayFab authenticating using Custom ID..."+PlayFabSettings.DeviceUniqueIdentifier);
 		Debug.Log ("PlayFab authenticating using Custom ID..."+PlayFabSettings.DeviceUniqueIdentifier);
@@ -35,10 +40,10 @@ public class pfa : MonoBehaviour
 		PlayFabClientAPI.LoginWithCustomID(new LoginWithCustomIDRequest()
 			{
 				CreateAccount = true,
-				CustomId = PlayFabSettings.DeviceUniqueIdentifier
+				CustomId =customId 
 			}, RequestPhotonToken, OnPlayFabError);
 	}
-
+	//CustomId =customId ;// PlayFabSettings.DeviceUniqueIdentifier
 	/*
     * Step 2
    
@@ -86,36 +91,73 @@ public class pfa : MonoBehaviour
 	public void test()
 	{
 
-		Debug.LogError ("//test// " + PhotonNetwork.AuthValues);
-		Debug.LogError ("//test// " + PhotonNetwork.countOfPlayers);
-		Debug.LogError ("//test// " + PhotonNetwork.countOfRooms);
-		Debug.LogError ("//test// " + PhotonNetwork.inRoom);
-		t.text = ("//test// " + PhotonNetwork.AuthValues);
-		t.text+= ("//test// " + PhotonNetwork.countOfPlayers);
-		t.text+=  ("//test// " + PhotonNetwork.countOfRooms);
-		t.text+=  ("//test// " + PhotonNetwork.inRoom+"//"+PhotonNetwork.room.Name );
-	}
+		Debug.LogError ("//test// AuthValues=" + PhotonNetwork.AuthValues);
+		Debug.LogError ("//test// countOfPlayers=" + PhotonNetwork.countOfPlayers);
+		Debug.LogError ("//test// countOfRooms=" + PhotonNetwork.countOfRooms);
+		Debug.LogError ("//test// inRoom=" + PhotonNetwork.inRoom);
+		t.text = ("//test//AuthValues= " + PhotonNetwork.AuthValues)+"\n";
+		t.text+= ("//test// countOfPlayers=" + PhotonNetwork.countOfPlayers)+"\n";
+		t.text+=  ("//test// countOfRooms=" + PhotonNetwork.countOfRooms)+"\n";
+		if (PhotonNetwork.inRoom) {
+			t.text+=  ("//test// " + PhotonNetwork.inRoom+"//"+PhotonNetwork.room.Name );
+		}
 
+	}
+	public void testrooms()
+	{
+
+		Debug.LogError ("//test// AuthValues=" + PhotonNetwork.GetRoomList());
+		string ttrr = "";
+		RoomInfo[] ri = PhotonNetwork.GetRoomList();
+		for (int i = 0; i < PhotonNetwork.countOfRooms; i++) {
+			ttrr+=ri[i].Name+" , ";
+		}
+		t.text = ("//test// room.Name=" + ttrr)+"\n";
+		Debug.LogError ("//test// room.Name=" + ttrr);
+
+		Debug.LogError ("//test// AllocateViewID=" + PhotonNetwork.AllocateViewID());
+		Debug.LogError ("//test// countOfPlayersInRooms=" + PhotonNetwork.countOfPlayersInRooms);
+		Debug.LogError ("//test// countOfPlayersOnMaster=" + PhotonNetwork.countOfPlayersOnMaster);
+		Debug.LogError ("//test// insideLobby=" + PhotonNetwork.insideLobby);
+		Debug.LogError ("//test// player.UserId=" + PhotonNetwork.player.UserId);
+
+
+		Debug.LogError ("//test// playerList=" + PhotonNetwork.playerList);
+		string ttpp = "";
+		PhotonPlayer [] pl = PhotonNetwork.playerList;
+		for (int j = 0; j < pl .Length ; j++) {
+			ttpp+=pl[j].IsLocal+" , ";
+		}
+		t.text += ("//test// playerList=" + ttpp)+"\n";
+		Debug.LogError ("//test// playerList=" + ttpp);
+
+
+	}
 	public void testJoinRandom()
 	{
 		
 		
 	//	ConnectAndJoinRandom ();
 		if (PhotonNetwork.connected) {
-			Debug.Log ("connected");
+			Debug.Log ("is connected");
 			t.text += "con!";
 			if (PhotonNetwork.countOfRooms > 0) {
 				//bool ttt =
+				Debug.Log ("JoinRandomRoom");
 				t.text += "   JoinRandomRoom!";
 				PhotonNetwork.JoinRandomRoom ();
 
 			} else {
 				t.text += "   CreateRoom!";
-				PhotonNetwork.CreateRoom ("testroom");
+				Debug.Log ("CreateRoom");
+				PhotonNetwork.CreateRoom (roomname);
 			}
 
-		} else {
-			Debug.Log ("unconnect!");
+		} else if (PhotonNetwork.connecting) {
+			Debug.Log ("connecting!"+PhotonNetwork.connecting );
+			t.text += "connecting!";
+		}else{
+			Debug.Log ("unconnect!"+PhotonNetwork.connecting );
 			t.text += "uncon!";
 			PhotonNetwork.ConnectUsingSettings ("1");//.ConnectToMaster
 		}
@@ -123,14 +165,14 @@ public class pfa : MonoBehaviour
 	}
 
 
-	public override void OnJoinedRoom()
-	{
-		LogMessage ("OnJoinedRoom  "+PhotonNetwork.room.Name );
-		Debug.Log ("OnJoinedRoom  "+PhotonNetwork.room.Name );
-//		GameObject monster = PhotonNetwork.Instantiate("monsterprefab", Vector3.zero, Quaternion.identity, 0);
-//		monster.GetComponent<myThirdPersonController>().isControllable = true;
-//		myPhotonView = monster.GetComponent<PhotonView>();
-	}
+//	public override void OnJoinedRoom()
+//	{
+//		LogMessage ("OnJoinedRoom  "+PhotonNetwork.room.Name );
+//		Debug.Log ("OnJoinedRoom  "+PhotonNetwork.room.Name );
+////		GameObject monster = PhotonNetwork.Instantiate("monsterprefab", Vector3.zero, Quaternion.identity, 0);
+////		monster.GetComponent<myThirdPersonController>().isControllable = true;
+////		myPhotonView = monster.GetComponent<PhotonView>();
+//	}
 
 
 

@@ -5,60 +5,77 @@ using System.Collections ;
 using System.Collections.Generic;
 public class PlayFabLogin : MonoBehaviour
 {
+	string pfid="aaa";
     public void Start()
     {
-		logintest ();
-
+		//logintest ();
+		AuthenticateWithPlayFab ();
     }
 
 	///////////////////////////////////////////
 	/// 
-
-
-	public void LoginToPlayFab()
+	private  void AuthenticateWithPlayFab()
 	{
-		Debug.Log("Using demo device id");
-		LoginWithAndroidDeviceIDRequest request = new LoginWithAndroidDeviceIDRequest();
-		request.AndroidDeviceId =  "a931f26995380c5a";
-		request.TitleId = "E7D7";
-		request.CreateAccount = true;
-		PlayFabClientAPI.LoginWithAndroidDeviceID(request, OnLoginSuccess, OnFailure);
-		//this.activeState = GuiStates.loading;
+		//LogMessage ("PlayFab authenticating using Custom ID..."+PlayFabSettings.DeviceUniqueIdentifier);
+		Debug.Log ("PlayFab authenticating using Custom ID..."+PlayFabSettings.DeviceUniqueIdentifier);
+
+		PlayFabClientAPI.LoginWithCustomID(new LoginWithCustomIDRequest()
+			{
+				CreateAccount = true,
+				CustomId = PlayFabSettings.DeviceUniqueIdentifier+"EDITOR"
+			}, RequestPhotonToken, OnFailure);
+	}
+	//CustomId =customId ;// PlayFabSettings.DeviceUniqueIdentifier
+	/*
+    * Step 2
+   
+    */
+	private void RequestPhotonToken(LoginResult obj)
+	{
+		//LogMessage("PlayFab authenticated. Requesting photon token...");
+		Debug.Log("PlayFab authenticated. Requesting photon token...");
+
+		//We can player PlayFabId. This will come in handy during next step
+		//_playFabPlayerIdCache = obj.PlayFabId;
+		//		GetPhotonAuthenticationTokenRequest GPArequest = new GetPhotonAuthenticationTokenRequest {
+		//			PhotonApplicationId = PhotonNetwork.PhotonServerSettings.AppID
+		//		};
+		//		PlayFabClientAPI.GetPhotonAuthenticationToken(GPArequest , AuthenticateWithPhoton, OnPlayFabError);
+		PlayFabClientAPI.GetPhotonAuthenticationToken(new GetPhotonAuthenticationTokenRequest()
+			{
+				PhotonApplicationId = PhotonNetwork.PhotonServerSettings.AppID
+			}, AuthenticateWithPhoton, OnFailure);
 	}
 
 
-	string  playfabId="";
-	string  AppId="5ee5d644-fcd7-40cc-8253-a2651e180254";
-	// callback on successful LoginToPlayFab request 
-	void OnLoginSuccess(LoginResult result)
+	/*
+     * Step 3
+     * This is the final and the simplest step. We create new AuthenticationValues instance.
+     * This class describes how to authenticate a players inside Photon environment.
+     */
+	private void AuthenticateWithPhoton(GetPhotonAuthenticationTokenResult obj)
 	{
-		Debug.Log("Congratulations, you made your first successful API call!");
 		
-		Debug.Log(result.PlayFabId);
-		StartCoroutine(GetUserStats());
-		this.playfabId = result.PlayFabId;
-		GetPhotonAuthenticationTokenRequest request = new GetPhotonAuthenticationTokenRequest();
-		request.PhotonApplicationId = AppId.Trim ();// photonComponent.AppId.Trim();
-		// get an authentication ticket to pass on to Photon 
-		PlayFabClientAPI.GetPhotonAuthenticationToken(request, OnPhotonAuthenticationSuccess, OnFailure);
-	}
+		Debug.Log("Photon token acquired: " + obj.PhotonCustomAuthenticationToken + "  Authentication complete.");
 
+		//We set AuthType to custom, meaning we bring our own, PlayFab authentication procedure.
+		var customAuth = new AuthenticationValues { AuthType = CustomAuthenticationType.Custom };
 
+		//We add "username" parameter. Do not let it confuse you: PlayFab is expecting this parameter to contain player PlayFab ID (!) and not username.
+		customAuth.AddAuthParameter("username",pfid );    // expected by PlayFab custom auth service
 
+		//We add "token" parameter. PlayFab expects it to contain Photon Authentication Token issues to your during previous step.
+		customAuth.AddAuthParameter("token", obj.PhotonCustomAuthenticationToken);
 
-	// callback on successful GetPhotonAuthenticationToken request 
-	void OnPhotonAuthenticationSuccess(GetPhotonAuthenticationTokenResult result)
-	{
-//		photonComponent.ConnectToMasterServer(this.playfabId, result.PhotonCustomAuthenticationToken);
-		ConnectToMasterServer(this.playfabId, result.PhotonCustomAuthenticationToken);
+		//We finally tell Photon to use this authentication parameters throughout the entire application.
+		PhotonNetwork.AuthValues = customAuth;
+		PhotonNetwork.autoJoinLobby = true;
 	}
 
 	// Example for getting the user statistics for a player.
 	IEnumerator GetUserStats(float sec = 0)
 	{
 		yield return new WaitForSeconds(sec);
-//		GetUserStatisticsRequest request = new GetUserStatisticsRequest();
-//		PlayFabClientAPI.GetUserStatistics(request, OnGetUserStatsSuccess, OnPlayFabError);
 		GetPlayerStatisticsRequest  request = new GetPlayerStatisticsRequest();
 		PlayFabClientAPI.GetPlayerStatistics (request, OnGetUserStatsSuccess, OnFailure);
 	}
@@ -135,15 +152,15 @@ public class PlayFabLogin : MonoBehaviour
 	/// //////////////////////////////////////////
 	/// </summary>
 
-	public void logintest()
-	{
-		PlayFabSettings.TitleId = "E7D7"; // Please change this value to your own titleId from PlayFab Game Manager
-
-		var request = new LoginWithCustomIDRequest { CustomId = "aaa", CreateAccount = true};
-		PlayFabClientAPI.LoginWithCustomID( request, OnLoginSuccess, OnFailure );
-		Debug.Log ("!!LoginWithCustomID");
-
-	}
+//	public void logintest()
+//	{
+//		PlayFabSettings.TitleId = "E7D7"; // Please change this value to your own titleId from PlayFab Game Manager
+//
+//		var request = new LoginWithCustomIDRequest { CustomId = "aaa", CreateAccount = true};
+//		PlayFabClientAPI.LoginWithCustomID( request, OnLoginSuccess, OnFailure );
+//		Debug.Log ("!!LoginWithCustomID");
+//
+//	}
 	public void getnewstest(){
 		var request = new GetTitleNewsRequest  {Count = 25};
 	
@@ -173,10 +190,18 @@ public class PlayFabLogin : MonoBehaviour
 	}
 
 	public void getCStest(){
-		var request = new ExecuteCloudScriptRequest  {FunctionName   = "bushelOnYourFirstDay"};
+		var request = new ExecuteCloudScriptRequest  {FunctionName   = "bushelOnYourFirstDay" };
 
 		PlayFabClientAPI.ExecuteCloudScript  ( request, OnCSSuccess, OnFailure,null,null);
-		Debug.Log ("!!PurchaseItemRequest");
+		Debug.Log ("!!getCStest");
+	}
+	public void getCSLoctest(){
+		Vector2 vv = new Vector2 (156,489);
+		var request = new ExecuteCloudScriptRequest ();
+		request.FunctionName   = "UpdateLocAtTheEnd";
+		request.FunctionParameter = new{LocLat = 123,LocLng = 147};
+		PlayFabClientAPI.ExecuteCloudScript  ( request, OnCSSuccess, OnFailure,null,null);
+		Debug.Log ("!!getCSLoctest");
 	}
 	private void OnCSSuccess(ExecuteCloudScriptResult result)
 	{

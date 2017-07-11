@@ -18,7 +18,7 @@ public class pfbtesteditor : Editor { // extend the Editor class
 		{
 			// if button pressed, then call function in script
 			Debug.Log ("oooo");
-			pfblogin.logintest ();
+			//pfblogin.logintest ();
 		}
 		if(GUILayout.Button("getnews test"))
 		{

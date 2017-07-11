@@ -4,25 +4,30 @@ using UnityEngine;
 using UnityEngine.UI ;
 using System.Collections.Generic;
 using Photon ;
-public class pfa : PunBehaviour
+public class pfa1 : PunBehaviour 
 {
 	[SerializeField ]
 	private string _playFabPlayerIdCache;
 	[SerializeField ]
-	string customId;
+	string customId="12354";
 	[SerializeField ]
 	string roomname;
 	[SerializeField]
 	Text  t;
-	[SerializeField ]
-	GameObject    Tobj;
+
 	//Run the entire thing on awake
 	public void Awake()
 	{
-
-		t.text=customId;
+		AuthenticateWithPlayFab();
+		DontDestroyOnLoad(gameObject);
+		//t.text=customId;
 	}
-
+	public void testloginbtn()
+	{
+		   AuthenticateWithPlayFab();
+        DontDestroyOnLoad(gameObject);
+		
+	}
 
 	/*
      * Step 1
@@ -37,12 +42,19 @@ public class pfa : PunBehaviour
 	{
 		LogMessage ("PlayFab authenticating using Custom ID..."+PlayFabSettings.DeviceUniqueIdentifier);
 		Debug.Log ("PlayFab authenticating using Custom ID..."+PlayFabSettings.DeviceUniqueIdentifier);
-
-        PlayFabClientAPI.LoginWithCustomID(new LoginWithCustomIDRequest()
-        {
-            CreateAccount = true,
-            CustomId = PlayFabSettings.DeviceUniqueIdentifier+"EDITOR"
-        }, RequestPhotonToken, OnPlayFabError);
+		//		LoginWithCustomIDRequest LWCrequest = new LoginWithCustomIDRequest
+		//		{ CreateAccount=true,CustomId= PlayFabSettings.DeviceUniqueIdentifier};
+		//		PlayFabClientAPI.LoginWithCustomID(LWCrequest , RequestPhotonToken, OnPlayFabError);
+		//		PlayFabClientAPI.LoginWithCustomID(new LoginWithCustomIDRequest()
+		//			{
+		//				CreateAccount = true,
+		//				CustomId =customId 
+		//			}, RequestPhotonToken, OnPlayFabError);
+		PlayFabClientAPI.LoginWithCustomID(new LoginWithCustomIDRequest()
+			{
+				CreateAccount = true,
+				CustomId = PlayFabSettings.DeviceUniqueIdentifier+"EDITOR"
+			}, RequestPhotonToken, OnPlayFabError);
 	}
 	//CustomId =customId ;// PlayFabSettings.DeviceUniqueIdentifier
 	/*
@@ -56,10 +68,10 @@ public class pfa : PunBehaviour
 
 		//We can player PlayFabId. This will come in handy during next step
 		_playFabPlayerIdCache = obj.PlayFabId;
-//		GetPhotonAuthenticationTokenRequest GPArequest = new GetPhotonAuthenticationTokenRequest {
-//			PhotonApplicationId = PhotonNetwork.PhotonServerSettings.AppID
-//		};
-//		PlayFabClientAPI.GetPhotonAuthenticationToken(GPArequest , AuthenticateWithPhoton, OnPlayFabError);
+		//		GetPhotonAuthenticationTokenRequest GPArequest = new GetPhotonAuthenticationTokenRequest {
+		//			PhotonApplicationId = PhotonNetwork.PhotonServerSettings.AppID
+		//		};
+		//		PlayFabClientAPI.GetPhotonAuthenticationToken(GPArequest , AuthenticateWithPhoton, OnPlayFabError);
 		PlayFabClientAPI.GetPhotonAuthenticationToken(new GetPhotonAuthenticationTokenRequest()
 			{
 				PhotonApplicationId = PhotonNetwork.PhotonServerSettings.AppID
@@ -90,35 +102,35 @@ public class pfa : PunBehaviour
 		PhotonNetwork.AuthValues = customAuth;
 		PhotonNetwork.autoJoinLobby = true;
 	}
-	
-
-    // Add small button to launch our example code 
-    public void OnGUI()
-    {
-        if (GUILayout.Button("Execute Example ")) ExecuteExample(); 
-    }
 
 
-    // Example code which raises custom room event, then sets custom room property
-    private void ExecuteExample()
-    {
+	// Add small button to launch our example code 
+	public void OnGUI()
+	{
+		if (GUILayout.Button("Execute Example ")) ExecuteExample(); 
+	}
 
-        // Raise custom room event
-        var data = new Dictionary<string, object>() { {"Hello","World"} };
-        var result = PhotonNetwork.RaiseEvent(15, data, true, new RaiseEventOptions()
-        {
-            ForwardToWebhook = true,
-        });
-        LogMessage("New Room Event Post: "+result);
 
-        // Set custom room property
-        var properties = new ExitGames.Client.Photon.Hashtable() { { "CustomProperty", "It's Value" } };
-        var expectedProperties = new ExitGames.Client.Photon.Hashtable();
-        PhotonNetwork.room.SetCustomProperties(properties, expectedProperties, true);
-        LogMessage("New Room Properties Set");
-    }
+	// Example code which raises custom room event, then sets custom room property
+	private void ExecuteExample()
+	{
+
+		// Raise custom room event
+		var data = new Dictionary<string, object>() { {"Hello","World"} };
+		var result = PhotonNetwork.RaiseEvent(15, data, true, new RaiseEventOptions()
+			{
+				ForwardToWebhook = true,
+			});
+		LogMessage("New Room Event Post: "+result);
+
+		// Set custom room property
+		var properties = new ExitGames.Client.Photon.Hashtable() { { "CustomProperty", "It's Value" } };
+		var expectedProperties = new ExitGames.Client.Photon.Hashtable();
+		PhotonNetwork.room.SetCustomProperties(properties, expectedProperties, true);
+		LogMessage("New Room Properties Set");
+	}
 	////////////////////////////////////////////////////////
-	 public void testclr()
+	public void testclr()
 	{	
 		t.text = "";
 	}
@@ -167,32 +179,7 @@ public class pfa : PunBehaviour
 
 
 	}
-	public void setStatic()
-	{
-		Tobj.transform.RotateAround (Tobj.transform.position, Vector3.forward, 10);
 
-	}
-	public void testRoll()
-	{
-		Tobj.transform.RotateAround (Tobj.transform.position, Vector3.forward, 10);
-
-	}
-	public void testLeft()
-	{
-		Tobj.transform.Translate  (Vector3.left );
-
-	}
-	public void testRight()
-	{
-		Tobj.transform.Translate (Vector3.right);
-
-	}
-	public void testloginbtn()
-	{
-		AuthenticateWithPlayFab();
-		DontDestroyOnLoad(gameObject);
-
-	}
 	public void testConnect()
 	{
 		if ( PhotonNetwork.connectionState == ConnectionState.Disconnected ) {
@@ -200,7 +187,7 @@ public class pfa : PunBehaviour
 			Debug.Log ("connect!"+PhotonNetwork.connectionState );
 			t.text += "connect!";
 		}
-	
+
 		t.text += "ConnectionState="+PhotonNetwork.connectionState;
 		Debug.Log ("ConnectionState!"+PhotonNetwork.connectionState );
 	}
@@ -231,7 +218,7 @@ public class pfa : PunBehaviour
 				Debug.Log ("CreateRoom");
 				PhotonNetwork.CreateRoom (roomname);
 			}
-				
+
 		}else{
 			Debug.Log ("unconnect! can not join"+PhotonNetwork.connecting );
 			t.text += "unconnect! can not join!\n";
@@ -244,9 +231,9 @@ public class pfa : PunBehaviour
 	{
 		LogMessage ("OnJoinedRoom  "+PhotonNetwork.room.Name );
 		Debug.LogError  ("OnJoinedRoom  "+PhotonNetwork.room.Name );
-		Tobj  = PhotonNetwork.Instantiate("photonPfbTest", Vector3.zero, Quaternion.identity, 0);
-//		monster.GetComponent<myThirdPersonController>().isControllable = true;
-//		myPhotonView = monster.GetComponent<PhotonView>();
+		//		GameObject monster = PhotonNetwork.Instantiate("monsterprefab", Vector3.zero, Quaternion.identity, 0);
+		//		monster.GetComponent<myThirdPersonController>().isControllable = true;
+		//		myPhotonView = monster.GetComponent<PhotonView>();
 	}
 	public override void OnReceivedRoomListUpdate()
 	{
@@ -272,7 +259,7 @@ public class pfa : PunBehaviour
 	public override void OnPhotonPlayerConnected(PhotonPlayer newPlayer){
 		LogMessage ("OnPhotonPlayerConnected  newPlayer="+newPlayer.ID );
 		Debug.LogError ("OnPhotonPlayerConnected newPlayer="+newPlayer.ID  );
-	
+
 	}
 
 

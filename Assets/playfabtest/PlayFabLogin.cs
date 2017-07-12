@@ -35,12 +35,6 @@ public class PlayFabLogin : MonoBehaviour
 		//LogMessage("PlayFab authenticated. Requesting photon token...");
 		Debug.Log("PlayFab authenticated. Requesting photon token...");
 
-		//We can player PlayFabId. This will come in handy during next step
-		//_playFabPlayerIdCache = obj.PlayFabId;
-		//		GetPhotonAuthenticationTokenRequest GPArequest = new GetPhotonAuthenticationTokenRequest {
-		//			PhotonApplicationId = PhotonNetwork.PhotonServerSettings.AppID
-		//		};
-		//		PlayFabClientAPI.GetPhotonAuthenticationToken(GPArequest , AuthenticateWithPhoton, OnPlayFabError);
 		PlayFabClientAPI.GetPhotonAuthenticationToken(new GetPhotonAuthenticationTokenRequest()
 			{
 				PhotonApplicationId = PhotonNetwork.PhotonServerSettings.AppID
@@ -200,7 +194,8 @@ public class PlayFabLogin : MonoBehaviour
 		var request = new ExecuteCloudScriptRequest ();
 		request.FunctionName   = "UpdateLocAtTheEnd";
 		request.FunctionParameter = new{LocLat = 123,LocLng = 147};
-		PlayFabClientAPI.ExecuteCloudScript  ( request, OnCSSuccess, OnFailure,null,null);
+		object ob = new{locs=new float[5]};
+		PlayFabClientAPI.ExecuteCloudScript  ( request, OnCSSuccess, OnFailure,ob,null);
 		Debug.Log ("!!getCSLoctest");
 	}
 	private void OnCSSuccess(ExecuteCloudScriptResult result)

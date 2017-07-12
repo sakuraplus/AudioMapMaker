@@ -76,7 +76,8 @@ handlers.UpdateLocAtTheEnd = function(args) {
       		  }]
         });
 
-
+	var ff=[2,1,3,4,5];
+	return var rrr:[{ff}];
     log.info("I am at !"+ args.LocLng+"/"+ args.LocLat);
 }
 

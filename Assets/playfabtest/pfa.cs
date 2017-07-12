@@ -26,12 +26,7 @@ public class pfa : PunBehaviour
 
 	/*
      * Step 1
-     * We authenticate current PlayFab user normally. 
-     * In this case we use LoginWithCustomID API call for simplicity.
-     * You can absolutely use any Login method you want.
-     * We use PlayFabSettings.DeviceUniqueIdentifier as our custom ID.
-     * We pass RequestPhotonToken as a callback to be our next step, if 
-     * authentication was successful.
+   
      */
 	private  void AuthenticateWithPlayFab()
 	{
@@ -41,10 +36,11 @@ public class pfa : PunBehaviour
         PlayFabClientAPI.LoginWithCustomID(new LoginWithCustomIDRequest()
         {
             CreateAccount = true,
-            CustomId = PlayFabSettings.DeviceUniqueIdentifier+"EDITOR"
+				CustomId =customId 
         }, RequestPhotonToken, OnPlayFabError);
+		//CustomId =PlayFabSettings.DeviceUniqueIdentifier+"EDITOR"
 	}
-	//CustomId =customId ;// PlayFabSettings.DeviceUniqueIdentifier
+
 	/*
     * Step 2
    
@@ -56,10 +52,7 @@ public class pfa : PunBehaviour
 
 		//We can player PlayFabId. This will come in handy during next step
 		_playFabPlayerIdCache = obj.PlayFabId;
-//		GetPhotonAuthenticationTokenRequest GPArequest = new GetPhotonAuthenticationTokenRequest {
-//			PhotonApplicationId = PhotonNetwork.PhotonServerSettings.AppID
-//		};
-//		PlayFabClientAPI.GetPhotonAuthenticationToken(GPArequest , AuthenticateWithPhoton, OnPlayFabError);
+
 		PlayFabClientAPI.GetPhotonAuthenticationToken(new GetPhotonAuthenticationTokenRequest()
 			{
 				PhotonApplicationId = PhotonNetwork.PhotonServerSettings.AppID
@@ -135,7 +128,7 @@ public class pfa : PunBehaviour
 		if (PhotonNetwork.inRoom) {
 			t.text+=  ("//test// " + PhotonNetwork.inRoom+"//"+PhotonNetwork.room.Name );
 		}
-
+	
 	}
 	public void testrooms()
 	{
@@ -160,7 +153,7 @@ public class pfa : PunBehaviour
 		string ttpp = "";
 		PhotonPlayer [] pl = PhotonNetwork.playerList;
 		for (int j = 0; j < pl .Length ; j++) {
-			ttpp+=pl[j].IsLocal+" , ";
+			ttpp+=pl[j].UserId+" , ";
 		}
 		t.text += ("//test// playerList=" + ttpp)+"\n";
 		Debug.LogWarning ("//test// playerList=" + ttpp);
@@ -238,7 +231,111 @@ public class pfa : PunBehaviour
 		}
 
 	}
+	/// <summary>
+	/// /////////////////////////////////
+	/// </summary>
+	/// 	public void testGetCurrentGames(){
+	public void testStartGames(){
+		var request = new StartGameRequest {BuildVersion="1",Region=PlayFab.ClientModels.Region.EUWest,GameMode="0"};
 
+		PlayFabClientAPI.StartGame   (request, OnStartGamesSuccess, OnPlayFabError,null,null);
+		Debug.Log ("!!testGetCurrentGames");
+	}
+	void OnStartGamesSuccess(StartGameResult result){
+		
+		Debug.Log ("!!OnStartGamesSuccess"+result.LobbyID +"  /"+result.ServerHostname );
+
+	}
+
+	/// <summary>
+	/// ////////////
+	/// </summary>
+	public void testGetleader(){
+		var request = new GetLeaderboardRequest {StatisticName="xp",StartPosition=0};
+
+		PlayFabClientAPI.GetLeaderboard   (request, OnLeaderboardSuccess, OnPlayFabError,null,null);
+		Debug.Log ("!!testGetleader");
+	}
+	void OnLeaderboardSuccess(GetLeaderboardResult  result){
+
+		Debug.Log ("!!GetLeaderboard"+result.Leaderboard .Count);
+		string ttpp = "";
+		List<PlayerLeaderboardEntry > GI =result.Leaderboard;
+		for (int i = 0; i < GI .Count  ; i++) {
+			//for (int j = 0; j < GI[i].PlayerUserIds.Count   ; j++) {
+			ttpp+=GI[i].PlayFabId +"=" +GI[i].StatValue+" , ";
+			//}
+			ttpp+="\n";
+			if (i < 5) {
+				IDS [i] = GI [i].PlayFabId;
+			}
+		}
+		t.text += ("//result// Leaderboard=" + ttpp)+"\n";
+		Debug.LogWarning ("//result// Leaderboard=" + ttpp);
+		testgetUserDataWithID (); /////////////////////////////
+
+	}
+	string[] IDS = new string[5];
+	[SerializeField ]
+	int indexID=0;
+	public  void testgetUserDataWithID(){
+		System.Collections.Generic.List<string> st=new System.Collections.Generic.List<string>();
+		st.Add ("xp");
+		st.Add ("LocLat");
+		st.Add ("LocLng");//={"startLat","startLng"};
+		st.Add ("static");
+		var request = new GetUserDataRequest {PlayFabId=IDS[indexID],Keys=st};
+
+		PlayFabClientAPI.GetUserData  (request, OnUserDataSuccess, OnPlayFabError);
+		Debug.Log ("!!GetTitleNews");
+	}
+
+	private void OnUserDataSuccess(GetUserDataResult    result)
+	{
+		Debug.Log("OnUserDataSuccess"+result.Data );
+		Debug.Log (result.Data.ToString ()  );
+		Debug.Log (result.Data.Values );
+//		foreach (StatisticValue ne in result.ToString) {
+//			Debug.Log (ne.StatisticName +"/"+ne.Value +"/"+ne.Version  );
+//		}
+	}
+
+
+	/// <summary>
+	/// ///////////////////////////
+	/// </summary>
+	public void testGetCurrentGames(){
+		var request = new CurrentGamesRequest {};
+
+		PlayFabClientAPI.GetCurrentGames  (request, OnGetCurrentGamesSuccess, OnPlayFabError,null,null);
+		Debug.Log ("!!testGetCurrentGames");
+	}
+	void OnGetCurrentGamesSuccess(CurrentGamesResult  result){
+
+		Debug.Log ("!!GetCurrentGames"+result.Games.Count+"/"+result.GameCount +"/" +result.PlayerCount );
+		string ttpp = "";
+		List<GameInfo> GI =result.Games;
+		for (int i = 0; i < GI .Count  ; i++) {
+			for (int j = 0; j < GI[i].PlayerUserIds.Count   ; j++) {
+				ttpp+=GI[i].PlayerUserIds[j] +" , ";
+			}
+			ttpp+="\n";
+		}
+		t.text += ("//result// PlayerUserIds=" + ttpp)+"\n";
+		Debug.LogWarning ("//result// PlayerUserIds=" + ttpp);
+	}
+
+	/// <summary>
+	/// /////////////////////
+	/// </summary>
+	/// <remarks>This method is commonly used to instantiate player characters.
+	/// If a match has to be started "actively", you can call an [PunRPC](@ref PhotonView.RPC) triggered by a user's
+	/// button-press or a timer.
+	/// 
+	/// When this is called, you can usually already access the existing players in the room via PhotonNetwork.playerList.
+	/// Also, all custom properties should be already available as Room.customProperties. Check Room.playerCount to find
+	/// out if
+	/// enough players are in the room to start playing.</remarks>
 
 	public override void OnJoinedRoom()
 	{

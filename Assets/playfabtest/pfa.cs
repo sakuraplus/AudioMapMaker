@@ -378,8 +378,6 @@ public class pfa : PunBehaviour
 		LogMessage ("OnJoinedRoom  "+PhotonNetwork.room.Name );
 		Debug.LogError  ("OnJoinedRoom  "+PhotonNetwork.room.Name );
 		Tobj  = PhotonNetwork.Instantiate("photonPfbTest", Vector3.zero, Quaternion.identity, 0);
-//		monster.GetComponent<myThirdPersonController>().isControllable = true;
-//		myPhotonView = monster.GetComponent<PhotonView>();
 	}
 	public override void OnReceivedRoomListUpdate()
 	{

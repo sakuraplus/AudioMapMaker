@@ -160,11 +160,8 @@ public class pfa : PunBehaviour
 
 
 	}
-	public void setStatic()
-	{
-		Tobj.transform.RotateAround (Tobj.transform.position, Vector3.forward, 10);
 
-	}
+	#region 同步测试
 	public void testRoll()
 	{
 		Tobj.transform.RotateAround (Tobj.transform.position, Vector3.forward, 10);
@@ -180,6 +177,8 @@ public class pfa : PunBehaviour
 		Tobj.transform.Translate (Vector3.right);
 
 	}
+	#endregion
+	#region 登录连接
 	public void testloginbtn()
 	{
 		AuthenticateWithPlayFab();
@@ -231,24 +230,10 @@ public class pfa : PunBehaviour
 		}
 
 	}
+	#endregion
+	#region 获取id和loc
 	/// <summary>
-	/// /////////////////////////////////
-	/// </summary>
-	/// 	public void testGetCurrentGames(){
-	public void testStartGames(){
-		var request = new StartGameRequest {BuildVersion="1",Region=PlayFab.ClientModels.Region.EUWest,GameMode="0"};
-
-		PlayFabClientAPI.StartGame   (request, OnStartGamesSuccess, OnPlayFabError,null,null);
-		Debug.Log ("!!testGetCurrentGames");
-	}
-	void OnStartGamesSuccess(StartGameResult result){
-		
-		Debug.Log ("!!OnStartGamesSuccess"+result.LobbyID +"  /"+result.ServerHostname );
-
-	}
-
-	/// <summary>
-	/// ////////////
+	/// ///获取排名前几的playfabid
 	/// </summary>
 	public void testGetleader(){
 		var request = new GetLeaderboardRequest {StatisticName="xp",StartPosition=0};
@@ -275,6 +260,12 @@ public class pfa : PunBehaviour
 		testgetUserDataWithID (); /////////////////////////////
 
 	}
+	//end 获取排名前几的playfabid
+
+	/// ///////////////////// <summary>
+	/// 使用playfabid获取title data
+	/// </summary>
+
 	string[] IDS = new string[5];
 	[SerializeField ]
 	int indexID=0;
@@ -284,22 +275,67 @@ public class pfa : PunBehaviour
 		st.Add ("LocLat");
 		st.Add ("LocLng");//={"startLat","startLng"};
 		st.Add ("static");
-		var request = new GetUserDataRequest {PlayFabId=IDS[indexID],Keys=st};
-
+		st.Add ("preferences");
+		var request = new GetUserDataRequest {PlayFabId=IDS[indexID]};
 		PlayFabClientAPI.GetUserData  (request, OnUserDataSuccess, OnPlayFabError);
-		Debug.Log ("!!GetTitleNews");
+		Debug.Log ("!!GetUserData"+IDS[indexID]);
 	}
 
 	private void OnUserDataSuccess(GetUserDataResult    result)
 	{
+		if (indexID < 4) {
+			indexID++;
+		} else {
+			indexID = 0;
+		}
 		Debug.Log("OnUserDataSuccess"+result.Data );
-		Debug.Log (result.Data.ToString ()  );
-		Debug.Log (result.Data.Values );
-//		foreach (StatisticValue ne in result.ToString) {
-//			Debug.Log (ne.StatisticName +"/"+ne.Value +"/"+ne.Version  );
-//		}
+		//Debug.Log (result.Data.  );
+		Debug.Log ("key="+result.Data.Keys.Count   );
+		///Debug.Log ("preferences"+result.Data["preferences"] .Value);
+		string ttt = "";
+		foreach (string  ne in result.Data.Keys ) {
+			ttt += "/ " + ne+"."+result.Data[ne].Value;
+		}
+		Debug.Log ("keys="+ttt );
+	}
+	//end使用playfabid获取title data
+
+	////////////////////////update player title data在每关结束后update坐标
+ 	public  void testupdateuserdata(){
+		System.Collections.Generic.Dictionary <string,string > st=new Dictionary<string, string>();
+		st.Add ("xpT","10");
+		st.Add ("LocLatT","123");
+		st.Add ("LocLngT","456");//={"startLat","startLng"};
+
+		var request = new UpdateUserDataRequest  {Data=st ,Permission=UserDataPermission.Public };
+		PlayFabClientAPI.UpdateUserData(request, OnupdateUserDataSuccess, OnPlayFabError);
+
+		Debug.Log ("!!testupdateuserdata");
 	}
 
+	private void OnupdateUserDataSuccess(UpdateUserDataResult    result)
+	{
+		Debug.Log("OnupdateUserDataSuccess"+result.DataVersion );
+	}
+	//end update player title data在每关结束后update坐标
+
+	/// <summary>
+	/// /////////////////////////////////
+	/// </summary>
+	/// 	public void testGetCurrentGames(){
+	public void testStartGames(){
+		var request = new StartGameRequest {BuildVersion="1",Region=PlayFab.ClientModels.Region.EUWest,GameMode="0"};
+
+		PlayFabClientAPI.StartGame   (request, OnStartGamesSuccess, OnPlayFabError,null,null);
+		Debug.Log ("!!testGetCurrentGames");
+	}
+	void OnStartGamesSuccess(StartGameResult result){
+
+		Debug.Log ("!!OnStartGamesSuccess"+result.LobbyID +"  /"+result.ServerHostname );
+
+	}
+
+	#endregion 
 
 	/// <summary>
 	/// ///////////////////////////

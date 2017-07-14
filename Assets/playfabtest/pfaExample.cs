@@ -19,7 +19,7 @@ public class pfaExample : PunBehaviour
 	//Run the entire thing on awake
 	public void Awake()
 	{
-
+		PhotonNetwork.autoCleanUpPlayerObjects = false;
 		t.text=customId;
 	}
 
@@ -165,6 +165,7 @@ public class pfaExample : PunBehaviour
 	#region 同步测试
 	public void nextstep()
 	{
+		t.text = "";
 		switch (LS) {
 		case loginstate.start:
 			testloginbtn ();
@@ -405,7 +406,17 @@ public class pfaExample : PunBehaviour
 		LS = loginstate.joinroom;////****
 		LogMessage ("OnJoinedRoom  "+PhotonNetwork.room.Name );
 		Debug.LogError  ("OnJoinedRoom  "+PhotonNetwork.room.Name );
-		//Tobj  = PhotonNetwork.Instantiate("photonPfbTest", Vector3.zero, Quaternion.identity, 0);
+	
+		Vector3 v= GameObject.Find ("_script").GetComponent<CharacterControllerSeed> ().TargetObj.transform.position;
+		DestroyImmediate (GameObject.Find ("_script").GetComponent<CharacterControllerSeed> ().Character );
+		Tobj  = PhotonNetwork.Instantiate("characterObj", v, Quaternion.identity, 0);
+
+		GameObject.Find ("_script").GetComponent<CharacterControllerSeed> ().Character = Tobj;
+		if (photonView.isMine) {
+			Tobj.name = "myCharacter";
+		} else {
+			Tobj.name="otherCha";
+		}
 	}
 	public override void OnReceivedRoomListUpdate()
 	{

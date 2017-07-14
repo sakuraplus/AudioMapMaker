@@ -16,9 +16,9 @@ public class CharacterControllerSeed : MonoBehaviour {
 	public float distanceV = 4f;
 	public bool cameragroundlimit;
 
-	public  Transform TargetObj;
-	public  Transform followCamera;
-	public  Transform Character;//显示的
+	public  GameObject  TargetObj;
+	public  GameObject followCamera;
+	public  GameObject Character;//显示的
 
 	// internal private variables
 	[SerializeField ]
@@ -27,11 +27,11 @@ public class CharacterControllerSeed : MonoBehaviour {
 	//Quaternion 	L_CharacterTargetRot;
 	private bool canmove=false;
 	void Start() {
-		distanceH = TargetObj.position.z - followCamera.position.z;
-		distanceV = followCamera.position.y-TargetObj.position.y ;
+		distanceH = TargetObj.transform .position.z - followCamera.transform.position.z;
+		distanceV = followCamera.transform.position.y-TargetObj.transform.position.y ;
 
 		//TargetObj = gameObject.transform;
-		m_CharacterTargetRot = TargetObj.localRotation;
+		m_CharacterTargetRot = TargetObj.transform.localRotation;
 	//	L_CharacterTargetRot = TargetObj.rotation ;//.localRotation;
 	//	m_CameraTargetRot = followCamera.localRotation;
 		//cc = GetComponent<CharacterController> ();
@@ -39,10 +39,10 @@ public class CharacterControllerSeed : MonoBehaviour {
 	
 	void Update() {
 
-	//	if (Input.GetKey (KeyCode.A )) {
+		if (Input.GetKey (KeyCode.A )) {
 			canmove = true ;
 			targetMove();
-	//	}
+		}
 
 		if (canmove) {
 		//targetMove();
@@ -54,17 +54,17 @@ public class CharacterControllerSeed : MonoBehaviour {
 	}
 	void LateUpdate()
 	{
-		Vector3 nextpos = TargetObj.forward * -1 * distanceH + TargetObj.up * distanceV + TargetObj.position;
+		Vector3 nextpos = TargetObj.transform.forward * -1 * distanceH + TargetObj.transform.up * distanceV + TargetObj.transform.position;
 		if (cameragroundlimit) {
 			nextpos=groundLimit (nextpos);
 		}
 		followCamera.transform.position = nextpos;
 
-		followCamera.transform.LookAt(TargetObj);
+		followCamera.transform.LookAt(TargetObj.transform);
 	}
 	Vector3 groundLimit(Vector3 _nextpos){
 		RaycastHit hit;
-		if(Physics.Raycast (followCamera.position ,Vector3.down ,out hit ))
+		if(Physics.Raycast (followCamera.transform.position ,Vector3.down ,out hit ))
 		{
 			//LayerMask.NameToLayer("Ground")
 			if(hit.collider.tag =="Ground"){
@@ -83,8 +83,8 @@ public class CharacterControllerSeed : MonoBehaviour {
 	{
 
 
-		TargetObj.Translate (Vector3.forward *moveSpeed * Time.deltaTime);
-		Character.position=TargetObj.position;
+		TargetObj.transform.Translate (Vector3.forward *moveSpeed * Time.deltaTime);
+		Character.transform.position=TargetObj.transform.position;
 
 
 
@@ -106,7 +106,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 
 	public void CharSmoothRotation()
 	{
-		Character.localRotation = Quaternion.Slerp (Character.localRotation, TargetObj.localRotation ,smoothTime * Time.deltaTime);//smoothTime * Time.deltaTime
+		Character.transform.localRotation = Quaternion.Slerp (Character.transform.localRotation, TargetObj.transform.localRotation ,smoothTime * Time.deltaTime);//smoothTime * Time.deltaTime
 	}
 
 	[SerializeField ]
@@ -133,9 +133,9 @@ public class CharacterControllerSeed : MonoBehaviour {
 	
 		}
 
-		TargetObj.localRotation  = m_CharacterTargetRot;
+		TargetObj.transform.localRotation  = m_CharacterTargetRot;
 		//TargetObj.RotateAround (TargetObj.position, Vector3.up , yRot);// ;
-		TargetObj.RotateAround (TargetObj.position, TargetObj.right, -xRot);// ;
+		TargetObj.transform.RotateAround (TargetObj.transform.position, TargetObj.transform.right, -xRot);// ;
 	
 
 //		float ff=0; //= m_CharacterTargetRot.ToAngleAxis ();

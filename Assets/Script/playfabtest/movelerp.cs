@@ -11,6 +11,8 @@ public class movelerp :  Photon.MonoBehaviour, IPunObservable
 	bool onctrl = false;
 	[SerializeField ]
 	bool isstreaming = true;
+	[SerializeField ]
+	string  ttt = "";
 	public void Start()
 	{
 		this.latestCorrectPos = transform.position;
@@ -20,13 +22,22 @@ public class movelerp :  Photon.MonoBehaviour, IPunObservable
 
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
+		ttt = "on";
+		if (stream.isReading) {
+			ttt="isreading";
+		}
+		if (stream.isWriting) {
+			ttt="isWriting";
+		}
+
+		//ttt = stream.ToString ();
 		if (stream.isWriting)
 		{
 			Vector3 pos = transform.localPosition;
-		//	Quaternion rot = transform.localRotation;
-			Debug.Log("!");
+			Quaternion rot = transform.localRotation;
+		//	Debug.Log("!");
 			stream.Serialize(ref pos);
-			//stream.Serialize(ref rot);
+			stream.Serialize(ref rot);
 			isstreaming = true;
 		}
 		else
@@ -37,13 +48,13 @@ public class movelerp :  Photon.MonoBehaviour, IPunObservable
 			Quaternion rot = Quaternion.identity;
 
 			stream.Serialize(ref pos);
-		//	stream.Serialize(ref rot);
+			stream.Serialize(ref rot);
 
 			this.latestCorrectPos = pos;                // save this to move towards it in FixedUpdate()
 			this.onUpdatePos = transform.localPosition; // we interpolate from here to latestCorrectPos
 			this.fraction = 0;                          // reset the fraction we alreay moved. see Update()
 
-			//transform.localRotation = rot;              // this sample doesn't smooth rotation
+			transform.localRotation = rot;              // this sample doesn't smooth rotation
 		}
 	}
 

@@ -412,11 +412,11 @@ public class pfaExample : PunBehaviour
 		Tobj  = PhotonNetwork.Instantiate("characterObj", v, Quaternion.identity, 0);
 
 		GameObject.Find ("_script").GetComponent<CharacterControllerSeed> ().Character = Tobj;
-		if (photonView.isMine) {
+//		if (photonView.isMine) {
 			Tobj.name = "myCharacter";
-		} else {
-			Tobj.name="otherCha";
-		}
+//		} else {
+//			Tobj.name="otherCha";
+//		}
 	}
 	public override void OnReceivedRoomListUpdate()
 	{

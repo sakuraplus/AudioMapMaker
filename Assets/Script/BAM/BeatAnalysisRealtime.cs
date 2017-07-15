@@ -5,16 +5,16 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 
 
-[System.Serializable]
-public class OnBeatLowEventHandler : UnityEngine.Events.UnityEvent
-{
-
-}
-[System.Serializable]
-public class OnBeatHighEventHandler : UnityEngine.Events.UnityEvent
-{
-
-}
+//[System.Serializable]
+//public class OnBeatLowEventHandler : UnityEngine.Events.UnityEvent
+//{
+//
+//}
+//[System.Serializable]
+//public class OnBeatHighEventHandler : UnityEngine.Events.UnityEvent
+//{
+//
+//}
 [System.Serializable]
 public class OnBeatrealtimeEventHandler : UnityEngine.Events.UnityEvent< int >
 {

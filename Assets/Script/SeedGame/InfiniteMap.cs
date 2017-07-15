@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic ;
 //using UnityStandardAssets.CrossPlatformInput ;
 
 public class InfiniteMap : MonoBehaviour {
@@ -7,143 +7,229 @@ public class InfiniteMap : MonoBehaviour {
 	//public float distanceH = 7f;
 	public float distanceV = 4f;
 	public bool cameragroundlimit;
+	public GameObject [] objs=new GameObject[9];
+	Vector3[] posAddUp=new Vector3[9] ;
+	GameObject[,] MapObjs=new GameObject[3,3] ;
+//	Dictionary <pos,GameObject > DictMapObj;
+	public Vector2 NumChunk;
+	public  Transform charPos;
 
-	public  Transform TargetObj;
-	public  Transform followCamera;
-
-
+	GameObject onchunk;
 	void Start() {
-		//distanceH = TargetObj.position.z - followCamera.position.z;
-		distanceV = followCamera.position.y-TargetObj.position.y ;
-		followCamera.LookAt (Vector3.down);
+		posAddUp = new Vector3[(int)NumChunk.x * (int)NumChunk.y];
+	
 
+
+		MapObjs=new GameObject[(int)NumChunk.x ,(int) NumChunk.y] ;
+		initMaps();
 	
 	}
 	
 	void Update() {
-
-
-	
+		onwhichchunk ();
 	}
-	void LateUpdate()
-	{
-		Vector3 nextpos = new Vector3(TargetObj.position.x, TargetObj.position.y+distanceV ,TargetObj.position.z);
 
-		followCamera.transform.position = nextpos;
-
-	}
-	Vector3 groundLimit(Vector3 _nextpos){
+	public  void onwhichchunk(){
 		RaycastHit hit;
-		if(Physics.Raycast (followCamera.position ,Vector3.down ,out hit ))
+		if(Physics.Raycast (charPos.position ,Vector3.down ,out hit ))
 		{
-			//LayerMask.NameToLayer("Ground")
+		//LayerMask.NameToLayer("Ground")
 			if(hit.collider.tag =="Ground"){
-				if (_nextpos.y-1 <hit.point.y ) {
-				//	Vector3 oldpos = new Vector3 (_nextpos.x, _nextpos.y, _nextpos.z);
-					_nextpos.y = hit.point.y + 1f;//方法需要根据体验效果调整****
-					//Debug.Log("r "+hit.distance+"//hitp= "+hit.point+"//old= "+oldpos+"//new= "+_nextpos+"//"+hit.collider.name  );
+			//	Debug.Log ("onwhich "+hit.collider.gameObject.transform.parent .gameObject .name);
+				if (hit.collider.gameObject.transform.parent .gameObject  != onchunk) {
+					Debug.Log ("onwhich "+hit.collider.gameObject.transform.parent .gameObject .name);
+					onchunk = hit.collider.gameObject.transform.parent .gameObject;
+					vpnow = onchunk.GetComponent<chunk> ().Vpos;
+					//if (vpnow != vplast) {
+						replacechunk (vpnow );
+						setpos (onchunk.transform.position);
+
+					//}
+		
 				}
 			}
 		}
-		return _nextpos;
+	}
+
+
+	/////////////////////////
+	[SerializeField ]
+	Vector2 id;
+	Vector2 vpnow;
+	Vector2 vplast;
+	void replacechunk(Vector2 vp){
+
+		Debug.Log(vp+"/"+vplast );
+		int stepY =(int) vp.x -Mathf.FloorToInt( NumChunk .x/2);
+		int stepX = (int)vp.y - Mathf.FloorToInt( NumChunk .x/2);
+		vplast = vp;
+		if (stepX> 0) {
+			for (int i = 0; i < NumChunk.x; i++) {
+				for (int j = 0; j < NumChunk.y; j++) {
+					id = new Vector2 (i, j);
+					if (MapObjs [i, j] != null) {
+						if (j < stepX) {
+							pool.Add (MapObjs [i, j]);
+						} else {
+							MapObjs [i, j - stepX] = MapObjs [i, j];
+							MapObjs [i, j - stepX].GetComponent<chunk> ().Vpos = new Vector2 (i, j - stepX);
+							MapObjs [i, j] = null;
+
+						}
+					}
+				}
+			}
+		}else if(stepX < 0) {
+			for (int i = 0; i < NumChunk.x; i++) {
+				for (int j =(int)NumChunk.y; j >0 ; j--) {
+					id = new Vector2 (i, j);
+					if (MapObjs [i, j-1] != null) {
+						if (j > (NumChunk.y + stepX)) {
+							pool.Add (MapObjs [i, j - 1]);
+						} else {
+
+							MapObjs [i, j] = MapObjs [i, j + stepX];
+							MapObjs [i, j].GetComponent<chunk> ().Vpos = new Vector2 (i, j);
+							MapObjs [i, j + stepX] = null;
+						}
+					}
+				}
+			}
+		}
+		if (stepY> 0) {
+			for (int i = 0; i < NumChunk.y; i++) {
+				for (int j = 0; j < NumChunk.x; j++) {
+					id = new Vector2 (j, i);
+					if (MapObjs [j, i] != null) {
+						if (j < stepY) {
+							pool.Add (MapObjs [j, i]);
+						} else {
+							MapObjs [j - stepY, i] = MapObjs [j, i];
+							MapObjs [j - stepY, i].GetComponent<chunk> ().Vpos = new Vector2 (j - stepY, i);
+							MapObjs [j, i] = null;
+						}
+					}
+				}
+			}
+		}else if(stepY< 0) {
+			for (int i = 0; i < NumChunk.y; i++) {
+				for (int j =(int)NumChunk.x; j >0 ; j--) {
+					id = new Vector2 (j, i);
+					if (MapObjs [j-1, i] != null) {
+						if (j > (NumChunk.y + stepY)) {
+							pool.Add (MapObjs [j - 1, i]);
+						} else {
+
+							MapObjs [j, i] = MapObjs [j + stepY, i];
+							MapObjs [j, i].GetComponent<chunk> ().Vpos = new Vector2 (j, i);
+							MapObjs [j + stepY, i] = null;
+						}
+					}
+				}
+			}
+		}
+		string ttt="";
+		for (int i = 0; i < NumChunk.x; i++) {
+			for (int j = 0; j < NumChunk.y; j++) {
+				if (MapObjs [i, j] == null && pool.Count>0) {
+					MapObjs [i, j] = pool [0];
+					MapObjs [i, j].GetComponent<chunk> ().Vpos = new Vector2 (i, j);
+
+					pool.RemoveAt (0);
+				}
+				ttt += MapObjs [i, j].name+",";
+			}
+			ttt+="/";
+		}
+		Debug.Log ("ttt=" + ttt);
+
+
+	}
+	void setpos(Vector3 centerpos){
+		int cx = Mathf.FloorToInt (NumChunk.x / 2);// + 1;
+		int cy = Mathf.FloorToInt (NumChunk.y / 2) ;//+ 1;
+
+		//string ttt="";
+		for (int i = 0; i < NumChunk.x; i++) {
+			for (int j = 0; j < NumChunk.y; j++) {
+				Vector3 nv = new	Vector3 (centerpos.x - distanceV * (cx - i), centerpos.y, centerpos.z +distanceV * (cy - j));
+				MapObjs [j, i] .transform.position=nv;
+				//		ttt += nv;
+			}
+			//	ttt+="/";
+
+		}
+		//Debug.Log (ttt);
+	}
+
+
+	List < GameObject> pool;
+	void initMaps(){
+		vpnow = new Vector2 (1,1);
+		vplast = vpnow;
+		MapObjs=new GameObject[(int)NumChunk.x ,(int)NumChunk.y ] ;
+		pool = new List<GameObject> ();
+
+		MapObjs [1, 0] = objs [0];
+		objs [0].transform.position  = new Vector3 (0-distanceV , 0, 0);
+		MapObjs [1, 1] = objs [1];
+		objs [1].transform.position  = new Vector3 (0, 0, 0);
+		MapObjs [1, 2] = objs [2];
+		objs [2].transform.position  = new Vector3 (distanceV, 0, 0);
+		MapObjs [0, 0] = objs [3];
+		objs [3].transform.position  = new Vector3 (0-distanceV,0,distanceV);
+		MapObjs [0, 1] = objs [4];
+		objs [4].transform.position   = new Vector3 (0, 0, distanceV);
+		MapObjs [0, 2] = objs [5];
+		objs [5].transform.position   = new Vector3 (distanceV, 0, distanceV);
+		MapObjs [2, 0] = objs [6];
+		objs [6].transform.position  = new Vector3 (-distanceV, 0, -distanceV);
+		MapObjs [2, 1] = objs [7];
+		objs [7].transform.position  = new Vector3 (0, 0, -distanceV);
+		MapObjs [2, 2] = objs [8];
+		objs [8].transform.position  = new Vector3 (distanceV,0,-distanceV);
+	
+	}
+
+	public void bbbb(int vv){
+		Vector2 vx=new Vector2(1,1) ;
+
+		switch (vv){
+		case 0:
+			vx=new Vector2(0,0);
+			break;
+		case 1:
+			vx=new Vector2(0,1);
+			break;
+		case 2 :
+			vx=new Vector2(0,2);;
+			break;
+		case 3  :
+			vx=new Vector2(1,0);
+			break;
+		case 4  :
+			vx=new Vector2(1,1);
+			break;
+		case 5 :
+			vx=new Vector2(1,2);
+			break;
+		case 6 :
+			vx=new Vector2(2,0);
+			break;
+		case 7 :
+			vx=new Vector2(2,1);
+			break;
+		case 8:
+			vx=new Vector2(2,2);
+			break;
+		}
+		vpnow = vx;
+		if (vpnow != vplast) {
+			replacechunk (vpnow );
+			setpos (Vector3.zero );// (onchunk.transform.position);
+		}
 
 	}
 
-//	void targetMove()
-//	{
-//
-//
-//		TargetObj.Translate (Vector3.forward *moveSpeed * Time.deltaTime);
-//		Character.position=TargetObj.position;
-//
-//
-////		Vector3 movementZ = Input.GetAxis("Vertical") * Vector3.forward * moveSpeed * Time.deltaTime;
-////
-////		// Determine how much should move in the x-direction
-////		Vector3 movementX = Input.GetAxis("Horizontal") * Vector3.right * moveSpeed * Time.deltaTime;
-////
-////		// Convert combined Vector3 from local space to world space based on the position of the current gameobject (player)
-////		Vector3 movement = transform.TransformDirection(movementZ+movementX);
-////		
-////		// Apply gravity (so the object will fall if not grounded)
-////		movement.y -= gravity * Time.deltaTime;
-////
-////		Debug.Log ("Movement Vector = " + movement);
-////
-////		// Actually move the character controller in the movement direction
-////		myController.Move(movement);
-//	}
-//
-//
-//
-//	void OnCollisionEnter (Collision newCollision)
-//	{
-//		Debug.Log ("aaaa"+newCollision.collider.name );
-//	}
-//
-//
-//
-//
-//
-//
-//
-//
-//	public void CharSmoothRotation()
-//	{
-//		Character.localRotation = Quaternion.Slerp (Character.localRotation, TargetObj.localRotation ,smoothTime * Time.deltaTime);//smoothTime * Time.deltaTime
-//	}
-//
-//	public void LookRotation()
-//	{
-//		//get the y and x rotation based on the Input manager
-//		float yRot = Input.GetAxis("Mouse X") * XSensitivity;
-//		float xRot = Input.GetAxis("Mouse Y") * YSensitivity;
-//
-//		m_CharacterTargetRot *= Quaternion.Euler (-xRot, yRot, 0f);
-//
-//		if(clampVerticalRotation)
-//		{
-//			m_CharacterTargetRot = ClampRotationAroundXAxis (m_CharacterTargetRot);
-//		}
-//
-//		if(smooth) // if smooth, then slerp over time
-//		{
-//			TargetObj.localRotation = Quaternion.Slerp (TargetObj.localRotation, m_CharacterTargetRot,
-//			                                            smoothTime * Time.deltaTime);
-//		}
-//		else // not smooth, so just jump
-//		{
-//			TargetObj.localRotation = m_CharacterTargetRot;
-//		}
-//		float ff=0; //= m_CharacterTargetRot.ToAngleAxis ();
-//		Vector3 vv=Vector3.forward;// m_CharacterTargetRot.ToAngleAxis ();
-//		m_CharacterTargetRot.ToAngleAxis(out ff,out vv);
-//		ttt =ff+"/"+vv;
-//	}
-//	
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//	// Some math ... eeck!
-//	Quaternion ClampRotationAroundXAxis(Quaternion q)
-//	{
-//		q.x /= q.w;
-//		q.y /= q.w;
-//		q.z /= q.w;
-//		q.w = 1.0f;
-//		
-//		float angleX = 2.0f * Mathf.Rad2Deg * Mathf.Atan (q.x);
-//		
-//		angleX = Mathf.Clamp (angleX, MinimumX, MaximumX);
-//		
-//		q.x = Mathf.Tan (0.5f * Mathf.Deg2Rad * angleX);
-//		
-//		return q;
-//	}
+
 }

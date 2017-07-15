@@ -11,6 +11,11 @@ using PlayFab ;
 ///实时显示节拍
 /// 
 /// </summary>
+//[System.Serializable]
+//public class StartFall : UnityEngine.Events.UnityEvent
+//{
+//
+//} 
 [RequireComponent (typeof (BeatAnalysisManager ) )]//
 public class SeedBeatMap : MonoBehaviour {
 	[HideInInspector ]
@@ -24,7 +29,7 @@ public class SeedBeatMap : MonoBehaviour {
 	 GameObject[] beatObj;
 	[SerializeField ]
 	GameObject beatObjDefault;
-
+//	public StartFall _startfall;
 	//根据实时采集到数据生成map
 	GameObject BeatMapContainer;
 	GameObject[] GameObjBeats;// = new GameObject[beatlist.Count ];
@@ -68,9 +73,7 @@ public class SeedBeatMap : MonoBehaviour {
 			Cursor.lockState=CursorLockMode.Locked ;
 		}
 		if (Input.GetKey (KeyCode.W)) {
-//			Debug.Log ("w" );
-//			beatmapToseedMode ();
-//			btnPlaymap ();
+//			
 			Cursor.visible=true;
 			Cursor.lockState=CursorLockMode.None ;
 		}
@@ -81,12 +84,11 @@ public class SeedBeatMap : MonoBehaviour {
 
 //		if(Input.GetKeyDown( KeyCode.Z ) ||beatmapauto){
 		CheckBeatMap();
-//		}
-//		else if (beatmapauto) {
-//			CheckBeatMap ();
-//		}
+
 		if (!_audio.isPlaying) {
 			playmap = false;
+			CharacterControllerSeed   CCS = FindObjectOfType<CharacterControllerSeed > ();
+			CCS.startFall = true;
 		}
 
 	}
@@ -160,7 +162,17 @@ public class SeedBeatMap : MonoBehaviour {
 			load (ta.text.ToString ());
 		}
 	}
-
+	public void LoadJsonAndPlay(){
+		Debug.Log ("qq" );
+		load (jsonfileAsset.text.ToString());
+		beatmapToseedMode ();
+		btnPlaymap ();
+		Cursor.visible=false;
+		Cursor.lockState=CursorLockMode.Locked ;
+		CharacterControllerSeed   CCS = FindObjectOfType<CharacterControllerSeed > ();
+		CCS.canmove  = true;//.onBeat.AddListener  (onOnbeatDetected);
+		CCS.startFall=  false ;
+	}
 	void load(string jsonstr) {  
 		savedBeatMap  smdread = JsonUtility.FromJson<savedBeatMap> (jsonstr);
 		Debug.Log ("load smdread.md="+smdread.MD );
@@ -371,12 +383,12 @@ public class SeedBeatMap : MonoBehaviour {
 	public void CheckBeatMap()
 	{
 			
-
+	
 		int ic=BeatMapContainer.transform.childCount ;
 		for (int i = 0; i < ic; i++) {
 			GameObject  b = BeatMapContainer.transform.GetChild (i).gameObject ; //<Beat> ();
-			if (b.GetComponent<Beat> ().Destorytime<_audio.time) {
-				b.transform.localScale = new Vector3 (0.5f, 0.4f, 0.4f);
+			if (b.GetComponent<Beat> ().Destorytime<_audio.time*1.2f) {
+			//	b.transform.localScale = new Vector3 (0.5f, 0.4f, 0.4f);
 					
 			}
 			if (b.GetComponent<Beat> ().CheckState||(b.GetComponent<Beat> ().Destorytime<_audio.time-killtime )) {
@@ -384,7 +396,7 @@ public class SeedBeatMap : MonoBehaviour {
 			//	Debug.Log (_audio.time +"///"+ b.GetComponent<Beat> ().Destorytime+">  "+(_audio.time -b.GetComponent<Beat> ().Destorytime ));
 			//	_audio.PlayOneShot (b.GetComponent<Beat> ().AC);
 				b.GetComponent<Beat> ().CheckState = false;
-				Destroy (b );		
+			//	Destroy (b );		
 			}
 		}
 				

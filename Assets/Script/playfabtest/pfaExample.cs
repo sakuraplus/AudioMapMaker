@@ -20,7 +20,7 @@ public class pfaExample : PunBehaviour
 	public void Awake()
 	{
 		PhotonNetwork.autoCleanUpPlayerObjects = false;
-		t.text=customId;
+		//t.text=customId;
 	}
 
 
@@ -30,13 +30,13 @@ public class pfaExample : PunBehaviour
      */
 	private  void AuthenticateWithPlayFab()
 	{
-		LogMessage ("PlayFab authenticating using Custom ID..."+PlayFabSettings.DeviceUniqueIdentifier);
+		LogMessage (" Custom ID..."+PlayFabSettings.DeviceUniqueIdentifier);
 		Debug.Log ("PlayFab authenticating using Custom ID..."+PlayFabSettings.DeviceUniqueIdentifier);
 
         PlayFabClientAPI.LoginWithCustomID(new LoginWithCustomIDRequest()
         {
             CreateAccount = true,
-				CustomId =customId 
+				CustomId =PlayFabSettings.DeviceUniqueIdentifier 
         }, RequestPhotonToken, OnPlayFabError);
 		//CustomId =PlayFabSettings.DeviceUniqueIdentifier+"EDITOR"
 	}
@@ -67,7 +67,7 @@ public class pfaExample : PunBehaviour
      */
 	private void AuthenticateWithPhoton(GetPhotonAuthenticationTokenResult obj)
 	{
-		LogMessage("Photon token acquired: " + obj.PhotonCustomAuthenticationToken + "  Authentication complete.");
+		LogMessage("Photon token acquired,  Authentication complete.");
 		Debug.Log("Photon token acquired: " + obj.PhotonCustomAuthenticationToken + "  Authentication complete.");
 
 		//We set AuthType to custom, meaning we bring our own, PlayFab authentication procedure.
@@ -83,84 +83,16 @@ public class pfaExample : PunBehaviour
 		PhotonNetwork.AuthValues = customAuth;
 		PhotonNetwork.autoJoinLobby = true;
 		LS = loginstate.loginpfa;////****
+		testConnect();
 	}
 	
 
-    // Add small button to launch our example code 
-    public void OnGUI()
-    {
-        if (GUILayout.Button("Execute Example ")) ExecuteExample(); 
-    }
 
-
-    // Example code which raises custom room event, then sets custom room property
-    private void ExecuteExample()
-    {
-
-        // Raise custom room event
-        var data = new Dictionary<string, object>() { {"Hello","World"} };
-        var result = PhotonNetwork.RaiseEvent(15, data, true, new RaiseEventOptions()
-        {
-            ForwardToWebhook = true,
-        });
-        LogMessage("New Room Event Post: "+result);
-
-        // Set custom room property
-        var properties = new ExitGames.Client.Photon.Hashtable() { { "CustomProperty", "It's Value" } };
-        var expectedProperties = new ExitGames.Client.Photon.Hashtable();
-        PhotonNetwork.room.SetCustomProperties(properties, expectedProperties, true);
-        LogMessage("New Room Properties Set");
-    }
-	////////////////////////////////////////////////////////
 	 public void testclr()
 	{	
 		t.text = "";
 	}
-	public void test()
-	{
 
-		Debug.LogWarning ("//test// AuthValues=" + PhotonNetwork.AuthValues);
-		Debug.LogWarning ("//test// countOfPlayers=" + PhotonNetwork.countOfPlayers);
-		Debug.LogWarning ("//test// countOfRooms=" + PhotonNetwork.countOfRooms);
-		Debug.LogWarning ("//test// inRoom=" + PhotonNetwork.inRoom);
-		t.text = ("//test//AuthValues= " + PhotonNetwork.AuthValues)+"\n";
-		t.text+= ("//test// countOfPlayers=" + PhotonNetwork.countOfPlayers)+"\n";
-		t.text+=  ("//test// countOfRooms=" + PhotonNetwork.countOfRooms)+"\n";
-		if (PhotonNetwork.inRoom) {
-			t.text+=  ("//test// " + PhotonNetwork.inRoom+"//"+PhotonNetwork.room.Name );
-		}
-	
-	}
-	public void testrooms()
-	{
-
-		Debug.LogWarning ("//test// GetRoomList length=" + PhotonNetwork.GetRoomList().Length );
-		string ttrr = "";
-		RoomInfo[] ri = PhotonNetwork.GetRoomList();
-		for (int i = 0; i < ri.Length ; i++) {
-			ttrr+=ri[i].Name+" , ";
-		}
-		t.text = ("//test// room.Name=" + ttrr)+"\n";
-		Debug.LogWarning ("//test// room.Name=" + ttrr);
-
-		Debug.LogWarning ("//test// AllocateViewID=" + PhotonNetwork.AllocateViewID());
-		Debug.LogWarning ("//test// countOfPlayersInRooms=" + PhotonNetwork.countOfPlayersInRooms);
-		Debug.LogWarning ("//test// countOfPlayersOnMaster=" + PhotonNetwork.countOfPlayersOnMaster);
-		Debug.LogWarning ("//test// insideLobby=" + PhotonNetwork.insideLobby);
-		Debug.LogWarning ("//test// player.UserId=" + PhotonNetwork.player.UserId);
-
-
-		Debug.LogWarning ("//test// playerList Length=" + PhotonNetwork.playerList.Length );
-		string ttpp = "";
-		PhotonPlayer [] pl = PhotonNetwork.playerList;
-		for (int j = 0; j < pl .Length ; j++) {
-			ttpp+=pl[j].UserId+" , ";
-		}
-		t.text += ("//test// playerList=" + ttpp)+"\n";
-		Debug.LogWarning ("//test// playerList=" + ttpp);
-
-
-	}
 
 	#region 同步测试
 	public void nextstep()
@@ -178,10 +110,10 @@ public class pfaExample : PunBehaviour
 			Debug.LogWarning ("*****"+LS);
 			testJoinRandom ();
 			break;
-		case loginstate.joinroom :
-			Debug.LogWarning ("*****"+LS);
-			testGetleader  ();
-			break;
+//		case loginstate.joinroom :
+//			Debug.LogWarning ("*****"+LS);
+//			testGetleader  ();
+//			break;
 		} 
 
 	}
@@ -209,6 +141,7 @@ public class pfaExample : PunBehaviour
 	loginstate LS=loginstate.start ;
 	public void testloginbtn()
 	{
+		t.text = "";
 		AuthenticateWithPlayFab();
 		DontDestroyOnLoad(gameObject);
 
@@ -403,8 +336,9 @@ public class pfaExample : PunBehaviour
 
 	public override void OnJoinedRoom()
 	{
+		t.text = "";
 		LS = loginstate.joinroom;////****
-		LogMessage ("OnJoinedRoom  "+PhotonNetwork.room.Name );
+		LogMessage ("Joined a Room  "+PhotonNetwork.room.Name +"You can play now!");
 		Debug.LogError  ("OnJoinedRoom  "+PhotonNetwork.room.Name );
 	
 		Vector3 v= GameObject.Find ("_script").GetComponent<CharacterControllerSeed> ().TargetObj.transform.position;
@@ -412,11 +346,9 @@ public class pfaExample : PunBehaviour
 		Tobj  = PhotonNetwork.Instantiate("characterObj", v, Quaternion.identity, 0);
 
 		GameObject.Find ("_script").GetComponent<CharacterControllerSeed> ().Character = Tobj;
-//		if (photonView.isMine) {
+
 			Tobj.name = "myCharacter";
-//		} else {
-//			Tobj.name="otherCha";
-//		}
+
 	}
 	public override void OnReceivedRoomListUpdate()
 	{
@@ -430,14 +362,17 @@ public class pfaExample : PunBehaviour
 	}
 	public override void OnJoinedLobby()
 	{
+		LS = loginstate.connectPht ;////****
+		testJoinRandom ();
 		LogMessage ("OnJoinedLobby  inlobby="+PhotonNetwork.insideLobby+" countinmaster=" +PhotonNetwork.countOfPlayersOnMaster );
 		Debug.LogError ("OnJoinedLobby  inlobby="+PhotonNetwork.insideLobby+" countinmaster=" +PhotonNetwork.countOfPlayersOnMaster );
 	}
 	public override void OnConnectedToPhoton()
 	{
-		LS = loginstate.connectPht ;////****
+		
 		LogMessage ("OnConnectedToPhoton  countOfRooms="+PhotonNetwork.countOfRooms  );
 		Debug.LogError ("OnConnectedToPhoton  countOfRooms="+PhotonNetwork.countOfRooms );
+
 	}
 
 	public override void OnPhotonPlayerConnected(PhotonPlayer newPlayer){

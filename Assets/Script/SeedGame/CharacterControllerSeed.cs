@@ -23,31 +23,28 @@ public class CharacterControllerSeed : MonoBehaviour {
 	// internal private variables
 	[SerializeField ]
 	private Quaternion m_CharacterTargetRot;
-	//private Quaternion m_CameraTargetRot;
-	//Quaternion 	L_CharacterTargetRot;
-	private bool canmove=false;
+
+	public  bool canmove=false;
 	void Start() {
 		distanceH = TargetObj.transform .position.z - followCamera.transform.position.z;
 		distanceV = followCamera.transform.position.y-TargetObj.transform.position.y ;
 
 		//TargetObj = gameObject.transform;
 		m_CharacterTargetRot = TargetObj.transform.localRotation;
-	//	L_CharacterTargetRot = TargetObj.rotation ;//.localRotation;
-	//	m_CameraTargetRot = followCamera.localRotation;
-		//cc = GetComponent<CharacterController> ();
+
 	}
 	
 	void Update() {
 
 		if (Input.GetKey (KeyCode.A )) {
 			canmove = true ;
-			targetMove();
+			//targetMove();
 		}
 
 		if (canmove) {
-		//targetMove();
+			targetMove();
 		}
-
+		Character.transform.position=TargetObj.transform.position;
 		LookRotation ();
 		CharSmoothRotation ();
 	
@@ -78,24 +75,87 @@ public class CharacterControllerSeed : MonoBehaviour {
 		return _nextpos;
 
 	}
-
+	public bool startFall = false;
 	void targetMove()
 	{
 
+		Vector3 nv = TargetObj.transform.position;
+		Vector3 addv = TargetObj.transform.forward;
+		RaycastHit hit;
 
-		TargetObj.transform.Translate (Vector3.forward *moveSpeed * Time.deltaTime);
-		Character.transform.position=TargetObj.transform.position;
 
+
+	 
+		if( Physics.Raycast (followCamera.transform.position ,Vector3.down ,out hit ))
+		{
+			//LayerMask.NameToLayer("Ground")
+			if(hit.collider.tag =="Ground"){
+				if (startFall) {
+
+					addv.y = Mathf .Min (addv.y, -0.1f);
+					Debug.Log ("End-addv=" + addv);
+					if ((TargetObj.transform.position.y - hit.point.y )< 1) {
+						canmove = false;
+					}
+				}else if (addv.y > 0) {
+					float speedy = 5 - TargetObj.transform.position.y + hit.point.y;
+					if (speedy > 3) {
+						speedy = 5;
+					}
+					speedy = Mathf.Clamp (speedy, -1, 5);
+					addv.y = addv.y * speedy / 5;
+				}
+
+			}
+			Debug.Log (TargetObj.transform.forward+"--to addv="+addv);
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		if (startFall) {
+			
+			addv.y = Mathf .Min (addv.y, -0.1f);
+			Debug.Log ("End-addv=" + addv);
+		}
+		else if(addv.y>0 && Physics.Raycast (followCamera.transform.position ,Vector3.down ,out hit ))
+		{
+			//LayerMask.NameToLayer("Ground")
+			if(hit.collider.tag =="Ground"){
+				float speedy = 5-TargetObj.transform.position.y + hit.point.y;
+				if (speedy > 3) {
+					speedy = 5;
+				}
+				speedy = Mathf.Clamp (speedy, -1,5);
+				addv.y = addv.y * speedy /5;
+			}
+			Debug.Log (TargetObj.transform.forward+"--to addv="+addv);
+		}
+		nv += (addv * moveSpeed * Time.deltaTime);
+		//TargetObj.transform.Translate (TargetObj.transform .forward *moveSpeed * Time.deltaTime);
+		//Character.transform.position=TargetObj.transform.position;
+		TargetObj.transform.position=nv;
 
 
 	}
 
 
 
-	void OnCollisionEnter (Collision newCollision)
-	{
-		Debug.Log ("aaaa"+newCollision.collider.name );
-	}
+//	void OnCollisionEnter (Collision newCollision)
+//	{
+//		Debug.Log ("aaaa"+newCollision.collider.name );
+//	}
 
 
 
@@ -138,11 +198,6 @@ public class CharacterControllerSeed : MonoBehaviour {
 		TargetObj.transform.RotateAround (TargetObj.transform.position, TargetObj.transform.right, -xRot);// ;
 	
 
-//		float ff=0; //= m_CharacterTargetRot.ToAngleAxis ();
-//		Vector3 vv=Vector3.forward;// m_CharacterTargetRot.ToAngleAxis ();
-//		Quaternion cc=Quaternion.Euler(m_CharacterTargetRot.x,m_CharacterTargetRot.y,0);
-//		m_CharacterTargetRot.ToAngleAxis(out ff,out vv);
-//		ttt =ff+"/"+vv;
 	}
 	
 

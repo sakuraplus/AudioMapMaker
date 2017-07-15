@@ -9,6 +9,7 @@ public class Beat : MonoBehaviour {
 	 AudioSource _audio;
 	//[SerializeField ]
 	public  AudioClip AC;
+	public GameObject ExpoPart;
 	// Update is called once per frame
 //	void Update () {
 //	
@@ -19,10 +20,10 @@ public class Beat : MonoBehaviour {
 		// invote the DestroyNow funtion to run after timeOut seconds
 	//	Invoke ("DestroyNow", time);
 	}
-	void OnCollisionEnter (Collision newCollision)
-	{
-		Debug.Log ("ccc  "+newCollision.collider .name  );
-	}
+//	void OnCollisionEnter (Collision newCollision)
+//	{
+//		Debug.Log ("ccc  "+newCollision.collider .name  );
+//	}
 	void OnTriggerEnter(Collider collider) 
 	{
 		
@@ -34,8 +35,13 @@ public class Beat : MonoBehaviour {
 			CheckState = true;
 			//AudioClip ac = GameObject.Find ("MCamera").GetComponent<BeatAnalysisManager > ().beatsoundDefault  as AudioClip;
 			_audio.PlayOneShot  (AC);
+			if (ExpoPart) {
+				// Instantiate an explosion effect at the gameObjects position and rotation
+				Instantiate (ExpoPart, transform.position, transform.rotation);
+			}
+
 			Destroy (gameObject);
-		//	Debug.Log ("ttt  "+collider.name );
+			Debug.Log ("ttt  "+collider.name );
 		}
 
 		//Debug.Log ("ttt  "+collider.name );

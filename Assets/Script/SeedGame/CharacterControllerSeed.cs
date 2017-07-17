@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+//using UnityEngine.iOS;
 //using UnityStandardAssets.CrossPlatformInput ;
 
 public class CharacterControllerSeed : MonoBehaviour {
@@ -45,7 +46,8 @@ public class CharacterControllerSeed : MonoBehaviour {
 			targetMove();
 		}
 		Character.transform.position=TargetObj.transform.position;
-		LookRotation ();
+//		LookRotation ();
+		LookRotationGyro ();
 		CharSmoothRotation ();
 	
 	}
@@ -85,51 +87,12 @@ public class CharacterControllerSeed : MonoBehaviour {
 
 
 
-	 
-		if( Physics.Raycast (followCamera.transform.position ,Vector3.down ,out hit ))
-		{
-			//LayerMask.NameToLayer("Ground")
-			if(hit.collider.tag =="Ground"){
-				if (startFall) {
-
-					addv.y = Mathf .Min (addv.y, -0.1f);
-					Debug.Log ("End-addv=" + addv);
-					if ((TargetObj.transform.position.y - hit.point.y )< 1) {
-						canmove = false;
-					}
-				}else if (addv.y > 0) {
-					float speedy = 5 - TargetObj.transform.position.y + hit.point.y;
-					if (speedy > 3) {
-						speedy = 5;
-					}
-					speedy = Mathf.Clamp (speedy, -1, 5);
-					addv.y = addv.y * speedy / 5;
-				}
-
-			}
-			Debug.Log (TargetObj.transform.forward+"--to addv="+addv);
-		}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 		if (startFall) {
 			
 			addv.y = Mathf .Min (addv.y, -0.1f);
 			Debug.Log ("End-addv=" + addv);
 		}
-		else if(addv.y>0 && Physics.Raycast (followCamera.transform.position ,Vector3.down ,out hit ))
+		else if(addv.y>0 && Physics.Raycast (TargetObj.transform.position ,Vector3.down ,out hit ))
 		{
 			//LayerMask.NameToLayer("Ground")
 			if(hit.collider.tag =="Ground"){
@@ -201,7 +164,28 @@ public class CharacterControllerSeed : MonoBehaviour {
 	}
 	
 
+	public void LookRotationGyro()
+	{
+		Gyroscope gy=Input.gyro ;
 
+		//get the y and x rotation based on the Input manager
+		yRot = gy.attitude .x * XSensitivity;
+		xRot +=gy.attitude.y* YSensitivity;
+
+		xRot = Mathf.Clamp (xRot, MinimumX, MaximumX);
+		m_CharacterTargetRot *= Quaternion.Euler (0, yRot, 0f);
+
+		if(clampVerticalRotation)
+		{
+			m_CharacterTargetRot = ClampRotationAroundXAxis (m_CharacterTargetRot);
+
+		}
+
+		TargetObj.transform.localRotation  = m_CharacterTargetRot;
+		TargetObj.transform.RotateAround (TargetObj.transform.position, TargetObj.transform.right, -xRot);// ;
+
+
+	}
 
 
 

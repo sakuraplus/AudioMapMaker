@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-//using UnityEngine.iOS;
+using UnityEngine.UI ;
 //using UnityStandardAssets.CrossPlatformInput ;
 
 public class CharacterControllerSeed : MonoBehaviour {
@@ -16,7 +16,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 	public float distanceH = 7f;
 	public float distanceV = 4f;
 	public bool cameragroundlimit;
-
+	public Text tttt;
 	public  GameObject  TargetObj;
 	public  GameObject followCamera;
 	public  GameObject Character;//显示的
@@ -167,7 +167,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 	public void LookRotationGyro()
 	{
 		Gyroscope gy=Input.gyro ;
-
+		tttt.text = gy.attitude.x+","+gy.attitude.y+","+gy.attitude.z+","+gy.attitude.w;
 		//get the y and x rotation based on the Input manager
 		yRot = gy.attitude .x * XSensitivity;
 		xRot +=gy.attitude.y* YSensitivity;

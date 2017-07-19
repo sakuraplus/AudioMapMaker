@@ -32,7 +32,13 @@ public class CharacterControllerSeed : MonoBehaviour {
 
 		//TargetObj = gameObject.transform;
 		m_CharacterTargetRot = TargetObj.transform.localRotation;
-
+		#if UNITY_ANDROID
+		Screen.sleepTimeout=SleepTimeout.NeverSleep ;
+		if (!Input.gyro.enabled) {
+			Input.gyro.updateInterval =0.5f;
+			Input.gyro.enabled = true;
+		}
+		#endif 
 	}
 	
 	void Update() {
@@ -46,8 +52,18 @@ public class CharacterControllerSeed : MonoBehaviour {
 			targetMove();
 		}
 		Character.transform.position=TargetObj.transform.position;
-//		LookRotation ();
+		#if UNITY_ANDROID
+
+		if (!Input.gyro.enabled) {
+			Input.gyro.enabled = true;
+		}
 		LookRotationGyro ();
+
+		#endif 
+		#if UNITY_STANDALONE
+		LookRotation ();
+		#endif 
+	
 		CharSmoothRotation ();
 	
 	}
@@ -167,24 +183,15 @@ public class CharacterControllerSeed : MonoBehaviour {
 	public void LookRotationGyro()
 	{
 		Gyroscope gy=Input.gyro ;
-		tttt.text = gy.attitude.x+","+gy.attitude.y+","+gy.attitude.z+","+gy.attitude.w;
-		//get the y and x rotation based on the Input manager
-		yRot = gy.attitude .x * XSensitivity;
-		xRot +=gy.attitude.y* YSensitivity;
+		tttt.text =st+"\nD    "+ gy.attitude;
+		//		
 
-		xRot = Mathf.Clamp (xRot, MinimumX, MaximumX);
-		m_CharacterTargetRot *= Quaternion.Euler (0, yRot, 0f);
-
-		if(clampVerticalRotation)
-		{
-			m_CharacterTargetRot = ClampRotationAroundXAxis (m_CharacterTargetRot);
-
-		}
-
-		TargetObj.transform.localRotation  = m_CharacterTargetRot;
-		TargetObj.transform.RotateAround (TargetObj.transform.position, TargetObj.transform.right, -xRot);// ;
-
-
+		m_CharacterTargetRot = gy.attitude;
+		m_CharacterTargetRot.x = -1*gy.attitude.z;
+		m_CharacterTargetRot.z = gy.attitude.x;
+		m_CharacterTargetRot.w = -1*gy.attitude.w;
+		TargetObj.transform.localRotation =m_CharacterTargetRot;// gy.attitude;//*new Quaternion(0,0,1,0);
+		TargetObj.transform.RotateAround (TargetObj.transform.position, TargetObj.transform.forward , 90);// ;
 	}
 
 

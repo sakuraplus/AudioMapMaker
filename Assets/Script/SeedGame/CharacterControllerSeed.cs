@@ -44,7 +44,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 		distanceH = TargetObj.transform .position.z - followCamera.transform.position.z;
 		distanceV = followCamera.transform.position.y-TargetObj.transform.position.y ;
 		m_CharacterTargetRot = TargetObj.transform.localRotation;
-	
+
 		#if UNITY_ANDROID
 		Screen.sleepTimeout=SleepTimeout.NeverSleep ;
 		if (!Input.gyro.enabled) {
@@ -126,9 +126,6 @@ public class CharacterControllerSeed : MonoBehaviour {
 				}
 			} while(objFound == false);
 
-
-
-
 			//if(hit.collider.tag =="Ground"){
 				if (_nextpos.y-1 <hit.point.y ) {
 					sttt="groundLimit"+(_nextpos.y-hit.point.y );
@@ -142,6 +139,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 		return _nextpos;
 
 	}
+
 
 	void targetMove()
 	{
@@ -188,10 +186,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 		//	
 		}
 		nv += (addv * moveSpeed * Time.deltaTime);
-
 		TargetObj.transform.position=nv;
-
-
 	}
 
 

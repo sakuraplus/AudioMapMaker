@@ -18,6 +18,8 @@ using PlayFab ;
 //} 
 [RequireComponent (typeof (BeatAnalysisManager ) )]//
 public class SeedBeatMap : MonoBehaviour {
+	[SerializeField ]
+	Text testT;
 	[HideInInspector ]
 	public bool readytoplay=false ;
 	[SerializeField ]
@@ -176,6 +178,7 @@ public class SeedBeatMap : MonoBehaviour {
 	void load(string jsonstr) {  
 		savedBeatMap  smdread = JsonUtility.FromJson<savedBeatMap> (jsonstr);
 		Debug.Log ("load smdread.md="+smdread.MD );
+		testT.text = ("\nload smdread.md=" + smdread.MD) + testT.text;
 		BeatAnalysisManager.BeatmapOffset  = smdread.offset;
 		BeatAnalysisManager.numBands   = smdread.numband ;
 		BeatAnalysisManager.BAL.Clear ();
@@ -205,7 +208,8 @@ public class SeedBeatMap : MonoBehaviour {
 	}
 	public  void beatmapToseedMode()
 	{
-		Debug.Log ("to seed mode" + BeatAnalysisManager.BAL.Count); 
+		Debug.Log ("to seed mode, BAL.Count=" + BeatAnalysisManager.BAL.Count); 
+		testT.text = ("\nto seed mode" + BeatAnalysisManager.BAL.Count)+testT.text;
 		for (int i = 0; i < BeatAnalysisManager.BAL.Count; i++) {
 			
 			for (int j =  BeatAnalysisManager.BAL.Count-1; j >i; j--) {
@@ -295,10 +299,12 @@ public class SeedBeatMap : MonoBehaviour {
 	Transform  charPos;
 //	[SerializeField ]
 //	float angleWind=120;
-//	[SerializeField ]
-//	float angleRange=45;
+	[SerializeField ]
+	Vector2  angleRange=Vector2.zero ;
 	[SerializeField ]
 	float yRange=0.2f;
+	[SerializeField ]
+	float xRange=0.2f;
 	Vector3  nextSeedPos(MusicData MD,float offset)
 	{
 		float R = speed*(MD.playtime - _audio.time + BeatAnalysisManager.BeatmapOffset-0.5f);
@@ -310,9 +316,11 @@ public class SeedBeatMap : MonoBehaviour {
 		Vector3 charAxis = charPos.forward;
 
 		/////////////////////////
-		float newX=charAxis.x* Random.Range (0.7f,1.2f);
+		float newX=charAxis.x* Random.Range (1-xRange ,1+xRange );
+		//float newX=charAxis.x* Random.Range (0.7f,1.2f);
 		float newY= Random.Range (0-yRange,yRange);
-		float newZ=charAxis.z* Random.Range (0.7f,1.2f);
+		float newZ=charAxis.z* Random.Range (1-xRange ,1+xRange );
+		//float newZ=charAxis.z* Random.Range (0.7f,1.2f);
 		float r = Mathf.Sqrt (newX*newX+newZ*newZ+newY*newY);
 		if (r != 0) {
 			newX = newX * R / r;

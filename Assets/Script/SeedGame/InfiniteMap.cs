@@ -48,41 +48,20 @@ public class InfiniteMap : MonoBehaviour {
 		if(Physics.Raycast (charPos.position ,Vector3.down ,out hit ))
 		{
 			//LayerMask.NameToLayer("Ground")//.transform.parent .gameObject 
-			bool objFound = false;
-			GameObject g=hit.collider.gameObject;
-			do {
-				if (g.tag =="Ground" && g.GetComponent<chunk > ()) {
-					if(onchunk==g){
-						return ;
-					}
-					onchunk =g;
-					objFound=true;
-					break ;
-				}
-				if(g.transform.parent !=null){
-					g=g.transform.parent.gameObject ;
-				}else{
-					return  ;
-				}
-			} while(objFound == false);
-
-
-//			if(hit.collider.tag =="Ground"){
-//				//Debug.Log ("onwhich "+hit.collider.gameObject.name);
-//				if (hit.collider.gameObject  != onchunk) {
-//
-//
-//			onchunk = hit.collider.gameObject;
-			Debug.Log ("onwhich "+hit.collider.gameObject.name+onchunk.transform.localPosition);
-			vpnow = onchunk.GetComponent<chunk> ().Vpos;
-			//if (vpnow != vplast) {
-			replacechunk (vpnow );
-			setpos (onchunk.transform.localPosition );
+			if(hit.collider.tag =="Ground"){
+				//Debug.Log ("onwhich "+hit.collider.gameObject.name);
+				if (hit.collider.gameObject  != onchunk) {
+					Debug.Log ("onwhich "+hit.collider.gameObject.name);
+					onchunk = hit.collider.gameObject;
+					vpnow = onchunk.GetComponent<chunk> ().Vpos;
+					//if (vpnow != vplast) {
+						replacechunk (vpnow );
+						setpos (onchunk.transform.position);
 
 					//}
-//		
-//				}
-//			}
+		
+				}
+			}
 		}
 	}
 
@@ -213,7 +192,7 @@ public class InfiniteMap : MonoBehaviour {
 			for (int j = 0; j < NumChunk.y; j++) {
 				Vector3 nv = new	Vector3 (0 + distanceV * (cx - j), 0, 0 -distanceV * (cy - i));
 				MapObjs [i, j] = objs [i*(int)NumChunk.x+j];
-				MapObjs [i, j] .transform.localPosition =nv;
+				MapObjs [i, j] .transform.position=nv;
 				MapObjs [i, j].GetComponent<chunk> ().Vpos = new Vector2 (i, j);
 				ttt += MapObjs [i, j].name+nv;
 			}

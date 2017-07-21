@@ -13,6 +13,7 @@ public class InfiniteMap : MonoBehaviour {
 	//	Dictionary <pos,GameObject > DictMapObj;
 	public Vector2 NumChunk;
 	public  Transform charPos;
+	public static Vector3[,] Vertives;
 
 	GameObject onchunk;
 	void Start() {
@@ -51,7 +52,7 @@ public class InfiniteMap : MonoBehaviour {
 			bool objFound = false;
 			GameObject g=hit.collider.gameObject;
 			do {
-				if (g.tag =="Ground" && g.GetComponent<chunk > ()) {
+				if (g.tag =="Ground" && g.GetComponent<drawJterrain > ()) {
 					if(onchunk==g){
 						return ;
 					}
@@ -74,7 +75,7 @@ public class InfiniteMap : MonoBehaviour {
 			//
 			//			onchunk = hit.collider.gameObject;
 			Debug.Log ("onwhich "+hit.collider.gameObject.name+onchunk.transform.localPosition);
-			vpnow = onchunk.GetComponent<chunk> ().Vpos;
+			vpnow = onchunk.GetComponent<drawJterrain> ().Vpos;
 			//if (vpnow != vplast) {
 			replacechunk (vpnow );
 			setpos (onchunk.transform.localPosition );
@@ -107,7 +108,7 @@ public class InfiniteMap : MonoBehaviour {
 							pool.Add (MapObjs [i, j]);
 						} else {
 							MapObjs [i, j - stepX] = MapObjs [i, j];
-							MapObjs [i, j - stepX].GetComponent<chunk> ().Vpos = new Vector2 (i, j - stepX);
+							MapObjs [i, j - stepX].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j - stepX);
 							MapObjs [i, j] = null;
 
 						}
@@ -124,7 +125,7 @@ public class InfiniteMap : MonoBehaviour {
 						} else {
 
 							MapObjs [i, j] = MapObjs [i, j + stepX];
-							MapObjs [i, j].GetComponent<chunk> ().Vpos = new Vector2 (i, j);
+							MapObjs [i, j].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j);
 							MapObjs [i, j + stepX] = null;
 						}
 					}
@@ -140,7 +141,7 @@ public class InfiniteMap : MonoBehaviour {
 							pool.Add (MapObjs [j, i]);
 						} else {
 							MapObjs [j - stepY, i] = MapObjs [j, i];
-							MapObjs [j - stepY, i].GetComponent<chunk> ().Vpos = new Vector2 (j - stepY, i);
+							MapObjs [j - stepY, i].GetComponent<drawJterrain> ().Vpos = new Vector2 (j - stepY, i);
 							MapObjs [j, i] = null;
 						}
 					}
@@ -156,7 +157,7 @@ public class InfiniteMap : MonoBehaviour {
 						} else {
 
 							MapObjs [j, i] = MapObjs [j + stepY, i];
-							MapObjs [j, i].GetComponent<chunk> ().Vpos = new Vector2 (j, i);
+							MapObjs [j, i].GetComponent<drawJterrain> ().Vpos = new Vector2 (j, i);
 							MapObjs [j + stepY, i] = null;
 						}
 					}
@@ -168,7 +169,7 @@ public class InfiniteMap : MonoBehaviour {
 			for (int j = 0; j < NumChunk.y; j++) {
 				if (MapObjs [i, j] == null && pool.Count>0) {
 					MapObjs [i, j] = pool [0];
-					MapObjs [i, j].GetComponent<chunk> ().Vpos = new Vector2 (i, j);
+					MapObjs [i, j].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j);
 
 					pool.RemoveAt (0);
 				}
@@ -214,7 +215,7 @@ public class InfiniteMap : MonoBehaviour {
 				Vector3 nv = new	Vector3 (0 + distanceV * (cx - j), 0, 0 -distanceV * (cy - i));
 				MapObjs [i, j] = objs [i*(int)NumChunk.x+j];
 				MapObjs [i, j] .transform.localPosition =nv;
-				MapObjs [i, j].GetComponent<chunk> ().Vpos = new Vector2 (i, j);
+				MapObjs [i, j].GetComponent<drawJterrain > ().Vpos = new Vector2 (i, j);
 				ttt += MapObjs [i, j].name+nv;
 			}
 			ttt+="/";

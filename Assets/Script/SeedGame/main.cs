@@ -9,8 +9,8 @@ using System.IO;
 
 public class main : MonoBehaviour {
 
-    GameObject terrmanager;//= new GameObject();
-  //	public  GameObject[] arrTrr;//= new GameObject[9];
+	GameObject terrmanager;//= new GameObject();
+	//	public  GameObject[] arrTrr;//= new GameObject[9];
 	public  GameObject[,] MapObjs;//= new GameObject[9];
 	[Header("latitude and longitude of the northwest")]
 	[Range (-90,90)]
@@ -47,7 +47,7 @@ public class main : MonoBehaviour {
 	[Header( "size of the esch piece of mesh in lat")]
 	public float SizeOfPiece=100;
 
-//	[SerializeField,  HeaderAttribute ("size of the mesh")]
+	//	[SerializeField,  HeaderAttribute ("size of the mesh")]
 	[HideInInspector]
 	public  Vector3 size = new Vector3 (100, 100,1);
 	[SerializeField,Header("the addition of real height data")]
@@ -58,32 +58,41 @@ public class main : MonoBehaviour {
 	[HideInInspector ]
 	public GameObject _newmeshobj;//=new GameObject ();
 
-    const float earthR = 6371000;//地球半径
+	const float earthR = 6371000;//地球半径
 	[SerializeField]
 	bool _havelicense=false;
 
 	public static  string savefiledate;
 	public static  int NumComplete;
 	public static  int NumError;
-	public static Vector3[] Vertives;
+	//public static float [,] Vertives;
 
 
-    void Start () {
+	void Start () {
 		NumComplete = 0;
 		NumError = 0;
-		Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1)*(int)(Pieces.y*SegmentInPiece.y+1)] ;
+		InfiniteMap . Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
 		//StartCoroutine (findLicense ());
 		makeTrr ();
-    }
+	}
+	public void testV(){
+		string st = "testV\n";
+		for (int i = 0; i < (int)(Pieces.x * SegmentInPiece.x + 1); i++) {
+			for (int j=0 ; j < (int)(Pieces.y * SegmentInPiece.y + 1); j++) {
+				st += ",\t" + InfiniteMap.Vertives [i, j];
+			}
+			st+="\n";
+		}
+		Debug.Log (st);
+	}
 
-
-//
+	//
 	void makeTrr()
 	{
-//		TSM = new TerrainSaveManager ();
-//		savefiledate=DateTime.Now.ToString("yyyy-MM-dd HH-mm");
-//		MTnumError = 0;
-//		MTnumComplete = 0;
+		//		TSM = new TerrainSaveManager ();
+		//		savefiledate=DateTime.Now.ToString("yyyy-MM-dd HH-mm");
+		//		MTnumError = 0;
+		//		MTnumComplete = 0;
 
 		//	Debug.Log ("savefiledate="+savefiledate);
 		ELEAPIkey = googleELEAPIKey;
@@ -147,7 +156,7 @@ public class main : MonoBehaviour {
 				g.name = nameT;
 				g.AddComponent<drawJterrain>().initTrr( nameT,SegmentInPiece,matTrr);
 				g.GetComponent <drawJterrain>().loadNewLoc(lat+j*steplat,lng+i*steplng ,
-					lat+(j+1)*steplat,lng+(i+1)*steplng,size);
+					lat+(j+1)*steplat,lng+(i+1)*steplng,size,new Vector2 (i,j));
 				//DrawTMesh DTM=new DrawTMesh();
 				int arrind = (int)Math.Floor(i * Pieces.y + j);
 

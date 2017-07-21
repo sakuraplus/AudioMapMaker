@@ -112,21 +112,22 @@ public class CharacterControllerSeed : MonoBehaviour {
 	LayerMask layerGround;
 	Vector3 groundLimit(Vector3 _nextpos){
 		RaycastHit hit;
-		if(Physics.Raycast (followCamera.transform.position ,Vector3.down ,out hit ,Mathf.Infinity,layerGround ))
+		//if(Physics.Raycast (followCamera.transform.position ,Vector3.down ,out hit ,Mathf.Infinity,layerGround ))
+		if(Physics.Raycast (followCamera.transform.position ,Vector3.down ,out hit ))
 		{
-
-//			bool objFound = false;
-//			GameObject g=hit.collider.gameObject;
-//			do {
-//				if (g.tag =="Ground") {
-//					objFound=true;
-//					break ;
-//				}else if(g.transform.parent !=null){
-//					g=g.transform.parent.gameObject ;
-//				}else{
-//					return _nextpos    ;
-//				}
-//			} while(objFound == false);
+			//Debug.Log ("glglgl");
+			bool objFound = false;
+			GameObject g=hit.collider.gameObject;
+			do {
+				if (g.tag =="Ground") {
+					objFound=true;
+					break ;
+				}else if(g.transform.parent !=null){
+					g=g.transform.parent.gameObject ;
+				}else{
+					return _nextpos    ;
+				}
+			} while(objFound == false);
 //
 			//if(hit.collider.tag =="Ground"){
 			if (_nextpos.y-1 <hit.point.y ) {
@@ -157,23 +158,24 @@ public class CharacterControllerSeed : MonoBehaviour {
 			addv.y = Mathf .Min (addv.y, -0.1f);
 			Debug.Log ("End-addv=" + addv);
 		}
-		else if(addv.y>0 && Physics.Raycast (TargetObj.transform.position ,Vector3.down ,out hit,Mathf.Infinity ,layerGround  ))
-		{
-			//LayerMask.NameToLayer("Ground")
-//			bool objFound = false;
-//			GameObject g=hit.collider.gameObject;
-//			do {
-//				if (g.tag =="Ground") {
-//					objFound=true;
-//					break ;
-//				}else if(g.transform.parent !=null){
-//					g=g.transform.parent.gameObject ;
-//				}else{
-//					break ;
-//				}
-//			} while(objFound == false);
-//
-//			if (objFound) {
+		//else if(addv.y>0 && Physics.Raycast (TargetObj.transform.position ,Vector3.down ,out hit,Mathf.Infinity ,layerGround  ))
+
+		else if(addv.y>0 && Physics.Raycast (TargetObj.transform.position ,Vector3.down ,out hit  ))
+		{	//LayerMask.NameToLayer("Ground")
+			bool objFound = false;
+			GameObject g=hit.collider.gameObject;
+			do {
+				if (g.tag =="Ground") {
+					objFound=true;
+					break ;
+				}else if(g.transform.parent !=null){
+					g=g.transform.parent.gameObject ;
+				}else{
+					break ;
+				}
+			} while(objFound == false);
+
+			if (objFound) {
 				//if(hit.collider.tag =="Ground"){
 				sttd = "distance=" + hit.distance;
 				float speedy = 5 - TargetObj.transform.position.y + hit.point.y;
@@ -183,8 +185,8 @@ public class CharacterControllerSeed : MonoBehaviour {
 				speedy = Mathf.Clamp (speedy, -1, 5);
 				addv.y = addv.y * speedy / 5;
 				Debug.Log (TargetObj.transform.forward+"--to addv="+addv);
-			//}
-			//	}
+				//}
+			}
 			//	
 		}
 		nv += (addv * moveSpeed * Time.deltaTime);

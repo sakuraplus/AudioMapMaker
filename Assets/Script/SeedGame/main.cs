@@ -59,6 +59,7 @@ public class main : MonoBehaviour {
 	public GameObject _newmeshobj;//=new GameObject ();
 
 	const float earthR = 6371000;//地球半径
+	const  float distanceEarthLat=1000000;
 	[SerializeField]
 	bool _havelicense=false;
 
@@ -87,14 +88,11 @@ public class main : MonoBehaviour {
 	}
 
 	//
+	float stepLng;//以赤道为基础
+	float stepLat;//以赤道为基础
 	void makeTrr()
 	{
-		//		TSM = new TerrainSaveManager ();
-		//		savefiledate=DateTime.Now.ToString("yyyy-MM-dd HH-mm");
-		//		MTnumError = 0;
-		//		MTnumComplete = 0;
-
-		//	Debug.Log ("savefiledate="+savefiledate);
+		
 		ELEAPIkey = googleELEAPIKey;
 
 		if (ELEAPIkey.Length < 1) {
@@ -125,44 +123,33 @@ public class main : MonoBehaviour {
 		MapObjs = new GameObject[(int)Pieces.x, (int)Pieces.y]; 
 
 
-		Trimlatlng ();//处理输入的经纬度信息，保证为西北，东南两点
-
-		//每个分块纬度差
-		float	steplat=(endlat-lat)/Pieces.y; //(float)Math.Floor(steplat*10)/10;
-		//每个分块经度差
-		//经度差绝对值>180时，取endlng+360计算step.计算后经度超过180的部分在索取数据时处理
-		float	steplng;
-		if (Math.Abs (endlng - lng) >= 180) {
-			//如果=180则认为lat，lng为西北点
-			steplng = (360 + endlng - lng) / Pieces.x;
-		} else {
-			steplng = (endlng - lng) / Pieces.x;
-		}
-
 		size = calcMeshSize (SizeOfPiece);//以纬度方向size y计算经度方向距离x
 		//zoomrange (steplat,steplng);
 
 		////////////////////////////////
-		//起点为左上块
+		//起点为center
 
 
 		int offsetx =(int) Mathf.Floor (Pieces .x / 2);
 		int offsety = (int)Mathf.Floor (Pieces.y / 2);
 
-		for (int i = 0; i < Pieces.x; i++) {
-			for (int j = 0; j < Pieces.y; j++) {
+		for (int i = 0; i < Pieces.y; i++) {
+			for (int j = 0; j < Pieces.x; j++) {
 				string nameT = "Trr" + i + j;
 				GameObject g = new GameObject ();
 				g.name = nameT;
 				g.AddComponent<drawJterrain>().initTrr( nameT,SegmentInPiece,matTrr);
-				g.GetComponent <drawJterrain>().loadNewLoc(lat+j*steplat,lng+i*steplng ,
-					lat+(j+1)*steplat,lng+(i+1)*steplng,size,new Vector2 (i,j));
-				//DrawTMesh DTM=new DrawTMesh();
-				int arrind = (int)Math.Floor(i * Pieces.y + j);
+				float _slat = lat+((offsety-i) * 2 + 1) * stepLat;
+				float _slng = lng+((j-offsetx )* 2 - 1) * stepLng;
+				float _elat = lat+((offsety-i) * 2 - 1) * stepLat;
+				float _elng = lng+((j-offsetx )* 2 + 1) * stepLng;
+
+
+				g.GetComponent <drawJterrain>().loadNewLoc(_slat,_slng,_elat,_elng,size,new Vector2 (i,j));
 
 				g.transform.parent=terrmanager.transform;
 
-				g.transform .Translate(new Vector3((i-offsetx)*size.x, 0, (offsety -j)*size.z));
+				g.transform .Translate(new Vector3((j-offsetx)*size.x, 0, (offsety -i)*size.z));
 
 				//arrTrr [arrind] = g ;
 				MapObjs[i,j]=g;
@@ -171,6 +158,8 @@ public class main : MonoBehaviour {
 		//_newmeshobj=new GameObject ();
 
 	}
+
+
 
 
 
@@ -216,29 +205,43 @@ public class main : MonoBehaviour {
 
 
 	public Vector3 calcMeshSize(float sizelat)
-	{
+	{	
+
 		Vector3 size;
 		size.z = sizelat;
-		float	steplatall=Mathf.Abs (endlat-lat); 
-		//每个分块经度差
-		//经度差绝对值>180时，取endlng+360计算step.计算后经度超过180的部分在索取数据时处理
-		float	steplngall;
-		if (Math.Abs (endlng - lng) >= 180) {
-			steplngall = (360 + endlng - lng) ;
-		} else {
-			steplngall = (endlng - lng) ;
-		}
+		//float 
+		stepLat= distanceEarthLat * 90 / (Mathf.PI * earthR);//**赤道处 单位距离经度跨度
+		Debug.Log("stepLat= "+stepLat);
 
-		float ttt=(endlat+lat)/2;//区域的平均纬度
-		ttt =Mathf.Deg2Rad*ttt;// 角度转弧度=Mathf.PI * ttt / 180;//
+		stepLng=stepLat;
+		float ttt=Mathf.Deg2Rad*lng;// 角度转弧度=Mathf.PI * ttt / 180;//
 		ttt=  Mathf.Abs (Mathf.Cos(ttt ));//当前纬度下，1纬度与1经度之间的距离比
-		size.x =size.z * ttt * Mathf.Abs (steplngall / steplatall)*(Pieces.y/Pieces.x);//根据当前纬度下跨越的纬度与跨越的经度距离的比例关系，求lng方向的mesh尺寸
+		size.x=sizelat*ttt;
 
-		float distancelat = 2 * Mathf.PI * earthR * steplatall / 360;//计算纬度方向实际距离
-		float _scale =Pieces.y* size.z / distancelat;//单位实际距离对应的mesh大小
-
+		float _scale = size.z / distanceEarthLat;//单位实际距离对应的mesh大小
 		size.y=_scale*heightScale ;
 		return size;
+		//float	steplatall = Mathf.Abs (endlat-lat); 
+
+		//每个分块经度差
+		//经度差绝对值>180时，取endlng+360计算step.计算后经度超过180的部分在索取数据时处理
+//		float	steplngall;
+//		if (Math.Abs (endlng - lng) >= 180) {
+//			steplngall = (360 + endlng - lng) ;
+//		} else {
+//			steplngall = (endlng - lng) ;
+//		}
+
+//		float ttt=(endlat+lat)/2;//区域的平均纬度
+//		ttt =Mathf.Deg2Rad*ttt;// 角度转弧度=Mathf.PI * ttt / 180;//
+//		ttt=  Mathf.Abs (Mathf.Cos(ttt ));//当前纬度下，1纬度与1经度之间的距离比
+		//size.x =size.z * ttt * Mathf.Abs (steplngall / steplatall)*(Pieces.y/Pieces.x);//根据当前纬度下跨越的纬度与跨越的经度距离的比例关系，求lng方向的mesh尺寸
+
+//		float distancelat = 2 * Mathf.PI * earthR * steplatall / 360;//计算纬度方向实际距离
+//		float _scale =Pieces.y* size.z / distancelat;//单位实际距离对应的mesh大小
+//
+//		size.y=_scale*heightScale ;
+//		return size;
 		//Debug.Log("steplat=" + steplat + "  steplng=" + steplng+" size="+size );//steplat0.5729578steplng3.71444
 	}
 
@@ -247,3 +250,183 @@ public class main : MonoBehaviour {
 
 
 }
+
+
+
+
+
+//	void makeTrr()
+//	{
+//
+//		ELEAPIkey = googleELEAPIKey;
+//
+//		if (ELEAPIkey.Length < 1) {
+//
+//			Debug.LogWarning ("you need ele key"+ELEAPIkey+googleELEAPIKey);
+//
+//			return;
+//		}
+//
+//		if ((lat == endlat) || (lng == endlng)) {
+//			Debug.LogWarning ("incorrect geographical coordinate");
+//			return;
+//		}
+//		if (lat > 85 || lat < -85 || endlat > 85 || endlat < -85) {
+//			Debug.LogWarning ("you may not get the right map texture above the +-85 latitude");
+//		}
+//		////////////////*****
+//		/// 
+//		size=calcBasicSizeWithCenter(SizeOfPiece);//计算基础size
+//		stepLng = distanceEarthLat * 90 / (Mathf.PI * earthR);//**赤道处 单位距离经度跨度
+//		Debug.Log("stepLng="+stepLng);
+//		if(terrmanager!=null){
+//			DestroyImmediate (terrmanager);
+//		}
+//		terrmanager = new GameObject();
+//		terrmanager.name = "TRRMAG";
+//
+//		//arrTrr = new GameObject[(int)Math.Floor( Pieces.x*Pieces.y)];
+//		MapObjs = new GameObject[(int)Pieces.x, (int)Pieces.y]; 
+//		int offsetx =(int) Mathf.Floor (Pieces .x / 2);
+//		int offsety = (int)Mathf.Floor (Pieces.y / 2);
+//
+//		Vector3 [] stepLats=new Vector3[(int)Pieces.y] ;
+//		stepLats [offsety].y = lat;
+//		float ttt =Mathf.Deg2Rad*lat;// 角度转弧度=Mathf.PI * ttt / 180;//
+//		ttt=  Mathf.Abs (Mathf.Cos(ttt ));//当前纬度下，1纬度与1经度之间的距离比
+//		stepLats [offsety].x=lat- stepLng / ttt;//stepLat = stepLng / ttt;//**纬度越高，单位距离跨越纬度越大
+//		stepLats [offsety].z=lat+ stepLng / ttt;
+//
+//		float lastStepLat=stepLng / ttt;
+//		float lastLat = lat;
+//		for (int i =offsety-1; i >=0; i--) {
+//			
+//		}
+//
+////		for (int i = 0; i < Pieces.y; i++) {
+////			float newLng=
+////			float ttt =Mathf.Deg2Rad*centerpos.y;// 角度转弧度=Mathf.PI * ttt / 180;//
+////			ttt=  Mathf.Abs (Mathf.Cos(ttt ));//当前纬度下，1纬度与1经度之间的距离比
+////
+////			stepLat = stepLng / ttt;//**纬度越高，单位距离跨越纬度越大
+////			for (int j = 0; j < Pieces.x; j++) {
+////				string nameT = "Trr" + i + j;
+////				GameObject g = new GameObject ();
+////				g.name = nameT;
+////				g.AddComponent<drawJterrain>().initTrr( nameT,SegmentInPiece,matTrr);
+////
+////
+////				g.GetComponent <drawJterrain>().loadNewLoc(startPos.y,startPos.x ,
+////					endPos.y,endPos.x,meshsize,new Vector2 (i,j));
+////						//DrawTMesh DTM=new DrawTMesh();
+////				g.transform.parent=terrmanager.transform;
+////				Vector3 nv = new Vector3 ((i - offsetx) * size.x, 0, (offsety - j) * size.z);
+////				g.transform .position=nv;		
+////						//arrTrr [arrind] = g ;
+////				MapObjs[i,j]=g;
+////			}
+////		}
+//
+//	}
+
+/// <summary>
+/// 通过中心位置坐标计算mesh尺寸
+/// </summary>
+/// <returns>Basic mesh size with center.</returns>
+/// <param name="sizelat">Sizelat.</param>
+//	public Vector3 calcBasicSizeWithCenter(float sizelat)
+//	{
+//		float _scale = sizelat / distanceEarthLat;//单位实际距离对应的mesh大小
+//		Vector3 size;
+//		size.x = sizelat;
+//		size.z = sizelat;//
+//		size.y=_scale*heightScale ;
+//		return size;
+//	}
+
+/// <summary>
+/// /calc start & end poisition  and size of each chunk,start pos at northwest.
+/// </summary>
+/// <param name="startpos">Startpos.,y=lat,x=lng</param>
+/// <param name="endpos">Endpos.y=lat,x=lng</param>
+/// <param name="centerpos">Centerpos.y=lat,x=lng</param>
+/// <param name="size">Size.</param>
+//	public void calcMeshSizeWithCenter(ref float stepLat,Vector2 centerpos,ref Vector3 size)
+//	{
+//		//centerpos.y=centerLat
+//		//float stepLng = distanceEarthLat * 90 / (Mathf.PI * earthR);//**赤道处 单位距离经度跨度
+//		float startLng = centerpos.x - stepLng;//**	
+//		float endLng = centerpos.x + stepLng;//**
+//
+//		float ttt =Mathf.Deg2Rad*centerpos.y;// 角度转弧度=Mathf.PI * ttt / 180;//
+//		ttt=  Mathf.Abs (Mathf.Cos(ttt ));//当前纬度下，1纬度与1经度之间的距离比
+//
+//		stepLat = stepLng / ttt;//**纬度越高，单位距离跨越纬度越大
+//		float startLat = centerpos.y - stepLat;//**
+//		float endLat = centerpos.y + stepLat;//**
+//		startLng=(startLng<-180)?(360+startLng):startLng;
+//		endLat=(endLat>180)?(endLat-360):endLat;
+//
+//		startpos.x=startLng;
+//		startpos.y=startLat;
+//		endpos.x=endLng;
+//		endpos.y=endLat;
+//
+//		if (startLat > 85) {
+//			startLat = 85;
+//			size.z*=((85-endLat )/(2*stepLat )+0.5f);
+//		}else if (endLat < -85) {
+//			endLat = -85;
+//			size.z*=((endLat+85 )/(2*stepLat )+0.5f);
+//		}
+//
+//	}
+//	void setpos(Vector3 centerpos){
+//		int cx = Mathf.FloorToInt (NumChunk.x / 2);// + 1;
+//		int cy = Mathf.FloorToInt (NumChunk.y / 2) ;//+ 1;
+//
+//		//string ttt="";
+//		for (int i = 0; i < NumChunk.x; i++) {
+//			for (int j = 0; j < NumChunk.y; j++) {
+//				Vector3 nv = new	Vector3 (centerpos.x + distanceV * (cx - j), centerpos.y, centerpos.z -distanceV * (cy - i));
+//				MapObjs [i, j] .transform.position=nv;
+//				//		ttt += nv;
+//			}
+//			//	ttt+="/";
+//
+//		}
+//		//Debug.Log (ttt);
+//	}
+//	public Vector3 calcMeshSizeWithCenter(float centerLat,float centerLng,float sizelat)
+//	{
+//		float stepLat = distanceEarthLat * 90 / (Mathf.PI * earthR);//**
+//		float startLat = centerLat - stepLat;//**	
+//		float endLat = centerLat + stepLat;//**
+//		Debug.Log ("startLat"+startLat+"/ endLat"+endLat);
+//		Vector3 size;
+//		size.x = sizelat;
+//		size.z = sizelat;//
+//		if (startLat > 85) {
+//			startLat = 85;
+//			size.z*=((85-endLat )/(2*stepLat )+0.5f);
+//		}else if (endLat < -85) {
+//			endLat = -85;
+//			size.z*=((endLat+85 )/(2*stepLat )+0.5f);
+//		}
+//
+//		float ttt =Mathf.Deg2Rad*centerLat;// 角度转弧度=Mathf.PI * ttt / 180;//
+//		ttt=  Mathf.Abs (Mathf.Cos(ttt ));//当前纬度下，1纬度与1经度之间的距离比
+//
+//		float stepLng = stepLat / ttt;//**
+//		float startLng = centerLng - stepLng;//**
+//		float endLng = centerLng + stepLng;//**
+//		startLng=(startLng<-180)?(360+startLng):startLng;
+//		endLat=(endLat>180)?(endLat-360):endLat;
+//
+//		float _scale = size.z / distanceEarthLat;//单位实际距离对应的mesh大小
+//		size.y=_scale*heightScale ;
+//		return size;
+//
+//	}
+//
+

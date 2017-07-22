@@ -32,19 +32,25 @@ public class MapLocation{
 /// </summary>
 [Serializable]
 public class JsonMapDataBing{
+	public string authenticationResultCode;
+	public string brandLogoUri;
+	public string copyright;
+	//public BingresourceSets[] resourceSets;
 	public BingresourceSets[] resourceSets;
-	public string status;
+	public string statusDescription;
 }
 
 [Serializable]
 public class BingresourceSets{
-	public Bingresources[]  resources;
+	public string estimatedTotal="x";
+	public Bingresources[] resources ;
 
 }
 
 [Serializable]
 public class Bingresources{
-	public float[] elevations;
+	public string [] elevations;
+	public int zoomLevel = 2;
 }
 
 
@@ -115,6 +121,7 @@ public class drawJterrain : MonoBehaviour {
 	//
 	public  void loadNewLoc(float _northwestlat,float _northwestlng, float _southeastlat, float _southeastlng,Vector3 _size,Vector2 _vpos)
 	{
+		Debug.Log ("*new"+Trrname+" pos="+_northwestlat+","+_northwestlng+"/"+_southeastlat+","+_southeastlng+" size="+_size );
 		complete = false;
 		Vpos = _vpos;
 		sizelat = _size.z;
@@ -137,8 +144,8 @@ public class drawJterrain : MonoBehaviour {
 		//fakeloadjson();
 		//		sampleLerp ();
 //		DrawMesh();
-			StartCoroutine(LoadJsonBing(southeastlat));
-//			StartCoroutine(LoadJsonGoogle(southeastlat));
+//			StartCoroutine(LoadJsonBing(southeastlat));
+			StartCoroutine(LoadJsonGoogle(southeastlat));
 
 
 	}
@@ -151,10 +158,10 @@ public class drawJterrain : MonoBehaviour {
 			//			if(
 		}
 		errorSamples.Clear();
-		string stvG="stvg= ";
+		string stvG="stvg= \n";
 		for (int i = 0; i <= segment.y; i++) {
 			for (int j = 0; j <= segment.x; j++) {
-				stvG += ","+(i * (int)segment.y + j)+vertives [i * (int)segment.y + j];
+				stvG += " / "+(i * (int)segment.y + j)+","+vertives [i * (int)segment.y + j].y;
 			}
 			stvG+="\n";
 		}
@@ -247,7 +254,7 @@ public class drawJterrain : MonoBehaviour {
 						*additionheight , (indVertives / GoogleJsonData.results.Length) * sizelat/segment.y);
 					//100/x方向分段数=顶点坐标，高度/100=顶点z，为多边形的
 					//tempstr +=GoogleJsonData.results[i].location.lat.ToString()+","+GoogleJsonData.results[i].location.lng.ToString()+vertives[indVertives + i].ToString ();//测试数据
-					tempstr+=","+(indVertives + i)+vertives[indVertives + i];
+					tempstr+=","+(indVertives + i)+vertives[indVertives + i].y;
 				}
 
 				indVertives =indVertives+(int)segment.x+1;//+= GoogleJsonData["results"].Count;/////////
@@ -314,17 +321,29 @@ public class drawJterrain : MonoBehaviour {
 		else    
 		{    
 			try{  
-				StrWwwData = www_data.text;    
-				Debug.Log(StrWwwData);
-				JsonMapDataBing  bingJsonData = JsonUtility.FromJson<JsonMapDataBing>(StrWwwData);
-				float[] bingresults=bingJsonData.resourceSets[0].resources[0].elevations;
+				StrWwwData = www_data.text; 
+				//////////////
+
+//				StrWwwData=(StrWwwData.Substring(StrWwwData.IndexOf("elevations")-1,(StrWwwData.IndexOf("zoomLevel")-StrWwwData.IndexOf("elevations"))));
+//				StrWwwData=StrWwwData.Substring(StrWwwData.IndexOf("[")+1,(StrWwwData.IndexOf("]")-StrWwwData.IndexOf("[")-1));
+//				Debug.Log(StrWwwData);//.Substring(StrWwwData.IndexOf("elevations"),(StrWwwData.IndexOf("zoomLevel")-StrWwwData.IndexOf("elevations"))));
+//				string[] bingresults=StrWwwData.Split (',');
+//				Debug.Log(bingresults.Length);
+//				Debug.Log(bingresults[0]);
+//				Debug.Log(float.Parse(bingresults[0]));
+				/////////////
+
+
+				JsonMapDataBing JMDB=JsonUtility.FromJson <JsonMapDataBing>(www_data.text );
+				string [] bingresults=JMDB.resourceSets[0].resources[0].elevations ;
+
 				for (int i=0; i < bingresults.Length ; i++)		
 				{
-					vertives[indVertives + i]= new Vector3(i*sizelng /segment.x, float.Parse(bingresults[i].ToString()) 
+					vertives[indVertives + i]= new Vector3(i*sizelng /segment.x, float.Parse(bingresults[i]) 
 						*additionheight , (indVertives /bingresults.Length ) * sizelat/segment.y);
 					//100/x方向分段数=顶点坐标，高度/100=顶点z，为多边形的
 					//tempstr +=bingJsonData.results[i].location.lat.ToString()+","+bingJsonData.results[i].location.lng.ToString()+vertives[indVertives + i].ToString ();//测试数据
-					tempstr+=","+(indVertives + i)+vertives[indVertives + i];
+					tempstr+="/"+(indVertives + i)+","+vertives[indVertives + i].y;
 				}
 
 				indVertives =indVertives+(int)segment.x+1;//+= bingJsonData["results"].Count;/////////

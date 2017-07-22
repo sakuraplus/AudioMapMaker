@@ -2,7 +2,7 @@
 using System.Collections.Generic ;
 //using UnityStandardAssets.CrossPlatformInput ;
 
-public class InfiniteMap : MonoBehaviour {
+public class InfiniteMap1 : MonoBehaviour {
 
 	//public float distanceH = 7f;
 	public float distanceV = 4f;
@@ -17,6 +17,8 @@ public class InfiniteMap : MonoBehaviour {
 
 	GameObject onchunk;
 	void Start() {
+		posAddUp = new Vector3[(int)NumChunk.x * (int)NumChunk.y];
+
 
 
 		MapObjs=new GameObject[(int)NumChunk.x ,(int) NumChunk.y] ;

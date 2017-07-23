@@ -6,7 +6,10 @@ using System;
 using System.Text;
 using System.IO;
 
-
+public  enum datasource
+{
+	google,bing
+}
 public class main : MonoBehaviour {
 
 	GameObject terrmanager;//= new GameObject();
@@ -18,14 +21,16 @@ public class main : MonoBehaviour {
 	[Range (-180,180)]
 	public   float lng = 70;			//起点经度，英国东方为正，应该西方为负
 
-	[Header ("latitude and longitude of the southeast")]
-	[Range (-90,90)]
-	public   float endlat = 20;			//终点纬度
+//	[Header ("latitude and longitude of the southeast")]
+//	[Range (-90,90)]
+	   float endlat = 20;			//终点纬度
 	[Range (-180,180)]
-	public   float endlng = 90;			//终点经度
+	   float endlng = 90;			//终点经度
 
 
-
+	[SerializeField,Header ("source of ele data")]
+	datasource _datasource;
+	public static datasource DataSource;
 	[SerializeField,HeaderAttribute ("Default material of each block")]
 	//[HideInInspector]
 	public Material matTrr;	
@@ -34,7 +39,9 @@ public class main : MonoBehaviour {
 	[SerializeField,Header ("API KEY of google elevation service")]
 	[Tooltip("Get a ELE KEY at developers.google.com/maps/documentation/elevation")]
 	string  googleELEAPIKey="";
-
+	[SerializeField,Header ("API KEY of Bing elevation service")]
+	[Tooltip("Get a ELE KEY at developers.google.com/maps/documentation/elevation")]
+	string  bingELEAPIKey="";
 	[Space(20)]
 	public static string ELEAPIkey;
 	//AIzaSyAYKDcM7_1gBCXxXGvPk5VgFjWs4w4BTfs
@@ -47,8 +54,8 @@ public class main : MonoBehaviour {
 	[Header( "size of the esch piece of mesh in lat")]
 	public float SizeOfPiece=100;
 
-	//	[SerializeField,  HeaderAttribute ("size of the mesh")]
-	[HideInInspector]
+		[SerializeField,  HeaderAttribute ("size of the mesh")]
+	//[HideInInspector]
 	public  Vector3 size = new Vector3 (100, 100,1);
 	[SerializeField,Header("the addition of real height data")]
 	[Tooltip("1 means the real scale")]
@@ -92,12 +99,16 @@ public class main : MonoBehaviour {
 	float stepLat;//以赤道为基础
 	void makeTrr()
 	{
-		
-		ELEAPIkey = googleELEAPIKey;
+		if (_datasource == datasource.google) {
+			ELEAPIkey = googleELEAPIKey;
+		} else if (_datasource == datasource.bing) {
+			ELEAPIkey = bingELEAPIKey ;
+		}
+		DataSource = _datasource;
 
 		if (ELEAPIkey.Length < 1) {
 
-			Debug.LogWarning ("you need ele key"+ELEAPIkey+googleELEAPIKey);
+			Debug.LogWarning ("you need ele key"+ELEAPIkey);
 
 			return;
 		}
@@ -214,7 +225,7 @@ public class main : MonoBehaviour {
 		Debug.Log("stepLat= "+stepLat);
 
 		stepLng=stepLat;
-		float ttt=Mathf.Deg2Rad*lng;// 角度转弧度=Mathf.PI * ttt / 180;//
+		float ttt=Mathf.Deg2Rad*lat;// 角度转弧度=Mathf.PI * ttt / 180;//
 		ttt=  Mathf.Abs (Mathf.Cos(ttt ));//当前纬度下，1纬度与1经度之间的距离比
 		size.x=sizelat*ttt;
 

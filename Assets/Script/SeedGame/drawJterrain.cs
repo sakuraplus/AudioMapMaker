@@ -69,6 +69,8 @@ public class drawJterrain : MonoBehaviour {
 	public bool complete=false;
 	public string Trrname;
 	public  Vector2 Vpos;
+	public  float centerlat;// +-90西北
+	public  float centerlng;//+-180西北
 	public  float northwestlat;// +-90西北
 	public  float northwestlng;//+-180西北
 	public  float southeastlat;// +-90东南
@@ -118,43 +120,63 @@ public class drawJterrain : MonoBehaviour {
 
 		DrawTexture ();
 	}
-	//
-	public  void loadNewLoc(float _northwestlat,float _northwestlng, float _southeastlat, float _southeastlng,Vector3 _size,Vector2 _vpos)
+	float trimLng(float lng){
+		
+		if (lng > 180) {
+			lng -=360 ;//将超过180度的经度转换为正常值
+		}else if(lng<-180){
+			lng += 360;
+		}
+		return lng;
+	}
+	//(float _northwestlat,float _northwestlng, float _southeastlat, float _southeastlng,Vector3 _size,Vector2 _vpos)
+	public  void loadNewLoc(float _centerlat,float _centerlng, float _steplat, float _steplng,Vector3 _size,Vector2 _vpos)
 	{
-		Debug.Log ("*new"+Trrname+" pos="+_northwestlat+","+_northwestlng+"/"+_southeastlat+","+_southeastlng+" size="+_size );
+
 		complete = false;
 		Vpos = _vpos;
 		sizelat = _size.z;
 		sizelng = _size.x;
 		additionheight = _size.y;
-		if (_northwestlng > 180) {
-			_northwestlng -=360 ;//将超过180度的经度转换为正常值
-		}
-		if (_southeastlng > 180) {
-			_southeastlng -=360;//将超过180度的经度转换为正常值
-		}
-		northwestlat = _northwestlat;// +-90 西北角纬度
-		northwestlng = _northwestlng;//+-180西北角经度
-		southeastlat = _southeastlat;// +-90 东南角纬度
-		southeastlng = _southeastlng;//+-180 东南角经度
-		steplat = ( northwestlat-southeastlat ) / segment.y;//每段跨越的纬度
-		steplng = ( southeastlng-northwestlng  ) / segment.x;//每段跨越的纬度
+
+		centerlat = _centerlat;
+		centerlng =trimLng( _centerlng);
+		northwestlat = _centerlat + _steplat;//_northwestlat;// +-90 西北角纬度
+		northwestlng = _centerlng - _steplng;// _northwestlng;//+-180西北角经度
+		southeastlat = _centerlat - _steplat;// _southeastlat;// +-90 东南角纬度
+		southeastlng = _centerlng + _steplng;// _southeastlng;//+-180 东南角经度
+		steplat = _steplat*2 / segment.y;//每段跨越的纬度
+		steplng = _steplng*2 / segment.x;//每段跨越的纬度
+		northwestlng = trimLng (northwestlng);
+		southeastlng = trimLng (southeastlng);
+
+		Debug.Log ("*new"+Trrname+" pos="+northwestlat+","+northwestlng+"/"+southeastlat+","+southeastlng+" size="+_size );
+//		centerlat = (_northwestlat + _southeastlat)/2;
+//		centerlng = (_southeastlng - _northwestlng;
+//		northwestlat = _northwestlat;// +-90 西北角纬度
+//		northwestlng = _northwestlng;//+-180西北角经度
+//		southeastlat = _southeastlat;// +-90 东南角纬度
+//		southeastlng = _southeastlng;//+-180 东南角经度
+//		steplat = ( northwestlat-southeastlat ) / segment.y;//每段跨越的纬度
+//		steplng = ( southeastlng-northwestlng  ) / segment.x;//每段跨越的纬度
 		//z正方向为北
 		//print (Trrname+"-init-"+northwestlat+","+_northwestlng+"//"+_southeastlat+","+_southeastlng+" step="+steplat);
 		//*************************************
-		fakeloadjson();
-				sampleLerp ();
-		DrawMesh();
-//		switch (main.DataSource){
-//		case (datasource.google):
-//			//	StartCoroutine(LoadJsonGoogleLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
-//				StartCoroutine(LoadJsonGoogleLng(northwestlng));//按精度取值，差值为南北方向
-//			break;
-//		case(datasource.bing ):
-//			//StartCoroutine(LoadJsonBingLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
-//			StartCoroutine(LoadJsonBingLng(northwestlng));//按精度取值，差值为南北方向
-//			break;
-//		}
+//		fakeloadjson();
+//		sampleLerp ();
+//		DrawMesh();
+		//************************************
+
+		switch (main.DataSource){
+		case (datasource.google):
+			//	StartCoroutine(LoadJsonGoogleLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
+			StartCoroutine(LoadJsonGoogleLng(northwestlng));//按精度取值，差值为南北方向
+			break;
+		case(datasource.bing ):
+			//StartCoroutine(LoadJsonBingLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
+			StartCoroutine(LoadJsonBingLng(northwestlng));//按精度取值，差值为南北方向
+			break;
+		}
 
 
 	}
@@ -183,7 +205,7 @@ public class drawJterrain : MonoBehaviour {
 	void saveStatic(){
 		for (int i = 0; i <= segment.x; i++) {
 			for (int j = 0; i <= segment.y; i++) {
-				//InfiniteMap.Vertives[Vpos .x*se+j]=vertives [];
+				//main.Vertives[Vpos .x*se+j]=vertives [];
 				//			if(
 			}
 		}
@@ -205,8 +227,8 @@ public class drawJterrain : MonoBehaviour {
 			for (int j = 0; j <= segment.y; j++) {
 				int ind = i * (int)(segment.y + 1) + j;
 
-				if (InfiniteMap .Vertives [(int)(Vpos.x * segment.x) + i, (int)(Vpos.y * segment.y) + j].y == 0) {
-					InfiniteMap.Vertives [(int)(Vpos.x * segment.x) + i, (int)(Vpos.y * segment.y) + j] = vertives [ind];
+				if (main .Vertives [(int)(Vpos.x * segment.x) + i, (int)(Vpos.y * segment.y) + j].y == 0) {
+					main.Vertives [(int)(Vpos.x * segment.x) + i, (int)(Vpos.y * segment.y) + j] = vertives [ind];
 				}
 			}
 		}
@@ -251,14 +273,14 @@ public class drawJterrain : MonoBehaviour {
 
 			indVertives =indVertives+(int)segment.x+1;//+= GoogleJsonData["results"].Count;/////////
 			lng += steplng;           
-			StartCoroutine(LoadJsonGoogleLng(lng));  //获取下一纬度，东西经度之间的数据
+			StartCoroutine(LoadJsonGoogleLng(trimLng( lng)));  //获取下一纬度，东西经度之间的数据
 			StrWwwData = "";  
 		}    
 		else    
 		{    
 			try{  
 				StrWwwData = www_data.text;    
-				Debug.Log(StrWwwData);
+				Debug.Log(ipaddress+"\n"+StrWwwData);
 				JsonMapDataGoogle GoogleJsonData = JsonUtility.FromJson<JsonMapDataGoogle>(StrWwwData);
 				for (int i=0; i < GoogleJsonData.results.Length ; i++)		
 				{
@@ -273,7 +295,7 @@ public class drawJterrain : MonoBehaviour {
 
 				indVertives ++;//=indVertives+(int)segment.y+1;//+= GoogleJsonData["results"].Count;/////////
 				lng += steplng;           
-				StartCoroutine(LoadJsonGoogleLng(lng));  //获取下一纬度，东西经度之间的数据
+				StartCoroutine(LoadJsonGoogleLng(trimLng( lng)));  //获取下一纬度，东西经度之间的数据
 				StrWwwData = "";  	
 
 			}  
@@ -381,7 +403,7 @@ public class drawJterrain : MonoBehaviour {
 		ipaddress +=lat +","+northwestlng +",";
 		ipaddress += lat  +","+southeastlng ;//获取同一纬度下，东西经度之间的数据
 		ipaddress += "&heights=ellipsoid&samples=" + (segment.x+1)+"&key=";
-		ipaddress +="Alx3lnaKPAchj200vPlB4UXk2UY6JXCm2FNO8LzAzjrftFyzS_2fJGmR_nii9VL_";//ELEKey;//需要自己注册！！
+		ipaddress +=ELEKey;//需要自己注册！"Alx3lnaKPAchj200vPlB4UXk2UY6JXCm2FNO8LzAzjrftFyzS_2fJGmR_nii9VL_";//！
 		//print(Trrname+"--"+ipaddress);
 		WWW www_data = new WWW(ipaddress);  
 		yield return www_data;  //获得数据后继续
@@ -468,7 +490,7 @@ public class drawJterrain : MonoBehaviour {
 		ipaddress +=southeastlat  +","+lng +",";
 		ipaddress += northwestlat  +","+lng ;//获取同一纬度下，东西经度之间的数据
 		ipaddress += "&heights=ellipsoid&samples=" + (segment.y+1)+"&key=";
-		ipaddress +="Alx3lnaKPAchj200vPlB4UXk2UY6JXCm2FNO8LzAzjrftFyzS_2fJGmR_nii9VL_";//ELEKey;//需要自己注册！！
+		ipaddress +=ELEKey;//需要自己注册！"Alx3lnaKPAchj200vPlB4UXk2UY6JXCm2FNO8LzAzjrftFyzS_2fJGmR_nii9VL_";//ELEKey;//需要自己注册！！
 		//print(Trrname+"--"+ipaddress);
 		WWW www_data = new WWW(ipaddress);  
 		yield return www_data;  //获得数据后继续
@@ -492,7 +514,7 @@ public class drawJterrain : MonoBehaviour {
 
 			indVertives =indVertives+(int)segment.x+1;//+= bingJsonData["results"].Count;/////////
 			lng += steplng;           
-			StartCoroutine(LoadJsonBingLng(lng));  //获取下一纬度，东西经度之间的数据
+			StartCoroutine(LoadJsonBingLng(trimLng( lng)));  //获取下一纬度，东西经度之间的数据
 			StrWwwData = "";  
 		}    
 		else    
@@ -527,7 +549,7 @@ public class drawJterrain : MonoBehaviour {
 
 				indVertives ++;//=indVertives+(int)segment.x+1;//+= bingJsonData["results"].Count;/////////
 				lng += steplng;           
-				StartCoroutine(LoadJsonBingLng(lng));  //获取下一纬度，东西经度之间的数据
+				StartCoroutine(LoadJsonBingLng(trimLng( lng)));  //获取下一纬度，东西经度之间的数据
 				StrWwwData = "";  	
 
 			}  

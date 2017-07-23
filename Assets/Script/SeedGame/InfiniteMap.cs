@@ -9,18 +9,20 @@ public class InfiniteMap : MonoBehaviour {
 	public bool cameragroundlimit;
 	public GameObject [] objs=new GameObject[9];
 	Vector3[] posAddUp=new Vector3[9] ;
-	GameObject[,] MapObjs=new GameObject[3,3] ;
+	GameObject[,] _MapObjs=new GameObject[3,3] ;
 	//	Dictionary <pos,GameObject > DictMapObj;
 	public Vector2 NumChunk;
 	public  Transform charPos;
-	public static Vector3[,] Vertives;
-
+	//public static Vector3[,] Vertives;
+	int numEachChunkx;
+	int numEachChunky;
 	GameObject onchunk;
 	void Start() {
 
-
-		MapObjs=new GameObject[(int)NumChunk.x ,(int) NumChunk.y] ;
-		initMaps();
+		numEachChunkx = (int)main.SegmentInPiece.x;
+		numEachChunky =(int) main.SegmentInPiece.y;
+		_MapObjs = main.MapObjs;//new GameObject[(int)NumChunk.x ,(int) NumChunk.y] ;
+		//initMaps();
 
 	}
 
@@ -98,33 +100,37 @@ public class InfiniteMap : MonoBehaviour {
 		int stepX = (int)vp.y - Mathf.FloorToInt( NumChunk .x/2);
 		vplast = vp;
 		if (stepX> 0) {
+			//右
 			for (int i = 0; i < NumChunk.x; i++) {
 				for (int j = 0; j < NumChunk.y; j++) {
 					id = new Vector2 (i, j);
-					if (MapObjs [i, j] != null) {
+					if (_MapObjs [i, j] != null) {
 						if (j < stepX) {
-							pool.Add (MapObjs [i, j]);
+							pool.Add (_MapObjs [i, j]);
 						} else {
-							MapObjs [i, j - stepX] = MapObjs [i, j];
-							MapObjs [i, j - stepX].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j - stepX);
-							MapObjs [i, j] = null;
-
+							_MapObjs [i, j - stepX] = _MapObjs [i, j];
+							_MapObjs [i, j - stepX].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j - stepX);
+							_MapObjs [i, j] = null;
+							////////////////////
+							//main.Vertives [
+							////////////////
 						}
 					}
 				}
 			}
 		}else if(stepX < 0) {
+			//左
 			for (int i = 0; i < NumChunk.x; i++) {
 				for (int j =(int)NumChunk.y; j >0 ; j--) {
 					id = new Vector2 (i, j);
-					if (MapObjs [i, j-1] != null) {
+					if (_MapObjs [i, j-1] != null) {
 						if (j > (NumChunk.y + stepX)) {
-							pool.Add (MapObjs [i, j - 1]);
+							pool.Add (_MapObjs [i, j - 1]);
 						} else {
 
-							MapObjs [i, j] = MapObjs [i, j + stepX];
-							MapObjs [i, j].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j);
-							MapObjs [i, j + stepX] = null;
+							_MapObjs [i, j] = _MapObjs [i, j + stepX];
+							_MapObjs [i, j].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j);
+							_MapObjs [i, j + stepX] = null;
 						}
 					}
 				}
@@ -134,13 +140,13 @@ public class InfiniteMap : MonoBehaviour {
 			for (int i = 0; i < NumChunk.y; i++) {
 				for (int j = 0; j < NumChunk.x; j++) {
 					id = new Vector2 (j, i);
-					if (MapObjs [j, i] != null) {
+					if (_MapObjs [j, i] != null) {
 						if (j < stepY) {
-							pool.Add (MapObjs [j, i]);
+							pool.Add (_MapObjs [j, i]);
 						} else {
-							MapObjs [j - stepY, i] = MapObjs [j, i];
-							MapObjs [j - stepY, i].GetComponent<drawJterrain> ().Vpos = new Vector2 (j - stepY, i);
-							MapObjs [j, i] = null;
+							_MapObjs [j - stepY, i] = _MapObjs [j, i];
+							_MapObjs [j - stepY, i].GetComponent<drawJterrain> ().Vpos = new Vector2 (j - stepY, i);
+							_MapObjs [j, i] = null;
 						}
 					}
 				}
@@ -149,14 +155,14 @@ public class InfiniteMap : MonoBehaviour {
 			for (int i = 0; i < NumChunk.y; i++) {
 				for (int j =(int)NumChunk.x; j >0 ; j--) {
 					id = new Vector2 (j, i);
-					if (MapObjs [j-1, i] != null) {
+					if (_MapObjs [j-1, i] != null) {
 						if (j > (NumChunk.y + stepY)) {
-							pool.Add (MapObjs [j - 1, i]);
+							pool.Add (_MapObjs [j - 1, i]);
 						} else {
 
-							MapObjs [j, i] = MapObjs [j + stepY, i];
-							MapObjs [j, i].GetComponent<drawJterrain> ().Vpos = new Vector2 (j, i);
-							MapObjs [j + stepY, i] = null;
+							_MapObjs [j, i] = _MapObjs [j + stepY, i];
+							_MapObjs [j, i].GetComponent<drawJterrain> ().Vpos = new Vector2 (j, i);
+							_MapObjs [j + stepY, i] = null;
 						}
 					}
 				}
@@ -165,13 +171,20 @@ public class InfiniteMap : MonoBehaviour {
 		string ttt="";
 		for (int i = 0; i < NumChunk.x; i++) {
 			for (int j = 0; j < NumChunk.y; j++) {
-				if (MapObjs [i, j] == null && pool.Count>0) {
-					MapObjs [i, j] = pool [0];
-					MapObjs [i, j].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j);
+				if (_MapObjs [i, j] == null && pool.Count>0) {
+					_MapObjs [i, j] = pool [0];
+					_MapObjs [i, j].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j);
+					//////////////////////////////////////***
+					if(j+1< NumChunk.y ){
+						
+					}
+
+
+					//////////////////////////////////////***
 
 					pool.RemoveAt (0);
 				}
-				ttt += MapObjs [i, j].name+",";
+				ttt += _MapObjs [i, j].name+",";
 			}
 			ttt+="/";
 		}
@@ -187,7 +200,7 @@ public class InfiniteMap : MonoBehaviour {
 		for (int i = 0; i < NumChunk.x; i++) {
 			for (int j = 0; j < NumChunk.y; j++) {
 				Vector3 nv = new	Vector3 (centerpos.x + distanceV * (cx - j), centerpos.y, centerpos.z -distanceV * (cy - i));
-				MapObjs [i, j] .transform.position=nv;
+				_MapObjs [i, j] .transform.position=nv;
 				//		ttt += nv;
 			}
 			//	ttt+="/";
@@ -201,7 +214,7 @@ public class InfiniteMap : MonoBehaviour {
 	void initMaps(){
 		vpnow = new Vector2 (1,1);
 		vplast = vpnow;
-		MapObjs=new GameObject[(int)NumChunk.x ,(int)NumChunk.y ] ;
+		_MapObjs=new GameObject[(int)NumChunk.x ,(int)NumChunk.y ] ;
 		pool = new List<GameObject> ();
 
 
@@ -211,10 +224,10 @@ public class InfiniteMap : MonoBehaviour {
 		for (int i = 0; i < NumChunk.x; i++) {
 			for (int j = 0; j < NumChunk.y; j++) {
 				Vector3 nv = new	Vector3 (0 + distanceV * (cx - j), 0, 0 -distanceV * (cy - i));
-				MapObjs [i, j] = objs [i*(int)NumChunk.x+j];
-				MapObjs [i, j] .transform.localPosition =nv;
-				MapObjs [i, j].GetComponent<drawJterrain > ().Vpos = new Vector2 (i, j);
-				ttt += MapObjs [i, j].name+nv;
+				_MapObjs [i, j] = objs [i*(int)NumChunk.x+j];
+				_MapObjs [i, j] .transform.localPosition =nv;
+				_MapObjs [i, j].GetComponent<drawJterrain > ().Vpos = new Vector2 (i, j);
+				ttt += _MapObjs [i, j].name+nv;
 			}
 			ttt+="/";
 		}

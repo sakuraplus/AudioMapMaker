@@ -1,6 +1,6 @@
 using UnityEngine;  
 //using UnityEditor;  
-using System.Collections;  
+using System.Collections.Generic ;  
 
 using System;
 using System.Text;
@@ -14,7 +14,7 @@ public class main : MonoBehaviour {
 
 	GameObject terrmanager;//= new GameObject();
 	//	public  GameObject[] arrTrr;//= new GameObject[9];
-	public  GameObject[,] MapObjs;//= new GameObject[9];
+	public static  GameObject[,] MapObjs;//= new GameObject[9];
 	[Header("latitude and longitude of the northwest")]
 	[Range (-90,90)]
 	public   float lat = 30;			//起点纬度，北极90，南极-90
@@ -46,10 +46,11 @@ public class main : MonoBehaviour {
 	public static string ELEAPIkey;
 	//AIzaSyAYKDcM7_1gBCXxXGvPk5VgFjWs4w4BTfs
 	[SerializeField,HeaderAttribute ("separate the full area to pieces")]
-	public Vector2 Pieces=new Vector2(3,3);//地图分块数
+	public  Vector2 Pieces=new Vector2(3,3);//地图分块数
 
 	[SerializeField,HeaderAttribute ("segment one mesh block in  lng,lat")]
-	public Vector2 SegmentInPiece=new Vector2(5,5);//每块地图分段数
+	Vector2 _SegmentInPiece=new Vector2(5,5);//每块地图分段数
+	public static  Vector2 SegmentInPiece=new Vector2(5,5);//每块地图分段数
 
 	[Header( "size of the esch piece of mesh in lat")]
 	public float SizeOfPiece=100;
@@ -73,13 +74,16 @@ public class main : MonoBehaviour {
 	public static  string savefiledate;
 	public static  int NumComplete;
 	public static  int NumError;
-	//public static float [,] Vertives;
-
+	public static  Vector3 [,] Vertives;
+//	public static List< List <Vector3 >> Vertives=new List< List<Vector3>> ();
 
 	void Start () {
 		NumComplete = 0;
 		NumError = 0;
-		InfiniteMap . Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
+		SegmentInPiece = _SegmentInPiece;
+		Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
+//		for (int i=0;i)
+		// Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
 		//StartCoroutine (findLicense ());
 		makeTrr ();
 	}
@@ -87,7 +91,7 @@ public class main : MonoBehaviour {
 		string st = "testV\n";
 		for (int i = 0; i < (int)(Pieces.x * SegmentInPiece.x + 1); i++) {
 			for (int j=0 ; j < (int)(Pieces.y * SegmentInPiece.y + 1); j++) {
-				st += ",\t" + InfiniteMap.Vertives [i, j];
+				st += ",\t" + Vertives [i, j];
 			}
 			st+="\n";
 		}
@@ -154,9 +158,12 @@ public class main : MonoBehaviour {
 				float _slng = lng+((j-offsetx )* 2 - 1) * stepLng;
 				float _elat = lat+((offsety-i) * 2 - 1) * stepLat;
 				float _elng = lng+((j-offsetx )* 2 + 1) * stepLng;
+				float _clat = lat+((offsety-i) * 2 ) * stepLat;
+				float _clng = lng+((j-offsetx )* 2 ) * stepLng;
 
 
-				g.GetComponent <drawJterrain>().loadNewLoc(_slat,_slng,_elat,_elng,size,new Vector2 (i,j));
+				g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,stepLat ,stepLng,size,new Vector2 (i,j));
+				//(_slat,_slng,_elat,_elng,size,new Vector2 (i,j));
 
 				g.transform.parent=terrmanager.transform;
 

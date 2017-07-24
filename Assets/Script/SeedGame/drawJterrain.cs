@@ -162,21 +162,21 @@ public class drawJterrain : MonoBehaviour {
 		//z正方向为北
 		//print (Trrname+"-init-"+northwestlat+","+_northwestlng+"//"+_southeastlat+","+_southeastlng+" step="+steplat);
 		//*************************************
-//		fakeloadjson();
-//		sampleLerp ();
-//		DrawMesh();
+		fakeloadjson();
+		sampleLerp ();
+		DrawMesh();
 		//************************************
-//
-		switch (main.DataSource){
-		case (datasource.google):
-			//	StartCoroutine(LoadJsonGoogleLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
-			StartCoroutine(LoadJsonGoogleLng(northwestlng));//按精度取值，差值为南北方向
-			break;
-		case(datasource.bing ):
-			//StartCoroutine(LoadJsonBingLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
-			StartCoroutine(LoadJsonBingLng(northwestlng));//按精度取值，差值为南北方向
-			break;
-		}
+////
+//		switch (main.DataSource){
+//		case (datasource.google):
+//			//	StartCoroutine(LoadJsonGoogleLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
+//			StartCoroutine(LoadJsonGoogleLng(northwestlng));//按精度取值，差值为南北方向
+//			break;
+//		case(datasource.bing ):
+//			//StartCoroutine(LoadJsonBingLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
+//			StartCoroutine(LoadJsonBingLng(northwestlng));//按精度取值，差值为南北方向
+//			break;
+//		}
 
 
 	}
@@ -202,7 +202,7 @@ public class drawJterrain : MonoBehaviour {
 		//print (Trrname+"-init-"+northwestlat+","+_northwestlng+"//"+_southeastlat+","+_southeastlng+" step="+steplat);
 		//*************************************
 				fakeloadjson();
-				sampleLerp ();
+				//sampleLerp ();
 				DrawMesh();
 		//************************************
 
@@ -253,7 +253,8 @@ public class drawJterrain : MonoBehaviour {
 		for (int i = 0; i <= segment.y; i++) {
 			for (int j = 0; j <= segment.x ; j++) {
 				int ind = i * (int)(segment.y + 1) + j;
-				vertives [ind].y = ind;// 0.1f* Vpos.y +0.001f*ind+Vpos.x  ;
+				float a=UnityEngine. Random.Range(0f,5f);
+				vertives [ind].y =a;// 0.1f* Vpos.y +0.001f*ind+Vpos.x  ;
 				vertives [ind].x =j * sizelng / segment.x;
 				vertives [ind].z = i * sizelat / segment.y;
 //				vertives [ind].y = ind;// 0.1f* Vpos.y +0.001f*ind+Vpos.x  ;
@@ -263,7 +264,7 @@ public class drawJterrain : MonoBehaviour {
 			}
 			stt+="\n";
 		}
-		Debug.Log (Trrname +" fake json"+stt);
+	//	Debug.Log (Trrname +" fake json"+stt);
 		for (int i = 0; i <= segment.x; i++) {
 			for (int j = 0; j <= segment.y; j++) {
 				int ind = i * (int)(segment.y + 1) + j;

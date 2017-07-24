@@ -14,7 +14,7 @@ public class main : MonoBehaviour {
 
 	GameObject terrmanager;//= new GameObject();
 	//	public  GameObject[] arrTrr;//= new GameObject[9];
-	public static  GameObject[,] MapObjs;//= new GameObject[9];
+	public static  GameObject[,] MapObjs= new GameObject[3,3];
 	[Header("latitude and longitude of the northwest")]
 	[Range (-90,90)]
 	public   float lat = 30;			//起点纬度，北极90，南极-90
@@ -46,8 +46,8 @@ public class main : MonoBehaviour {
 	public static string ELEAPIkey;
 	//AIzaSyAYKDcM7_1gBCXxXGvPk5VgFjWs4w4BTfs
 	[SerializeField,HeaderAttribute ("separate the full area to pieces")]
-	public  Vector2 Pieces=new Vector2(3,3);//地图分块数
-
+	Vector2 _Pieces=new Vector2(3,3);//地图分块数
+	public static  Vector2 Pieces=new Vector2(3,3);//地图分块数
 	[SerializeField,HeaderAttribute ("segment one mesh block in  lng,lat")]
 	Vector2 _SegmentInPiece=new Vector2(5,5);//每块地图分段数
 	public static  Vector2 SegmentInPiece=new Vector2(5,5);//每块地图分段数
@@ -78,14 +78,16 @@ public class main : MonoBehaviour {
 	public static  Vector3 [,] Vertives;
 //	public static List< List <Vector3 >> Vertives=new List< List<Vector3>> ();
 
-	void Start () {
+	void Awake () {
 		NumComplete = 0;
 		NumError = 0;
 		SegmentInPiece = _SegmentInPiece;
+		Pieces = _Pieces;
 		Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
 //		for (int i=0;i)
 		// Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
 		//StartCoroutine (findLicense ());
+//		MapObjs = new GameObject[(int)Pieces.x, (int)Pieces.y]; 
 		makeTrr ();
 	}
 	public void testV(){
@@ -158,6 +160,7 @@ public class main : MonoBehaviour {
 			for (int j = 0; j < Pieces.x; j++) {
 				string nameT = "Trr" + i + j;
 				GameObject g = new GameObject ();
+				g.tag="Ground";
 				g.name = nameT;
 				g.AddComponent<drawJterrain>().initTrr( nameT,SegmentInPiece,matTrr);
 				float _slat = lat+((offsety-i) * 2 + 1) * stepLat;

@@ -166,7 +166,7 @@ public class drawJterrain : MonoBehaviour {
 //		sampleLerp ();
 //		DrawMesh();
 		//************************************
-
+//
 		switch (main.DataSource){
 		case (datasource.google):
 			//	StartCoroutine(LoadJsonGoogleLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
@@ -180,7 +180,45 @@ public class drawJterrain : MonoBehaviour {
 
 
 	}
+	public   void loadNewLoc(float _centerlat,float _centerlng, Vector2 _vpos)
+	{
+		
+		complete = false;
+		Vpos = _vpos;
 
+		centerlat = _centerlat;
+		centerlng =trimLng( _centerlng);
+		northwestlat = _centerlat + main.stepLat ;//_northwestlat;// +-90 西北角纬度
+		northwestlng = _centerlng - main.stepLng ;// _northwestlng;//+-180西北角经度
+		southeastlat = _centerlat - main.stepLat ;// _southeastlat;// +-90 东南角纬度
+		southeastlng = _centerlng + main.stepLng ;// _southeastlng;//+-180 东南角经度
+		steplat = main.stepLat *2 / segment.y;//每段跨越的纬度
+		steplng = main.stepLng *2 / segment.x;//每段跨越的纬度
+		northwestlng = trimLng (northwestlng);
+		southeastlng = trimLng (southeastlng);
+
+		Debug.Log ("*2new"+Trrname+" pos="+northwestlat+","+northwestlng+"/"+southeastlat+","+southeastlng+" size="+main.MeshSize  );
+
+		//print (Trrname+"-init-"+northwestlat+","+_northwestlng+"//"+_southeastlat+","+_southeastlng+" step="+steplat);
+		//*************************************
+				fakeloadjson();
+				sampleLerp ();
+				DrawMesh();
+		//************************************
+
+//		switch (main.DataSource){
+//		case (datasource.google):
+//			//	StartCoroutine(LoadJsonGoogleLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
+//			StartCoroutine(LoadJsonGoogleLng(northwestlng));//按精度取值，差值为南北方向
+//			break;
+//		case(datasource.bing ):
+//			//StartCoroutine(LoadJsonBingLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
+//			StartCoroutine(LoadJsonBingLng(northwestlng));//按精度取值，差值为南北方向
+//			break;
+//		}
+
+
+	}
 	List<int> errorSamples = new List<int> ();
 	Vector2[] testVertives;
 	void sampleLerp(){
@@ -216,8 +254,11 @@ public class drawJterrain : MonoBehaviour {
 			for (int j = 0; j <= segment.x ; j++) {
 				int ind = i * (int)(segment.y + 1) + j;
 				vertives [ind].y = ind;// 0.1f* Vpos.y +0.001f*ind+Vpos.x  ;
-				vertives [ind].x =Vpos.x;// j * sizelng / segment.x;
-				vertives [ind].z =Vpos.y;// i * sizelat / segment.y;
+				vertives [ind].x =j * sizelng / segment.x;
+				vertives [ind].z = i * sizelat / segment.y;
+//				vertives [ind].y = ind;// 0.1f* Vpos.y +0.001f*ind+Vpos.x  ;
+//				vertives [ind].x =Vpos.x;// j * sizelng / segment.x;
+//				vertives [ind].z =Vpos.y;// i * sizelat / segment.y;
 				stt +=","+i+","+j+","+ind+ vertives [ind];
 			}
 			stt+="\n";
@@ -565,12 +606,13 @@ public class drawJterrain : MonoBehaviour {
 	///////////////////////////
 	/// 
 
-
+	Mesh mesh ;
 	//
 	private void DrawMesh()
 	{
-
-		Mesh mesh = gameObject .AddComponent<MeshFilter>().mesh;
+		if (gameObject.GetComponent <MeshFilter> () == null) {
+			mesh = gameObject.AddComponent<MeshFilter> ().mesh;
+		} 
 		//给mesh 赋值
 		mesh.Clear();
 		mesh.vertices = vertives;//,pos);
@@ -583,9 +625,11 @@ public class drawJterrain : MonoBehaviour {
 		main.NumComplete++;//加载成功计数。用于计算是否所有块都完成
 		//		DrawTexture ();
 		////////////////////////
-		//        terrain.AddComponent<MeshCollider>();
-		//        terrain.GetComponent<MeshCollider>().sharedMesh = mesh ;
-		//        terrain.GetComponent<MeshCollider>().convex = true;
+		if (gameObject.AddComponent<MeshCollider> () == null) {
+			gameObject.AddComponent<MeshCollider> ();
+			gameObject.GetComponent<MeshCollider> ().sharedMesh = mesh;
+			gameObject.GetComponent<MeshCollider> ().convex = true;
+		}
 		//		SaveAsset();
 	}
 

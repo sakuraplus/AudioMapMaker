@@ -17,34 +17,27 @@ public class InfiniteMap : MonoBehaviour {
 	int numEachChunkx;
 	int numEachChunky;
 	GameObject onchunk;
+	float onchunkLat,onchunkLng;
 	void Start() {
 
 		numEachChunkx = (int)main.SegmentInPiece.x;
 		numEachChunky =(int) main.SegmentInPiece.y;
-		_MapObjs = main.MapObjs;//new GameObject[(int)NumChunk.x ,(int) NumChunk.y] ;
+		//_MapObjs = main.MapObjs;//new GameObject[(int)NumChunk.x ,(int) NumChunk.y] ;
+		//Debug.Log("_MapObjs-"+_MapObjs.Length );
 		//initMaps();
 
 	}
 
 	void Update() {
+		_MapObjs = main.MapObjs;
 		onwhichchunk ();
 
 	}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 	public  void onwhichchunk(){
+		
 		RaycastHit hit;
 		if(Physics.Raycast (charPos.position ,Vector3.down ,out hit ))
 		{
@@ -57,6 +50,8 @@ public class InfiniteMap : MonoBehaviour {
 						return ;
 					}
 					onchunk =g;
+					onchunkLat=onchunk.GetComponent<drawJterrain>().centerlat ;
+					onchunkLat=onchunk.GetComponent<drawJterrain>().centerlng ;
 					objFound=true;
 					break ;
 				}
@@ -75,6 +70,7 @@ public class InfiniteMap : MonoBehaviour {
 			//
 			//			onchunk = hit.collider.gameObject;
 			Debug.Log ("onwhich "+hit.collider.gameObject.name+onchunk.transform.localPosition);
+			Debug.Log ("onwhich "+hit.collider.gameObject.name+onchunk.transform.localPosition);
 			vpnow = onchunk.GetComponent<drawJterrain> ().Vpos;
 			//if (vpnow != vplast) {
 			replacechunk (vpnow );
@@ -92,10 +88,12 @@ public class InfiniteMap : MonoBehaviour {
 	[SerializeField ]
 	Vector2 id;
 	Vector2 vpnow;
-	Vector2 vplast;
+	Vector2 vplast;//测试用？
 	void replacechunk(Vector2 vp){
 
 		Debug.Log(vp+"/"+vplast );
+//		int stepY =(int) vp.x -(int)vplast.x;
+//		int stepX = (int)vp.y - (int)vplast.y;
 		int stepY =(int) vp.x -Mathf.FloorToInt( NumChunk .x/2);
 		int stepX = (int)vp.y - Mathf.FloorToInt( NumChunk .x/2);
 		vplast = vp;
@@ -169,16 +167,19 @@ public class InfiniteMap : MonoBehaviour {
 			}
 		}
 		string ttt="";
+		Vector2  baseChunkPos = onchunk.GetComponent<drawJterrain> ().Vpos;
+
 		for (int i = 0; i < NumChunk.x; i++) {
 			for (int j = 0; j < NumChunk.y; j++) {
 				if (_MapObjs [i, j] == null && pool.Count>0) {
 					_MapObjs [i, j] = pool [0];
-					_MapObjs [i, j].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j);
+					//_MapObjs [i, j].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j);
 					//////////////////////////////////////***
-					if(j+1< NumChunk.y ){
-						
-					}
+					float newClat = (i - baseChunkPos.x) * 2 * main.stepLng;
+					float newClng = (baseChunkPos.y - j) * 2 * main.stepLat;
+					_MapObjs [i, j].GetComponent<drawJterrain> ().loadNewLoc(newClat,newClng, new Vector2 (i, j));//,main.stepLat,main.stepLng,main.s
 
+				//	g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,stepLat ,stepLng,size,new Vector2 (i,j));
 
 					//////////////////////////////////////***
 

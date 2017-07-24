@@ -55,9 +55,10 @@ public class main : MonoBehaviour {
 	[Header( "size of the esch piece of mesh in lat")]
 	public float SizeOfPiece=100;
 
-		[SerializeField,  HeaderAttribute ("size of the mesh")]
+	[SerializeField,  HeaderAttribute ("size of the mesh")]
 	//[HideInInspector]
-	public  Vector3 size = new Vector3 (100, 100,1);
+	Vector3 _meshsize=new Vector3 (100, 100,1);
+	public static Vector3 MeshSize = new Vector3 (100, 100,1);
 	[SerializeField,Header("the addition of real height data")]
 	[Tooltip("1 means the real scale")]
 	[Range (0.01f,1000f)]
@@ -98,9 +99,14 @@ public class main : MonoBehaviour {
 		Debug.Log (st);
 	}
 
-	//
-	float stepLng;//以赤道为基础
-	float stepLat;//以赤道为基础
+	/// <summary>
+	/// 以赤道为基础每块跨越的lng范围/2
+	/// </summary>
+	public static  float stepLng;//以赤道为基础
+	/// <summary>
+	/// 以赤道为基础每块跨越的lat范围/2
+	/// </summary>
+	public static  float stepLat;//以赤道为基础
 	void makeTrr()
 	{
 		if (_datasource == datasource.google) {
@@ -138,7 +144,7 @@ public class main : MonoBehaviour {
 		MapObjs = new GameObject[(int)Pieces.x, (int)Pieces.y]; 
 
 
-		size = calcMeshSize (SizeOfPiece);//以纬度方向size y计算经度方向距离x
+		MeshSize = calcMeshSize (SizeOfPiece);//以纬度方向size y计算经度方向距离x
 		//zoomrange (steplat,steplng);
 
 		////////////////////////////////
@@ -162,12 +168,12 @@ public class main : MonoBehaviour {
 				float _clng = lng+((j-offsetx )* 2 ) * stepLng;
 
 
-				g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,stepLat ,stepLng,size,new Vector2 (i,j));
+				g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,stepLat ,stepLng,MeshSize,new Vector2 (i,j));
 				//(_slat,_slng,_elat,_elng,size,new Vector2 (i,j));
 
 				g.transform.parent=terrmanager.transform;
 
-				g.transform .Translate(new Vector3((j-offsetx)*size.x, 0, (offsety -i)*size.z));
+				g.transform .Translate(new Vector3((j-offsetx)*MeshSize.x, 0, (offsety -i)*MeshSize.z));
 
 				//arrTrr [arrind] = g ;
 				MapObjs[i,j]=g;

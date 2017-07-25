@@ -158,7 +158,7 @@ public class main1 : MonoBehaviour {
 				g.GetComponent <drawJterrain>().loadNewLoc(lat+j*steplat,lng+i*steplng ,
 					lat+(j+1)*steplat,lng+(i+1)*steplng,size,new Vector2 (i,j));
 				//DrawTMesh DTM=new DrawTMesh();
-				int arrind = (int)Math.Floor(i * Pieces.y + j);
+			//	int arrind = (int)Math.Floor(i * Pieces.y + j);
 
 				g.transform.parent=terrmanager.transform;
 

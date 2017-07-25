@@ -7,10 +7,10 @@ public class movelerp :  Photon.MonoBehaviour, IPunObservable
 	public  Vector3 latestCorrectPos;
 	public  Vector3 onUpdatePos;
 	private float fraction;
-	[SerializeField ]
-	bool onctrl = false;
-	[SerializeField ]
-	bool isstreaming = true;
+	//[SerializeField ]
+	//bool onctrl = false;
+	//[SerializeField ]
+	//bool isstreaming = true;
 	[SerializeField ]
 	string  ttt = "";
 	public void Start()
@@ -38,11 +38,11 @@ public class movelerp :  Photon.MonoBehaviour, IPunObservable
 		//	Debug.Log("!");
 			stream.Serialize(ref pos);
 			stream.Serialize(ref rot);
-			isstreaming = true;
+			//isstreaming = true;
 		}
 		else
 		{
-			isstreaming = false;
+			//isstreaming = false;
 			// Receive latest state information
 			Vector3 pos = Vector3.zero;
 			Quaternion rot = Quaternion.identity;
@@ -62,7 +62,8 @@ public class movelerp :  Photon.MonoBehaviour, IPunObservable
 	public void Update()
 	{
 		if (this.photonView.isMine)
-		{onctrl = true;
+		{
+			//onctrl = true;
 			return;     // if this object is under our control, we don't need to apply received position-updates 
 		}
 

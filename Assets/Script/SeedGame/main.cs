@@ -8,7 +8,7 @@ using System.IO;
 
 public  enum datasource
 {
-	google,bing
+	google,bing,random
 }
 public class main : MonoBehaviour {
 
@@ -57,6 +57,9 @@ public class main : MonoBehaviour {
 
 	[SerializeField,  HeaderAttribute ("size of the mesh")]
 	//[HideInInspector]
+	/// <summary>
+	/// 测试用 meshsize
+	/// </summary>
 	Vector3 _meshsize=new Vector3 (100, 100,1);
 	public static Vector3 MeshSize = new Vector3 (100, 100,1);
 	[SerializeField,Header("the addition of real height data")]
@@ -66,9 +69,15 @@ public class main : MonoBehaviour {
 
 	[HideInInspector ]
 	public GameObject _newmeshobj;//=new GameObject ();
-
+	/// <summary>
+	/// The earth r.6371000;//地球半径
+	/// </summary>
 	const float earthR = 6371000;//地球半径
-	const  float distanceEarthLat=1000000;
+
+	/// <summary>
+	/// The distance earth lat.单位距离,1000000m
+	/// </summary>
+	const  float distanceEarthLat=100000;
 	[SerializeField]
 	bool _havelicense=false;
 
@@ -83,9 +92,10 @@ public class main : MonoBehaviour {
 		NumError = 0;
 		SegmentInPiece = _SegmentInPiece;
 		Pieces = _Pieces;
-		Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
-//		for (int i=0;i)
-		// Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
+//		Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
+		Vertives=new Vector3[(int)(Pieces.x*Pieces.y),(int)(SegmentInPiece.x+1)*(int)(SegmentInPiece.y+1)] ;
+
+
 		//StartCoroutine (findLicense ());
 //		MapObjs = new GameObject[(int)Pieces.x, (int)Pieces.y]; 
 		makeTrr ();
@@ -163,15 +173,15 @@ public class main : MonoBehaviour {
 				g.tag="Ground";
 				g.name = nameT;
 				g.AddComponent<drawJterrain>().initTrr( nameT,SegmentInPiece,matTrr);
-				float _slat = lat+((offsety-i) * 2 + 1) * stepLat;
-				float _slng = lng+((j-offsetx )* 2 - 1) * stepLng;
-				float _elat = lat+((offsety-i) * 2 - 1) * stepLat;
-				float _elng = lng+((j-offsetx )* 2 + 1) * stepLng;
+//				float _slat = lat+((offsety-i) * 2 + 1) * stepLat;
+//				float _slng = lng+((j-offsetx )* 2 - 1) * stepLng;
+//				float _elat = lat+((offsety-i) * 2 - 1) * stepLat;
+//				float _elng = lng+((j-offsetx )* 2 + 1) * stepLng;
 				float _clat = lat+((offsety-i) * 2 ) * stepLat;
 				float _clng = lng+((j-offsetx )* 2 ) * stepLng;
 
-
-				g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,stepLat ,stepLng,MeshSize,new Vector2 (i,j));
+				g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,new Vector2 (i,j));
+				//g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,stepLat ,stepLng,MeshSize,new Vector2 (i,j));
 				//(_slat,_slng,_elat,_elng,size,new Vector2 (i,j));
 
 				g.transform.parent=terrmanager.transform;
@@ -230,7 +240,11 @@ public class main : MonoBehaviour {
 		//	Debug.Log ("trim" + lat + "," + lng + "|" + endlat + "," + endlng);
 	}
 
-
+	/// <summary>
+	/// Calculates the size of the mesh.
+	/// </summary>
+	/// <returns>The mesh size.</returns>
+	/// <param name="sizelat">Sizelat=size of piece</param>
 	public Vector3 calcMeshSize(float sizelat)
 	{	
 
@@ -247,6 +261,7 @@ public class main : MonoBehaviour {
 
 		float _scale = size.z / distanceEarthLat;//单位实际距离对应的mesh大小
 		size.y=_scale*heightScale ;
+		_meshsize = size;//测试用
 		return size;
 		//float	steplatall = Mathf.Abs (endlat-lat); 
 

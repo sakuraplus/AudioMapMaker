@@ -190,7 +190,7 @@ public class PlayFabLogin : MonoBehaviour
 		Debug.Log ("!!getCStest");
 	}
 	public void getCSLoctest(){
-		Vector2 vv = new Vector2 (156,489);
+		//Vector2 vv = new Vector2 (156,489);
 		var request = new ExecuteCloudScriptRequest ();
 		request.FunctionName   = "UpdateLocAtTheEnd";
 		request.FunctionParameter = new{LocLat = 123,LocLng = 147};

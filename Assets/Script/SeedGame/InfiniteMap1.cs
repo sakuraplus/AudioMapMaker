@@ -8,7 +8,7 @@ public class InfiniteMap1 : MonoBehaviour {
 	public float distanceV = 4f;
 	public bool cameragroundlimit;
 	public GameObject [] objs=new GameObject[9];
-	Vector3[] posAddUp=new Vector3[9] ;
+	//Vector3[] posAddUp=new Vector3[9] ;
 	GameObject[,] MapObjs=new GameObject[3,3] ;
 	//	Dictionary <pos,GameObject > DictMapObj;
 	public Vector2 NumChunk;
@@ -17,7 +17,7 @@ public class InfiniteMap1 : MonoBehaviour {
 
 	GameObject onchunk;
 	void Start() {
-		posAddUp = new Vector3[(int)NumChunk.x * (int)NumChunk.y];
+		//posAddUp = new Vector3[(int)NumChunk.x * (int)NumChunk.y];
 
 
 
@@ -74,7 +74,7 @@ public class InfiniteMap1 : MonoBehaviour {
 			//
 			//
 			//			onchunk = hit.collider.gameObject;
-			Debug.Log ("onwhich "+hit.collider.gameObject.name+onchunk.transform.localPosition);
+			Debug.LogWarning  ("onwhich "+hit.collider.gameObject.name+onchunk.transform.localPosition);
 			vpnow = onchunk.GetComponent<drawJterrain> ().Vpos;
 			//if (vpnow != vplast) {
 			replacechunk (vpnow );
@@ -90,7 +90,7 @@ public class InfiniteMap1 : MonoBehaviour {
 
 	/////////////////////////
 	[SerializeField ]
-	Vector2 id;
+//	Vector2 id;
 	Vector2 vpnow;
 	Vector2 vplast;
 	void replacechunk(Vector2 vp){
@@ -102,7 +102,7 @@ public class InfiniteMap1 : MonoBehaviour {
 		if (stepX> 0) {
 			for (int i = 0; i < NumChunk.x; i++) {
 				for (int j = 0; j < NumChunk.y; j++) {
-					id = new Vector2 (i, j);
+					//id = new Vector2 (i, j);
 					if (MapObjs [i, j] != null) {
 						if (j < stepX) {
 							pool.Add (MapObjs [i, j]);
@@ -118,7 +118,7 @@ public class InfiniteMap1 : MonoBehaviour {
 		}else if(stepX < 0) {
 			for (int i = 0; i < NumChunk.x; i++) {
 				for (int j =(int)NumChunk.y; j >0 ; j--) {
-					id = new Vector2 (i, j);
+					//id = new Vector2 (i, j);
 					if (MapObjs [i, j-1] != null) {
 						if (j > (NumChunk.y + stepX)) {
 							pool.Add (MapObjs [i, j - 1]);
@@ -135,7 +135,7 @@ public class InfiniteMap1 : MonoBehaviour {
 		if (stepY> 0) {
 			for (int i = 0; i < NumChunk.y; i++) {
 				for (int j = 0; j < NumChunk.x; j++) {
-					id = new Vector2 (j, i);
+					//id = new Vector2 (j, i);
 					if (MapObjs [j, i] != null) {
 						if (j < stepY) {
 							pool.Add (MapObjs [j, i]);
@@ -150,7 +150,7 @@ public class InfiniteMap1 : MonoBehaviour {
 		}else if(stepY< 0) {
 			for (int i = 0; i < NumChunk.y; i++) {
 				for (int j =(int)NumChunk.x; j >0 ; j--) {
-					id = new Vector2 (j, i);
+					//id = new Vector2 (j, i);
 					if (MapObjs [j-1, i] != null) {
 						if (j > (NumChunk.y + stepY)) {
 							pool.Add (MapObjs [j - 1, i]);

@@ -251,6 +251,12 @@ public class drawJterrain : MonoBehaviour {
 			}
 		}
 	}
+	public void test(){
+		initTrr ("xxx", new Vector2 (5, 5), diffuseMap );
+		fakeloadjson ();
+		sampleLerp ();
+		DrawMesh ();
+	}
 	void fakeloadjson(){
 		string stt = "";
 		for (int i = 0; i <= segment.y; i++) {

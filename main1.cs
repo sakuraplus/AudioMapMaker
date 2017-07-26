@@ -71,19 +71,19 @@ public class main1 : MonoBehaviour {
 	void Start () {
 		NumComplete = 0;
 		NumError = 0;
-		main . Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
+//		main . Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
 		//StartCoroutine (findLicense ());
 		makeTrr ();
 	}
 	public void testV(){
-		string st = "testV\n";
-		for (int i = 0; i < (int)(Pieces.x * SegmentInPiece.x + 1); i++) {
-			for (int j=0 ; j < (int)(Pieces.y * SegmentInPiece.y + 1); j++) {
-				st += ",\t" + main.Vertives [i, j];
-			}
-			st+="\n";
-		}
-		Debug.Log (st);
+//		string st = "testV\n";
+//		for (int i = 0; i < (int)(Pieces.x * SegmentInPiece.x + 1); i++) {
+//			for (int j=0 ; j < (int)(Pieces.y * SegmentInPiece.y + 1); j++) {
+//				st += ",\t" + main.Vertives [i, j];
+//			}
+//			st+="\n";
+//		}
+//		Debug.Log (st);
 	}
 
 	//

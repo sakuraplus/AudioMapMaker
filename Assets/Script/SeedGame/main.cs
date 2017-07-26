@@ -10,6 +10,53 @@ public  enum datasource
 {
 	google,bing,random
 }
+/// <summary>
+/// Json map data of google.
+/// </summary>
+[Serializable]
+public class JsonMapDataGoogle{
+	public MapRes[] results;
+	public string status;
+}
+
+[Serializable]
+public class MapRes{
+	public double elevation;
+	public MapLocation location;
+	public double resolution;
+}
+
+[Serializable]
+public class MapLocation{
+	public double lat;
+	public double lng;
+}
+/// <summary>
+/// /son map data  of bing
+/// </summary>
+[Serializable]
+public class JsonMapDataBing{
+	public string authenticationResultCode;
+	public string brandLogoUri;
+	public string copyright;
+	//public BingresourceSets[] resourceSets;
+	public BingresourceSets[] resourceSets;
+	public string statusDescription;
+}
+
+[Serializable]
+public class BingresourceSets{
+	public string estimatedTotal="x";
+	public Bingresources[] resources ;
+
+}
+
+[Serializable]
+public class Bingresources{
+	public string [] elevations;
+	public int zoomLevel = 2;
+}
+
 public class main : MonoBehaviour {
 
 	GameObject terrmanager;//= new GameObject();
@@ -77,15 +124,16 @@ public class main : MonoBehaviour {
 	/// <summary>
 	/// The distance earth lat.单位距离,1000000m
 	/// </summary>
-	const  float distanceEarthLat=100000;
+	const  float distanceEarthLat=1000000;
 	[SerializeField]
 	bool _havelicense=false;
 
 	public static  string savefiledate;
 	public static  int NumComplete;
 	public static  int NumError;
-	public static  Vector3 [,] Vertives;
-//	public static List< List <Vector3 >> Vertives=new List< List<Vector3>> ();
+//	public static  Vector3 [,] Vertives;
+//	public static List< Vector3 []> Vertives=new List<Vector3[]> ();
+	public static  Vector3 [,][] Vertives;
 
 	void Awake () {
 		NumComplete = 0;
@@ -93,8 +141,8 @@ public class main : MonoBehaviour {
 		SegmentInPiece = _SegmentInPiece;
 		Pieces = _Pieces;
 //		Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
-		Vertives=new Vector3[(int)(Pieces.x*Pieces.y),(int)(SegmentInPiece.x+1)*(int)(SegmentInPiece.y+1)] ;
-
+//		Vertives=new Vector3[(int)(Pieces.x*Pieces.y),(int)(SegmentInPiece.x+1)*(int)(SegmentInPiece.y+1)] ;
+		Vertives=new Vector3[(int)Pieces.y,(int)Pieces.x][] ;
 
 		//StartCoroutine (findLicense ());
 //		MapObjs = new GameObject[(int)Pieces.x, (int)Pieces.y]; 
@@ -102,9 +150,11 @@ public class main : MonoBehaviour {
 	}
 	public void testV(){
 		string st = "testV\n";
-		for (int i = 0; i < (int)(Pieces.x * SegmentInPiece.x + 1); i++) {
-			for (int j=0 ; j < (int)(Pieces.y * SegmentInPiece.y + 1); j++) {
-				st += ",\t" + Vertives [i, j];
+		for (int i = 0; i < (int)(Pieces .y ); i++) {
+			for (int j=0 ; j < (int)(Pieces .x ); j++) {
+				st += ",\t" + i+","+j+" "+MapObjs[i,j].GetComponent<drawJterrain>().vertives ;
+				st += "/" + Vertives [i , j] [(int)SegmentInPiece.x + 1].y;
+				//st += "/" + Vertives [i * (int)Pieces.x + j] [(int)SegmentInPiece.x + 1].y;
 			}
 			st+="\n";
 		}
@@ -128,12 +178,12 @@ public class main : MonoBehaviour {
 		}
 		DataSource = _datasource;
 
-		if (ELEAPIkey.Length < 1) {
-
-			Debug.LogWarning ("you need ele key"+ELEAPIkey);
-
-			return;
-		}
+//		if (ELEAPIkey.Length < 1) {
+//
+//			Debug.LogWarning ("you need ele key"+ELEAPIkey);
+//
+//			return;
+//		}
 
 		if ((lat == endlat) || (lng == endlng)) {
 			Debug.LogWarning ("incorrect geographical coordinate");
@@ -153,7 +203,7 @@ public class main : MonoBehaviour {
 		terrmanager = new GameObject();
 		terrmanager.name = "TRRMAG";
 		//arrTrr = new GameObject[(int)Math.Floor( Pieces.x*Pieces.y)];
-		MapObjs = new GameObject[(int)Pieces.x, (int)Pieces.y]; 
+		MapObjs = new GameObject[(int)Pieces.y, (int)Pieces.x]; 
 
 
 		MeshSize = calcMeshSize (SizeOfPiece);//以纬度方向size y计算经度方向距离x
@@ -180,10 +230,13 @@ public class main : MonoBehaviour {
 				float _clat = lat+((offsety-i) * 2 ) * stepLat;
 				float _clng = lng+((j-offsetx )* 2 ) * stepLng;
 
+				//Vertives.Add (null);//(g.GetComponent <drawJterrain>().vertives );
+				Vertives[i,j]=null;
+
 				g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,new Vector2 (i,j));
 				//g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,stepLat ,stepLng,MeshSize,new Vector2 (i,j));
 				//(_slat,_slng,_elat,_elng,size,new Vector2 (i,j));
-
+			
 				g.transform.parent=terrmanager.transform;
 
 				g.transform .Translate(new Vector3((j-offsetx)*MeshSize.x, 0, (offsety -i)*MeshSize.z));

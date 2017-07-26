@@ -8,13 +8,10 @@ using System.IO;
 
 
 
-public class drawJterrain : MonoBehaviour {
+public class drawJterrain1 : MonoBehaviour {
 
-	public bool edgeUp = false;
-	public bool edgeDown = false;
-	public bool edgeLeft = false;
-	public bool edgeRight = false;
-	//**********************
+	//	GameObject Player ;
+
 	string  ipaddress = "https://maps.googleapis.com/maps/api/elevation/json?locations="; 
 	string ELEKey = main.ELEAPIkey;//google高度api key = "AIzaSyD04LHgbiErZTYJMfda2epkG0YeaQHVuEE";//需要自己注册！！
 	//string STMKey = main.STMAPIkey ;// google static map api key= "//需要自己注册！！
@@ -279,38 +276,47 @@ public class drawJterrain : MonoBehaviour {
 		string synct="sync error=";
 		int ind = (int)(Vpos.x * main.Pieces.x + Vpos.y);
 
-		if (Vpos.x > 0 && main.Vertives [(int)(Vpos.x - 1) ,(int) Vpos.y] != null) {
+		if (Vpos.x > 0 && main.Vertives [(int)((Vpos.x - 1) * main.Pieces.x + Vpos.y)] != null) {
 			//sync edge up
-			edgeUp=true;
-			//int iv = (int)((Vpos.x - 1) * main.Pieces.x + Vpos.y);//
+			int iv = (int)((Vpos.x - 1) * main.Pieces.x + Vpos.y);//
 			int ib = (int)(segment.x * (segment.y - 1));
-			Debug.Log ("sync upedge " + Vpos + " ,m.v.ind=" + (int)(Vpos.x - 1) +","+(int) Vpos.y);
+			Debug.Log ("sync upedge " + Vpos + " ,m.v.ind=" + iv);
 			for (int y = 0; y < main.Pieces.y; y++) {
-				if (vertives [y+ib].y != main.Vertives [(int)(Vpos.x - 1) ,(int) Vpos.y] [y].y) {
+				if (vertives [y] != main.Vertives [iv] [ib + y]) {
 					synct += "," + Vpos + " up " + y;
 				}
-				vertives [y+ib].y = main.Vertives [(int)(Vpos.x - 1) ,(int) Vpos.y] [y].y;
+				vertives [y] = main.Vertives [iv] [ib + y];
 			}
 		}
-		if (Vpos.x <main.Pieces.y -1 && main.Vertives [(int)(Vpos.x + 1) ,(int) Vpos.y] != null) {
+		if (Vpos.x <main.Pieces.y -1 && main.Vertives [(int)((Vpos.x + 1) * main.Pieces.x + Vpos.y)] != null) {
 			//sync edge down
-			edgeDown=true;
-			//int iv = (int)((Vpos.x + 1) * main.Pieces.x + Vpos.y);//
+			int iv = (int)((Vpos.x + 1) * main.Pieces.x + Vpos.y);//
 			int ib = (int)(segment.x * (segment.y - 1));
-			Debug.Log ("sync downedge " + Vpos + " ,m.v.ind=" + (int)(Vpos.x + 1) +","+(int) Vpos.y);
+			Debug.Log ("sync upedge " + Vpos + " ,m.v.ind=" + iv);
 			for (int y = 0; y < main.Pieces.y; y++) {
-				if (vertives [y].y != main.Vertives [(int)(Vpos.x + 1) ,(int) Vpos.y] [y+ib].y) {
+				if (vertives [ib+y] != main.Vertives [iv] [y]) {
 					synct += "," + Vpos + " up " + y;
 				}
-				vertives [y].y = main.Vertives [(int)(Vpos.x + 1) ,(int) Vpos.y] [y+ib].y;
+				vertives [ib+y] = main.Vertives [iv] [y];
 			}
 		}
 
-
+		if (Vpos.y > 0 && main.Vertives [(int)((Vpos.x - 1) * main.Pieces.x + Vpos.y)] != null) {
+			//sync edge up
+			int iv = (int)((Vpos.x - 1) * main.Pieces.x + Vpos.y);//
+			int ib = (int)(segment.x * (segment.y - 1));
+			Debug.Log ("sync upedge " + Vpos + " ,m.v.ind=" + iv);
+			for (int y = 0; y < main.Pieces.y; y++) {
+				if (vertives [y] != main.Vertives [iv] [ib + y]) {
+					synct += "," + Vpos + " up " + y;
+				}
+				vertives [y] = main.Vertives [iv] [ib + y];
+			}
+		}
 
 
 		//Debug.Log ("syncMainVertives"+Vpos+" main.v.count="+main.Vertives.Count +",ind="+ind);
-		main.Vertives [(int)Vpos.x,(int)Vpos.y] = vertives;
+		main.Vertives [ind] = vertives;
 		//Debug.Log (Trrname+"  syncMainVertives");
 	}
 //	void syncMainVertives()

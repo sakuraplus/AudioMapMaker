@@ -152,8 +152,12 @@ public class main : MonoBehaviour {
 		string st = "testV\n";
 		for (int i = 0; i < (int)(Pieces .y ); i++) {
 			for (int j=0 ; j < (int)(Pieces .x ); j++) {
-				st += ",\t" + i+","+j+" "+MapObjs[i,j].GetComponent<drawJterrain>().vertives ;
-				st += "/" + Vertives [i , j] [(int)SegmentInPiece.x + 1].y;
+				st += ",\t" + i+","+j+">>"; ;
+				for (int v = 0; v < Vertives [i, j].Length; v++) {
+					st+=Vertives[i,j][v]+",";
+				}
+
+				st += "\n" ;//+ Vertives [i , j] [(int)SegmentInPiece.x + 1].y;
 				//st += "/" + Vertives [i * (int)Pieces.x + j] [(int)SegmentInPiece.x + 1].y;
 			}
 			st+="\n";

@@ -135,7 +135,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 
 				_nextpos.y = hit.point.y + 1f;//方法需要根据体验效果调整****
 
-				Debug.Log("r "+hit.distance+"//hitp= "+hit.point+"//new= "+_nextpos+"//"+hit.collider.name  );
+			//	Debug.Log("r "+hit.distance+"//hitp= "+hit.point+"//new= "+_nextpos+"//"+hit.collider.name  );
 			}
 			//}
 		}
@@ -184,7 +184,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 				}
 				speedy = Mathf.Clamp (speedy, -1, 5);
 				addv.y = addv.y * speedy / 5;
-				Debug.Log (TargetObj.transform.forward+"--to addv="+addv);
+			//	Debug.Log (TargetObj.transform.forward+"--to addv="+addv);
 				//}
 			}
 			//	

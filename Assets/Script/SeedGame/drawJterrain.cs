@@ -22,7 +22,8 @@ public class drawJterrain : MonoBehaviour {
 	//string STMKey = main.STMAPIkey ;// google static map api key= "//需要自己注册！！
 	//;//"AIzaSyApPJ8CP4JxKWIW2vavwdRl6fnDvdcgCLk"
 	string StrWwwData;
-	int indVertives=0;
+	int indVertivesLng=0;
+	int indVertivesLat=0;
 
 
 	float steplat ;//每次获取高度数据的间隔
@@ -68,7 +69,10 @@ public class drawJterrain : MonoBehaviour {
 	/// </summary>
 	private int[] triangles;
 
-
+	/// <summary>
+	/// The error samples.
+	/// </summary>
+	List<int> errorSamples = new List<int> ();
 
 
 	//private GameObject terrain;
@@ -89,7 +93,7 @@ public class drawJterrain : MonoBehaviour {
 		segment=_segment;
 		int leng = ((int)segment.x + 1) * ((int)segment.y + 1);
 		vertives = new Vector3[leng];//用于存每个点的坐标
-		testVertives=new Vector2 [leng];
+		//testVertives=new Vector2 [leng];
 		GetUV();
 		GetTriangles();
 		DrawTexture ();
@@ -106,7 +110,7 @@ public class drawJterrain : MonoBehaviour {
 	{		
 		complete = false;
 		Vpos = _vpos;
-
+		indVertivesLng=0;
 		centerlat = _centerlat;
 		centerlng =trimLng( _centerlng);
 		northwestlat = _centerlat + main.stepLat ;//_northwestlat;// +-90 西北角纬度
@@ -122,7 +126,9 @@ public class drawJterrain : MonoBehaviour {
 
 		//print (Trrname+"-init-"+northwestlat+","+_northwestlng+"//"+_southeastlat+","+_southeastlng+" step="+steplat);
 		//*************************************
-
+		fakeloadjson ();//随机地形
+		syncMainEdge ();//同步边界
+		DrawMesh ();
 		switch (main.DataSource){
 		case (datasource.google):
 			//	StartCoroutine(LoadJsonGoogleLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
@@ -133,43 +139,97 @@ public class drawJterrain : MonoBehaviour {
 			StartCoroutine(LoadJsonBingLng(northwestlng));//按精度取值，差值为南北方向
 			break;
 		case(datasource.random):
-			fakeloadjson ();
-
-			syncMainVertives ();
-			sampleLerp ();
+//			syncMainEdge ();//同步边界
+//			fakeloadjson ();//随机地形
+//			DrawMesh ();
+//		
+			testsampleError ();//随机增加错误数据
+			sampleLerp ();//修正错误数据
+			syncMainEdge ();//同步边界
+			syncMainVertives();//更新main数据
 			DrawMesh ();
 			break;
 		}
 
 
 	}
-	List<int> errorSamples = new List<int> ();
-	Vector2[] testVertives;
+	void testsampleError()
+	{
+		//*********************
+		int yy=Mathf.FloorToInt ( UnityEngine.Random.Range(0,segment.x+1));//<segx
+		string tse=" testsampleError= \n";
+		if (yy > 0 && yy<=segment.x) {
+			for (int i = 0; i <= segment.y; i++) {
+				
+				storeErrorSample ((int)(i * (segment.x + 1) + yy));
+				//errorSamples.Add ((int)(i * (segment.x + 1) + yy));
+				}
+		}
+		for (int cc = 0; cc <errorSamples.Count ;cc ++) {
+			tse += ","+errorSamples[cc];
+		}
+		if (errorSamples.Count > 0) {
+			Debug.Log (Trrname + tse);
+		}
+	}
+	void  storeErrorSample(int index){
+		if (edgeUp && index > (int)((segment.x + 1) * segment.y)) {
+			return;
+		}
+		if (edgeDown && index <=segment.x) {
+			return;
+		}
+		if ((edgeLeft && indVertivesLng ==0) ||(edgeRight  && indVertivesLng >segment.x)) {
+			return;
+		}
+		errorSamples.Add (index);
+	}
 
 	/// <summary>
 	/// 计算插值补充网络错误造成的异常数据
 	/// </summary>
 	void sampleLerp(){
+		if (errorSamples.Count <= 0) {
+			return;
+		}
+		string stlerp = Trrname+ "stlerp("+errorSamples.Count+")= ";
+		List<float> samples=new List<float> ();
 		for(int i=0;i<errorSamples.Count ;i++) {
-			int num = 0;
-			float sumSamples = 0;
+			
+			int sampleIndex =(int) errorSamples [i];
+			stlerp+=sampleIndex+",";
+			int ix = Mathf.FloorToInt (sampleIndex / ((int)segment.x + 1));
+			int iy = sampleIndex - ix * ((int)segment.x + 1);
 
-			//			if(
-		}
-		errorSamples.Clear();
-
-		//*********************
-		string stvG=" stvg= \n";
-		for (int i = 0; i <= segment.y; i++) {
-			for (int j = 0; j <= segment.x; j++) {
-				int ind = i * ((int)segment.x + 1) + j;
-				stvG += " / "+ind+","+vertives [ind];//+","+vertives [ind].y;
-				//stvG += "," + vertives [ind].z + ")<";
-				//stvG += testVertives [ind].x+","+testVertives [ind].y+">";
+			if (ix > 0 && !errorSamples.Contains ((ix - 1) * ((int)segment.x + 1) + iy)) {
+				samples.Add (vertives [(ix - 1) * ((int)segment.x + 1) + iy].y);
 			}
-			stvG+="\n";
+			if (ix < segment.y && !errorSamples.Contains ((ix + 1) * ((int)segment.x + 1) + iy)) {
+				samples.Add (vertives [(ix + 1) * ((int)segment.x + 1) + iy].y);
+			}
+			if (iy > 0 && !errorSamples.Contains (ix * ((int)segment.x + 1) + iy - 1)) {
+				samples.Add (vertives [ix * ((int)segment.x + 1) + iy - 1].y);
+			}
+			if (iy < segment.x && !errorSamples.Contains (ix * ((int)segment.x + 1) + iy + 1)) {
+				samples.Add (vertives [ix * ((int)segment.x + 1) + iy + 1].y);
+			}	
+
+			if (samples.Count < 0) {
+				//vertives [sampleIndex] = UnityEngine.Random.Range (1, 2);
+			} else {
+				float sum = 0;
+				for (int s = 0; s < samples.Count; s++) {
+					sum += samples [s];
+				}
+				vertives [sampleIndex].y = sum / samples.Count;
+				samples.Clear ();
+			}
+			errorSamples [i] = -1;
 		}
-		Debug.Log (Trrname + stvG );
+
+		errorSamples.Clear ();
+		Debug.LogWarning (stlerp);
+
 	}
 
 
@@ -177,9 +237,10 @@ public class drawJterrain : MonoBehaviour {
 	/// <summary>
 	/// 同步所有地图块数据到main，同步边界，避免数据源出错时地块衔接处开裂Syncs the main vertives.
 	/// </summary>
-	void syncMainVertives()
+	void syncMainEdge()
 	{
 		string synct="  sync =";//测试***
+
 		if (Vpos.x > 0 && main.Vertives [(int)(Vpos.x - 1) ,(int) Vpos.y] != null) {
 			//sync edge up
 			edgeUp=true;
@@ -235,15 +296,38 @@ public class drawJterrain : MonoBehaviour {
 				vertives [(int)segment.x+ib].y = main.Vertives [(int)(Vpos.x), (int)(Vpos.y+1)] [ib].y;
 			}
 		}
+		Debug.Log (Trrname+ synct);
+	
 
-		Debug.Log (Trrname+synct);//测试***
-		main.Vertives [(int)Vpos.x,(int)Vpos.y] = vertives;
-//		//Debug.Log (Trrname+"  syncMainVertives");
 	}
+	/// <summary>
+	/// 更新main。vertives.
+	/// </summary>
+	void syncMainVertives()
+	{
+		//	Debug.Log (Trrname+synct);//测试***
+		main.Vertives [(int)Vpos.x,(int)Vpos.y] = vertives;
 
+
+		//*********************
+		string stvG=" stvg= \n";
+		for (int i = 0; i <= segment.y; i++) {
+			for (int j = 0; j <= segment.x; j++) {
+				int ind = i * ((int)segment.x + 1) + j;
+				stvG += " / "+ind+","+vertives [ind];//+","+vertives [ind].y;
+				//stvG += "," + vertives [ind].z + ")<";
+				//stvG += testVertives [ind].x+","+testVertives [ind].y+">";
+			}
+			stvG+="\n";
+		}
+		Debug.Log (Trrname + stvG );
+	}
 	 
 
 	#region ~随机地形
+	/// <summary>
+	/// 随机数地形
+	/// </summary>
 	void fakeloadjson(){
 		string stt = "  "+main.MeshSize.z+","+main.MeshSize.x+">\n";
 		for (int i = 0; i <= segment.y; i++) {
@@ -254,10 +338,7 @@ public class drawJterrain : MonoBehaviour {
 				vertives [ind].y =a;//Vpos.x +0.1f*Vpos.y;// // Mathf.Floor (centerlat)*0.01f + Mathf.Floor (centerlng) * 0.00001f;// Vpos.x +0.1f*Vpos.y  ;
 				vertives [ind].x =j * main.MeshSize.x / segment.x;
 				vertives [ind].z = i * +main.MeshSize.z / segment.y;
-				//				vertives [ind].y = ind;// 0.1f* Vpos.y +0.001f*ind+Vpos.x  ;
-				//				vertives [ind].x =Vpos.x;// j * main.MeshSize.x / segment.x;
-				//				vertives [ind].z =Vpos.y;// i * +main.MeshSize.z / segment.y;
-				stt +=","+i+","+j+","+ind+ vertives [ind];
+			stt +=","+i+","+j+","+ind+ vertives [ind];
 			}
 			stt+="\n";
 		}
@@ -266,15 +347,18 @@ public class drawJterrain : MonoBehaviour {
 	}
 	#endregion
 	#region ~lng方向插值
-	//加载高度数据，按照纬度方向分段多次加载
+	/// <summary>
+	///加载高度数据，按照纬度方向分段多次加载
+	///<summary>
 	public IEnumerator LoadJsonGoogleLng(float lng)
 	{  
-		if (indVertives*(segment.y+1) >= vertives.Length)		  
+		if (indVertivesLng>=segment.x)		  
 		{
-			/////////////////
-			Debug.LogWarning (Trrname + "Data complete!!!!!!!"+tempstr );
-			syncMainVertives ();
-			sampleLerp ();
+			/////////////////(indVertives*(segment.y+1) >= vertives.Length)		
+			Debug.Log (Trrname + "Data complete!!!!!!!"+tempstr );
+			sampleLerp ();//修正错误数据
+			syncMainEdge ();//同步边界
+			syncMainVertives();//更新main数据
 			DrawMesh();
 			yield break;
 		}
@@ -292,20 +376,20 @@ public class drawJterrain : MonoBehaviour {
 		////////////////////////////
 		if (www_data.error != null)    
 		{    
-			Debug.LogWarning ("error :"+Trrname +"/"+indVertives +"-" + www_data.error+"--"+www_data.isDone  );
+			Debug.LogWarning ("error :"+Trrname +"/"+indVertivesLng +"-" + www_data.error+"--"+www_data.isDone  );
 
 			StrWwwData =  "error :" + www_data.error;  
 			main.NumError++;
 
 			//
-			for (int i=0; i <= segment.x ; i++)		
+			for (int i=0; i <= segment.y ; i++)		
 			{
-				errorSamples.Add (indVertives + i);
-
+				//errorSamples.Add (indVertivesLng + i);
+				storeErrorSample (i*((int)segment.x+1)+indVertivesLng );
 
 			}
 
-			indVertives =indVertives+(int)segment.x+1;//+= GoogleJsonData["results"].Count;/////////
+			indVertivesLng =indVertivesLng+(int)segment.x+1;//+= GoogleJsonData["results"].Count;/////////
 			lng += steplng;           
 			StartCoroutine(LoadJsonGoogleLng(trimLng( lng)));  //获取下一纬度，东西经度之间的数据
 			StrWwwData = "";  
@@ -318,16 +402,16 @@ public class drawJterrain : MonoBehaviour {
 				JsonMapDataGoogle GoogleJsonData = JsonUtility.FromJson<JsonMapDataGoogle>(StrWwwData);
 				for (int i=0; i < GoogleJsonData.results.Length ; i++)		
 				{
-					vertives[i*((int)segment.x+1)+indVertives ]= new Vector3(indVertives*main.MeshSize.x /segment.x, 
+					vertives[i*((int)segment.x+1)+indVertivesLng ]= new Vector3(indVertivesLng*main.MeshSize.x /segment.x, 
 						float.Parse(GoogleJsonData.results[i].elevation.ToString())	*main.MeshSize.y , 
 						i* +main.MeshSize.z/segment.y);
-					testVertives [i*((int)segment.x+1)+indVertives]=new Vector2 ((float )GoogleJsonData.results[i].location .lng,(float )GoogleJsonData.results[i].location .lat);
+				//	testVertives [i*((int)segment.x+1)+indVertives]=new Vector2 ((float )GoogleJsonData.results[i].location .lng,(float )GoogleJsonData.results[i].location .lat);
 					//100/x方向分段数=顶点坐标，高度/100=顶点z，为多边形的
 					//tempstr +=GoogleJsonData.results[i].location.lat.ToString()+","+GoogleJsonData.results[i].location.lng.ToString()+vertives[indVertives + i].ToString ();//测试数据
-					tempstr+=","+(indVertives + i)+vertives[indVertives + i].y;
+					tempstr+=","+(indVertivesLng + i)+vertives[indVertivesLng + i].y;
 				}
 
-				indVertives ++;//=indVertives+(int)segment.y+1;//+= GoogleJsonData["results"].Count;/////////
+				indVertivesLng ++;//=indVertives+(int)segment.y+1;//+= GoogleJsonData["results"].Count;/////////
 				lng += steplng;           
 				StartCoroutine(LoadJsonGoogleLng(trimLng( lng)));  //获取下一纬度，东西经度之间的数据
 				StrWwwData = "";  	
@@ -335,7 +419,7 @@ public class drawJterrain : MonoBehaviour {
 			}  
 			catch (Exception ex)  
 			{  
-				Debug.Log(ex.ToString()+indVertives);  
+				Debug.Log(ex.ToString()+indVertivesLng);  
 			}  
 
 			finally  	{}  
@@ -347,12 +431,13 @@ public class drawJterrain : MonoBehaviour {
 	//加载高度数据，按照纬度方向分段多次加载bing
 	public IEnumerator LoadJsonBingLng(float lng)
 	{  
-		if (indVertives*(segment.y+1) >= vertives.Length)		  
+		if(indVertivesLng>=segment.x)
 		{
-			/////////////////
-			Debug.LogWarning (Trrname + "Data complete!!!!!!!"+tempstr );
-			syncMainVertives ();
-			sampleLerp ();
+			/////////////////(indVertives*(segment.y+1) >= vertives.Length)		
+			Debug.Log (Trrname + "Data complete!!!!!!!"+tempstr );
+			sampleLerp ();//修正错误数据
+			syncMainEdge ();//同步边界
+			syncMainVertives();//更新main数据
 			DrawMesh();
 			yield break;
 		}
@@ -370,20 +455,19 @@ public class drawJterrain : MonoBehaviour {
 		////////////////////////////
 		if (www_data.error != null)    
 		{    
-			Debug.LogWarning ("error :"+Trrname +"/"+indVertives +"-" + www_data.error+"--"+www_data.isDone  );
+			Debug.LogWarning ("error :"+Trrname +"/"+indVertivesLng +"-" + www_data.error+"--"+www_data.isDone  );
 
 			StrWwwData =  "error :" + www_data.error;  
 			main.NumError++;
 
 			//
-			for (int i=0; i <= segment.x ; i++)		
+			for (int i=0; i <= segment.y ; i++)		
 			{
-				errorSamples.Add (indVertives + i);
-
-
+				//errorSamples.Add (indVertivesLng + i);
+				storeErrorSample (i*((int)segment.x+1)+indVertivesLng );
 			}
 
-			indVertives =indVertives+(int)segment.x+1;//+= bingJsonData["results"].Count;/////////
+			indVertivesLng =indVertivesLng+(int)segment.x+1;//+= bingJsonData["results"].Count;/////////
 			lng += steplng;           
 			StartCoroutine(LoadJsonBingLng(trimLng( lng)));  //获取下一纬度，东西经度之间的数据
 			StrWwwData = "";  
@@ -393,16 +477,7 @@ public class drawJterrain : MonoBehaviour {
 			try{  
 				StrWwwData = www_data.text; 
 				Debug.Log (Trrname+","+ southeastlat +","+lng +","+ northwestlat  +","+lng+"\n"+StrWwwData );
-				//////////////
 
-				//				StrWwwData=(StrWwwData.Substring(StrWwwData.IndexOf("elevations")-1,(StrWwwData.IndexOf("zoomLevel")-StrWwwData.IndexOf("elevations"))));
-				//				StrWwwData=StrWwwData.Substring(StrWwwData.IndexOf("[")+1,(StrWwwData.IndexOf("]")-StrWwwData.IndexOf("[")-1));
-				//				Debug.Log(StrWwwData);//.Substring(StrWwwData.IndexOf("elevations"),(StrWwwData.IndexOf("zoomLevel")-StrWwwData.IndexOf("elevations"))));
-				//				string[] bingresults=StrWwwData.Split (',');
-				//				Debug.Log(bingresults.Length);
-				//				Debug.Log(bingresults[0]);
-				//				Debug.Log(float.Parse(bingresults[0]));
-				/////////////
 
 
 				JsonMapDataBing JMDB=JsonUtility.FromJson <JsonMapDataBing>(www_data.text );
@@ -411,14 +486,14 @@ public class drawJterrain : MonoBehaviour {
 				for (int i=0; i < bingresults.Length ; i++)		
 				{
 										
-					vertives[i*((int)segment.x+1)+indVertives ]= new Vector3(indVertives*main.MeshSize.x /segment.x, float.Parse(bingresults[i]) 
+					vertives[i*((int)segment.x+1)+indVertivesLng ]= new Vector3(indVertivesLng*main.MeshSize.x /segment.x, float.Parse(bingresults[i]) 
 						*main.MeshSize.y  , i*  main.MeshSize.z/segment.y);
 					//100/x方向分段数=顶点坐标，高度/100=顶点z，为多边形的
 					//tempstr +=bingJsonData.results[i].location.lat.ToString()+","+bingJsonData.results[i].location.lng.ToString()+vertives[indVertives + i].ToString ();//测试数据
-					tempstr+="/"+(indVertives + i)+","+vertives[indVertives + i].y;
+					tempstr+="/"+(indVertivesLng + i)+","+vertives[indVertivesLng + i].y;
 				}
 
-				indVertives ++;//=indVertives+(int)segment.x+1;//+= bingJsonData["results"].Count;/////////
+				indVertivesLng ++;//=indVertives+(int)segment.x+1;//+= bingJsonData["results"].Count;/////////
 				lng += steplng;           
 				StartCoroutine(LoadJsonBingLng(trimLng( lng)));  //获取下一纬度，东西经度之间的数据
 				StrWwwData = "";  	
@@ -442,11 +517,11 @@ public class drawJterrain : MonoBehaviour {
 	//加载高度数据，按照纬度方向分段多次加载
 	public IEnumerator LoadJsonGoogleLat(float lat)
 	{  
-		if (indVertives >= vertives.Length)		  
+		if (indVertivesLat >= vertives.Length)		  
 		{
 			/////////////////
 			Debug.LogWarning (Trrname + "Data complete!!!!!!!"+tempstr );
-			syncMainVertives ();
+			syncMainEdge ();
 			sampleLerp ();
 			DrawMesh();
 			yield break;
@@ -465,7 +540,7 @@ public class drawJterrain : MonoBehaviour {
 		////////////////////////////
 		if (www_data.error != null)    
 		{    
-			Debug.LogWarning ("error :"+Trrname +"/"+indVertives +"-" + www_data.error+"--"+www_data.isDone  );
+			Debug.LogWarning ("error :"+Trrname +"/"+indVertivesLat +"-" + www_data.error+"--"+www_data.isDone  );
 
 			StrWwwData =  "error :" + www_data.error;  
 			main.NumError++;
@@ -473,12 +548,12 @@ public class drawJterrain : MonoBehaviour {
 			//
 			for (int i=0; i <= segment.x ; i++)		
 			{
-				errorSamples.Add (indVertives + i);
+				errorSamples.Add (indVertivesLat + i);
 
 
 			}
 
-			indVertives =indVertives+(int)segment.x+1;//+= GoogleJsonData["results"].Count;/////////
+			indVertivesLat =indVertivesLat+(int)segment.x+1;//+= GoogleJsonData["results"].Count;/////////
 			lat += steplat;           
 			StartCoroutine(LoadJsonGoogleLat(lat));  //获取下一纬度，东西经度之间的数据
 			StrWwwData = "";  
@@ -491,16 +566,16 @@ public class drawJterrain : MonoBehaviour {
 				JsonMapDataGoogle GoogleJsonData = JsonUtility.FromJson<JsonMapDataGoogle>(StrWwwData);
 				for (int i=0; i < GoogleJsonData.results.Length ; i++)		
 				{
-					vertives[indVertives + i]= new Vector3(i*main.MeshSize.x /segment.x, float.Parse(GoogleJsonData.results[i].elevation.ToString()) 
-						*main.MeshSize.y  , (indVertives / GoogleJsonData.results.Length) * main.MeshSize.z/segment.y);
-					testVertives [indVertives + i]=new Vector2 ((float )GoogleJsonData.results[i].location .lng,(float )GoogleJsonData.results[i].location .lat);
+					vertives[indVertivesLat + i]= new Vector3(i*main.MeshSize.x /segment.x, float.Parse(GoogleJsonData.results[i].elevation.ToString()) 
+						*main.MeshSize.y  , (indVertivesLat / GoogleJsonData.results.Length) * main.MeshSize.z/segment.y);
+					//testVertives [indVertivesLat + i]=new Vector2 ((float )GoogleJsonData.results[i].location .lng,(float )GoogleJsonData.results[i].location .lat);
 
 					//100/x方向分段数=顶点坐标，高度/100=顶点z，为多边形的
-					//tempstr +=GoogleJsonData.results[i].location.lat.ToString()+","+GoogleJsonData.results[i].location.lng.ToString()+vertives[indVertives + i].ToString ();//测试数据
-					tempstr+=","+(indVertives + i)+vertives[indVertives + i].y;
+					//tempstr +=GoogleJsonData.results[i].location.lat.ToString()+","+GoogleJsonData.results[i].location.lng.ToString()+vertives[indVertivesLat + i].ToString ();//测试数据
+					tempstr+=","+(indVertivesLat + i)+vertives[indVertivesLat + i].y;
 				}
 
-				indVertives =indVertives+(int)segment.x+1;//+= GoogleJsonData["results"].Count;/////////
+				indVertivesLat =indVertivesLat+(int)segment.x+1;//+= GoogleJsonData["results"].Count;/////////
 				lat += steplat;           
 				StartCoroutine(LoadJsonGoogleLat(lat));  //获取下一纬度，东西经度之间的数据
 				StrWwwData = "";  	
@@ -520,11 +595,11 @@ public class drawJterrain : MonoBehaviour {
 	//加载高度数据，按照纬度方向分段多次加载bing
 	public IEnumerator LoadJsonBingLat(float lat)
 	{  
-		if (indVertives >= vertives.Length)		  
+		if (indVertivesLat >= vertives.Length)		  
 		{
 			/////////////////
 			Debug.LogWarning (Trrname + "Data complete!!!!!!!"+tempstr );
-			syncMainVertives ();
+			syncMainEdge ();
 			sampleLerp ();
 			DrawMesh();
 			yield break;
@@ -543,7 +618,7 @@ public class drawJterrain : MonoBehaviour {
 		////////////////////////////
 		if (www_data.error != null)    
 		{    
-			Debug.LogWarning ("error :"+Trrname +"/"+indVertives +"-" + www_data.error+"--"+www_data.isDone  );
+			Debug.LogWarning ("error :"+Trrname +"/"+indVertivesLat +"-" + www_data.error+"--"+www_data.isDone  );
 
 			StrWwwData =  "error :" + www_data.error;  
 			main.NumError++;
@@ -551,12 +626,12 @@ public class drawJterrain : MonoBehaviour {
 			//
 			for (int i=0; i <= segment.x ; i++)		
 			{
-				errorSamples.Add (indVertives + i);
+				errorSamples.Add (indVertivesLat + i);
 
 
 			}
 
-			indVertives =indVertives+(int)segment.x+1;//+= bingJsonData["results"].Count;/////////
+			indVertivesLat =indVertivesLat+(int)segment.x+1;//+= bingJsonData["results"].Count;/////////
 			lat += steplat;           
 			StartCoroutine(LoadJsonBingLat(lat));  //获取下一纬度，东西经度之间的数据
 			StrWwwData = "";  
@@ -583,14 +658,14 @@ public class drawJterrain : MonoBehaviour {
 
 				for (int i=0; i < bingresults.Length ; i++)		
 				{
-					vertives[indVertives + i]= new Vector3(i*main.MeshSize.x /segment.x, float.Parse(bingresults[i]) 
-						*main.MeshSize.y  , (indVertives /bingresults.Length ) *  main.MeshSize.z/segment.y);
+					vertives[indVertivesLat + i]= new Vector3(i*main.MeshSize.x /segment.x, float.Parse(bingresults[i]) 
+						*main.MeshSize.y  , (indVertivesLat /bingresults.Length ) *  main.MeshSize.z/segment.y);
 					//100/x方向分段数=顶点坐标，高度/100=顶点z，为多边形的
-					//tempstr +=bingJsonData.results[i].location.lat.ToString()+","+bingJsonData.results[i].location.lng.ToString()+vertives[indVertives + i].ToString ();//测试数据
-					tempstr+="/"+(indVertives + i)+","+vertives[indVertives + i].y;
+					//tempstr +=bingJsonData.results[i].location.lat.ToString()+","+bingJsonData.results[i].location.lng.ToString()+vertives[indVertivesLat + i].ToString ();//测试数据
+					tempstr+="/"+(indVertivesLat + i)+","+vertives[indVertivesLat + i].y;
 				}
 
-				indVertives =indVertives+(int)segment.x+1;//+= bingJsonData["results"].Count;/////////
+				indVertivesLat =indVertivesLat+(int)segment.x+1;//+= bingJsonData["results"].Count;/////////
 				lat += steplat;           
 				StartCoroutine(LoadJsonBingLat(lat));  //获取下一纬度，东西经度之间的数据
 				StrWwwData = "";  	

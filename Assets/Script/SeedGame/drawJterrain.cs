@@ -126,9 +126,13 @@ public class drawJterrain : MonoBehaviour {
 
 		//print (Trrname+"-init-"+northwestlat+","+_northwestlng+"//"+_southeastlat+","+_southeastlng+" step="+steplat);
 		//*************************************
-		fakeloadjson ();//随机地形
+
 		syncMainEdge ();//同步边界
-		DrawMesh ();
+		prevLoad  ();//随机地形
+		if (gameObject.GetComponent <MeshFilter> () != null) {
+			DrawMesh ();
+		} 
+
 		switch (main.DataSource){
 		case (datasource.google):
 			//	StartCoroutine(LoadJsonGoogleLat(southeastlat));//按纬度取值，差值为与赤道相交的平面，非东西方向
@@ -140,7 +144,7 @@ public class drawJterrain : MonoBehaviour {
 			break;
 		case(datasource.random):
 //			syncMainEdge ();//同步边界
-//			fakeloadjson ();//随机地形
+			fakeloadjson ();//随机地形
 //			DrawMesh ();
 //		
 			testsampleError ();//随机增加错误数据
@@ -148,6 +152,8 @@ public class drawJterrain : MonoBehaviour {
 			syncMainEdge ();//同步边界
 			syncMainVertives();//更新main数据
 			DrawMesh ();
+			break;
+		case(datasource.test):
 			break;
 		}
 
@@ -174,12 +180,16 @@ public class drawJterrain : MonoBehaviour {
 	}
 	void  storeErrorSample(int index){
 		if (edgeUp && index > (int)((segment.x + 1) * segment.y)) {
+			Debug.Log ("up  "+index);
 			return;
 		}
 		if (edgeDown && index <=segment.x) {
+			Debug.Log ("down  "+index);
 			return;
 		}
-		if ((edgeLeft && indVertivesLng ==0) ||(edgeRight  && indVertivesLng >segment.x)) {
+		//if ((edgeLeft && indVertivesLng ==0) ||(edgeRight  && indVertivesLng >segment.x)) {
+		if ((edgeLeft &&index% (segment.x+1) ==0) ||(edgeRight  &&(index+1)% (segment.x+1) ==0)) {
+			Debug.Log ("leftright  "+index);
 			return;
 		}
 		errorSamples.Add (index);
@@ -296,9 +306,20 @@ public class drawJterrain : MonoBehaviour {
 				vertives [(int)segment.x+ib].y = main.Vertives [(int)(Vpos.x), (int)(Vpos.y+1)] [ib].y;
 			}
 		}
-		Debug.Log (Trrname+ synct);
+//		Debug.Log (Trrname+ synct);
 	
-
+		//*********************
+		string stvG=" syncedge= \n";
+		for (int i = 0; i <= segment.y; i++) {
+			for (int j = 0; j <= segment.x; j++) {
+				int ind = i * ((int)segment.x + 1) + j;
+				stvG += " / "+ind+","+vertives [ind];//+","+vertives [ind].y;
+				//stvG += "," + vertives [ind].z + ")<";
+				//stvG += testVertives [ind].x+","+testVertives [ind].y+">";
+			}
+			stvG+="\n";
+		}
+		Debug.Log (Trrname +synct+"\n"+ stvG );
 	}
 	/// <summary>
 	/// 更新main。vertives.
@@ -325,6 +346,29 @@ public class drawJterrain : MonoBehaviour {
 	 
 
 	#region ~随机地形
+	void prevLoad(){
+		string stt = "  "+main.MeshSize.z+","+main.MeshSize.x+">\n";
+		int starti = edgeUp ? 1 : 0;
+		int endi = edgeDown ? (int)segment.y :(int) segment.y + 1;
+		int startj = edgeLeft ? 1 : 0;
+		int endj=edgeRight ? (int)segment.x: (int)segment.x + 1;
+
+
+		for (int i = starti; i < endi ; i++) {
+			for (int j = startj; j < endj  ; j++) {
+				int ind = i * (int)(segment.x + 1) + j;
+
+				vertives [ind].y =0;//Vpos.x +0.1f*Vpos.y;// // Mathf.Floor (centerlat)*0.01f + Mathf.Floor (centerlng) * 0.00001f;// Vpos.x +0.1f*Vpos.y  ;
+				vertives [ind].x =j * main.MeshSize.x / segment.x;
+				vertives [ind].z = i * +main.MeshSize.z / segment.y;
+				stt +=","+i+","+j+","+ind+ vertives [ind];
+			}
+			//indVertivesLng++;
+			stt+="\n";
+		}
+		Debug.Log (Trrname +" prevLoad "+stt);
+
+	}
 	/// <summary>
 	/// 随机数地形
 	/// </summary>
@@ -340,6 +384,7 @@ public class drawJterrain : MonoBehaviour {
 				vertives [ind].z = i * +main.MeshSize.z / segment.y;
 			stt +=","+i+","+j+","+ind+ vertives [ind];
 			}
+			//indVertivesLng++;
 			stt+="\n";
 		}
 		Debug.Log (Trrname +" fake json"+stt);
@@ -352,10 +397,11 @@ public class drawJterrain : MonoBehaviour {
 	///<summary>
 	public IEnumerator LoadJsonGoogleLng(float lng)
 	{  
-		if (indVertivesLng>=segment.x)		  
+		if (indVertivesLng>segment.x)		  
 		{
 			/////////////////(indVertives*(segment.y+1) >= vertives.Length)		
 			Debug.Log (Trrname + "Data complete!!!!!!!"+tempstr );
+			complete = true;
 			sampleLerp ();//修正错误数据
 			syncMainEdge ();//同步边界
 			syncMainVertives();//更新main数据
@@ -431,10 +477,11 @@ public class drawJterrain : MonoBehaviour {
 	//加载高度数据，按照纬度方向分段多次加载bing
 	public IEnumerator LoadJsonBingLng(float lng)
 	{  
-		if(indVertivesLng>=segment.x)
+		if(indVertivesLng>segment.x)
 		{
 			/////////////////(indVertives*(segment.y+1) >= vertives.Length)		
 			Debug.Log (Trrname + "Data complete!!!!!!!"+tempstr );
+			complete = true;
 			sampleLerp ();//修正错误数据
 			syncMainEdge ();//同步边界
 			syncMainVertives();//更新main数据
@@ -599,6 +646,7 @@ public class drawJterrain : MonoBehaviour {
 		{
 			/////////////////
 			Debug.LogWarning (Trrname + "Data complete!!!!!!!"+tempstr );
+			complete = true;
 			syncMainEdge ();
 			sampleLerp ();
 			DrawMesh();

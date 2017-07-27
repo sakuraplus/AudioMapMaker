@@ -8,7 +8,7 @@ using System.IO;
 
 public  enum datasource
 {
-	google,bing,random
+	google,bing,random,test
 }
 [Serializable]
 public class Vector2Int

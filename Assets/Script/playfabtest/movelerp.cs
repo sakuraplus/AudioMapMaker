@@ -11,8 +11,8 @@ public class movelerp :  Photon.MonoBehaviour, IPunObservable
 	//bool onctrl = false;
 	//[SerializeField ]
 	//bool isstreaming = true;
-	[SerializeField ]
-	string  ttt = "";
+//	[SerializeField ]
+//	string  ttt = "";
 	public void Start()
 	{
 		this.latestCorrectPos = transform.position;
@@ -22,14 +22,14 @@ public class movelerp :  Photon.MonoBehaviour, IPunObservable
 
 	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
-		ttt = "on";
-		if (stream.isReading) {
-			ttt="isreading";
-		}
-		if (stream.isWriting) {
-			ttt="isWriting";
-		}
-
+//		ttt = "on";
+//		if (stream.isReading) {
+//			ttt="isreading";
+//		}
+//		if (stream.isWriting) {
+//			ttt="isWriting";
+//		}
+//
 		//ttt = stream.ToString ();
 		if (stream.isWriting)
 		{

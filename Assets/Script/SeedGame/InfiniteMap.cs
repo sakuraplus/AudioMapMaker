@@ -23,18 +23,21 @@ public class InfiniteMap : MonoBehaviour {
 
 
 	//	Dictionary <pos,GameObject > DictMapObj;
-	public Vector2 NumChunk;
+	//public Vector2 NumChunk;
+	public Vector2Int  NumChunk;
 	public  Transform charPos;
 	//public static Vector3[,] Vertives;
-
+	//[SerializeField ]
+	Vector2Int vpnow;
+	Vector2Int vplast;//测试用
 	[SerializeField]
 	GameObject onchunk;
 	float onchunkLat,onchunkLng;
 	void Start() {
 
-		_MapObjs = main.MapObjs;//new GameObject[(int)NumChunk.x ,(int) NumChunk.y] ;
-		_Vertives= main.Vertives ;
-		NumChunk = main.Pieces;
+		_MapObjs = TerrainManager.MapObjs;//new GameObject[(int)NumChunk.x ,(int) NumChunk.y] ;
+		_Vertives= TerrainManager.Vertives ;
+		NumChunk = TerrainManager.Pieces;
 		initMaps();
 
 	}
@@ -49,9 +52,9 @@ public class InfiniteMap : MonoBehaviour {
 
 		int sy =Mathf.FloorToInt( NumChunk .x/2);
 		int sx = Mathf.FloorToInt( NumChunk .x/2);
-		vpnow = new Vector2 (sy,sx);
+		vpnow = new Vector2Int (sy,sx);
 		//vplast = vpnow;//测试用
-		_MapObjs = main.MapObjs;// new GameObject[(int)NumChunk.x ,(int)NumChunk.y ] ;
+		_MapObjs = TerrainManager.MapObjs;// new GameObject[(int)NumChunk.x ,(int)NumChunk.y ] ;
 		pool = new List<GameObject> ();
 
 	}
@@ -96,10 +99,8 @@ public class InfiniteMap : MonoBehaviour {
 
 
 	/////////////////////////
-	//[SerializeField ]
-	Vector2 vpnow;
-	Vector2 vplast;//测试用
-	void replacechunk(Vector2 vp){
+
+	void replacechunk(Vector2Int vp){
 //		if (vplast == vp) {
 //			Debug.Log ("vplast == vp");
 //			return;
@@ -119,7 +120,7 @@ public class InfiniteMap : MonoBehaviour {
 							pool.Add (_MapObjs [i, j]);
 						} else {
 							_MapObjs [i, j - stepX] = _MapObjs [i, j];
-							_MapObjs [i, j - stepX].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j - stepX);
+							_MapObjs [i, j - stepX].GetComponent<drawJterrain> ().Vpos = new Vector2Int (i, j - stepX);
 
 							_MapObjs [i, j] = null;
 							////////////////////
@@ -141,7 +142,7 @@ public class InfiniteMap : MonoBehaviour {
 						} else {
 
 							_MapObjs [i, j-stepX] = _MapObjs [i, j ];
-							_MapObjs [i, j-stepX].GetComponent<drawJterrain> ().Vpos = new Vector2 (i, j-stepX);
+							_MapObjs [i, j-stepX].GetComponent<drawJterrain> ().Vpos = new Vector2Int (i, j-stepX);
 							_MapObjs [i, j ] = null;
 							////////////////////
 							_Vertives [i, j-stepX]=_Vertives [i,j];
@@ -162,7 +163,7 @@ public class InfiniteMap : MonoBehaviour {
 							pool.Add (_MapObjs [i, j]);
 						} else {
 							_MapObjs [i - stepY, j] = _MapObjs [i,j];
-							_MapObjs [i - stepY, j].GetComponent<drawJterrain> ().Vpos = new Vector2 (i - stepY, j);
+							_MapObjs [i - stepY, j].GetComponent<drawJterrain> ().Vpos = new Vector2Int (i - stepY, j);
 							_MapObjs [i, j] = null;
 							////////////////////
 							_Vertives [i - stepY, j]=_Vertives [i,j];
@@ -183,7 +184,7 @@ public class InfiniteMap : MonoBehaviour {
 						} else {
 
 							_MapObjs [i - stepY, j] = _MapObjs [i, j];
-							_MapObjs [i - stepY, j].GetComponent<drawJterrain> ().Vpos = new Vector2 (i - stepY, j);
+							_MapObjs [i - stepY, j].GetComponent<drawJterrain> ().Vpos = new Vector2Int (i - stepY, j);
 							_MapObjs [i , j] = null;
 							////////////////////
 							_Vertives [i - stepY, j]=_Vertives [i,j];
@@ -210,7 +211,7 @@ public class InfiniteMap : MonoBehaviour {
 	
 		string ttt=     "`MapObjs.name= ";
 
-		Vector2  baseChunkPos = onchunk.GetComponent<drawJterrain> ().Vpos;
+		Vector2Int  baseChunkPos = onchunk.GetComponent<drawJterrain> ().Vpos;
 		//Debug.LogWarning ("baseChunkPos=" + baseChunkPos);
 		for (int i = 0; i < NumChunk.y; i++) {
 			for (int j = 0; j < NumChunk.x; j++) {
@@ -222,10 +223,10 @@ public class InfiniteMap : MonoBehaviour {
 					/// float newClng = (j - 0) * 2 * main.stepLng+onchunkLng ;
 					//float newClat = ( 0-i) * 2 * main.stepLat+onchunkLat ;
 				
-					float newClng = (j - baseChunkPos.y) * 2 * main.stepLng+onchunkLng ;
-					float newClat = (baseChunkPos.x - i) * 2 * main.stepLat+onchunkLat ;
+					float newClng = (j - baseChunkPos.y) * 2 * TerrainManager.stepLng+onchunkLng ;
+					float newClat = (baseChunkPos.x - i) * 2 * TerrainManager.stepLat+onchunkLat ;
 					//Debug.LogError  ("set with pool "+pool [0].name+"("+i+","+j+") base="+baseChunkPos  +"lat,lng="+onchunkLat +","+onchunkLng);
-					_MapObjs [i, j].GetComponent<drawJterrain> ().loadNewLoc(newClat,newClng, new Vector2 (i, j));//,main.stepLat,main.stepLng,main.s
+					_MapObjs [i, j].GetComponent<drawJterrain> ().loadNewLoc(newClat,newClng, new Vector2Int (i, j));//,main.stepLat,main.stepLng,main.s
 
 				//	g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,stepLat ,stepLng,size,new Vector2 (i,j));
 
@@ -248,7 +249,7 @@ public class InfiniteMap : MonoBehaviour {
 
 		for (int i = 0; i < NumChunk.y; i++) {
 			for (int j = 0; j < NumChunk.x; j++) {
-				Vector3 nv = new Vector3 (centerpos.x + main.MeshSize.x * (j-cx), centerpos.y, centerpos.z +main.MeshSize.z * (cy - i));
+				Vector3 nv = new Vector3 (centerpos.x + TerrainManager.MeshSize.x * (j-cx), centerpos.y, centerpos.z +TerrainManager.MeshSize.z * (cy - i));
 				_MapObjs [i, j] .transform.position=nv;
 			}
 			//	ttt+="/";

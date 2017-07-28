@@ -23,6 +23,10 @@ public class Vector2Int
 		x = (int)_x;
 		y = (int)_y;
 	}
+	public Vector2Int(Vector2 v){
+		x = (int)v.x;
+		y = (int)v.y;
+	}
 }
 /// <summary>
 /// Json map data of google.
@@ -71,7 +75,7 @@ public class Bingresources{
 	public int zoomLevel = 2;
 }
 
-public class main : MonoBehaviour {
+public class TerrainManager : MonoBehaviour {
 
 	GameObject terrmanager;//= new GameObject();
 	//	public  GameObject[] arrTrr;//= new GameObject[9];
@@ -108,10 +112,11 @@ public class main : MonoBehaviour {
 	//AIzaSyAYKDcM7_1gBCXxXGvPk5VgFjWs4w4BTfs
 	[SerializeField,HeaderAttribute ("separate the full area to pieces")]
 	Vector2 _Pieces=new Vector2(3,3);//地图分块数
-	public static  Vector2 Pieces=new Vector2(3,3);//地图分块数
+//	public static  Vector2 Pieces=new Vector2(3,3);//地图分块数
+	public static  Vector2Int Pieces=new Vector2Int(3,3);//地图分块数
 	[SerializeField,HeaderAttribute ("segment one mesh block in  lng,lat")]
 	Vector2 _SegmentInPiece=new Vector2(5,5);//每块地图分段数
-	public static  Vector2 SegmentInPiece=new Vector2(5,5);//每块地图分段数
+	public static  Vector2Int SegmentInPiece=new Vector2Int(5,5);//每块地图分段数
 
 	[Header( "size of the esch piece of mesh in lat")]
 	public float SizeOfPiece=100;
@@ -152,8 +157,8 @@ public class main : MonoBehaviour {
 	void Awake () {
 		NumComplete = 0;
 		NumError = 0;
-		SegmentInPiece = _SegmentInPiece;
-		Pieces = _Pieces;
+		SegmentInPiece =new Vector2Int( _SegmentInPiece);
+		Pieces =new Vector2Int( _Pieces);
 //		Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
 //		Vertives=new Vector3[(int)(Pieces.x*Pieces.y),(int)(SegmentInPiece.x+1)*(int)(SegmentInPiece.y+1)] ;
 		Vertives=new Vector3[(int)Pieces.y,(int)Pieces.x][] ;
@@ -231,8 +236,8 @@ public class main : MonoBehaviour {
 		//起点为center
 
 
-		int offsetx =(int) Mathf.Floor (Pieces .x / 2);
-		int offsety = (int)Mathf.Floor (Pieces.y / 2);
+		int offsetx = Mathf.FloorToInt (Pieces .x / 2);
+		int offsety = Mathf.FloorToInt (Pieces.y / 2);
 
 		for (int i = 0; i < Pieces.y; i++) {
 			for (int j = 0; j < Pieces.x; j++) {
@@ -251,7 +256,7 @@ public class main : MonoBehaviour {
 				//Vertives.Add (null);//(g.GetComponent <drawJterrain>().vertives );
 				Vertives[i,j]=null;
 
-				g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,new Vector2 (i,j));
+				g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,new Vector2Int (i,j));
 				//g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,stepLat ,stepLng,MeshSize,new Vector2 (i,j));
 				//(_slat,_slng,_elat,_elng,size,new Vector2 (i,j));
 			

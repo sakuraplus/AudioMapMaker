@@ -40,19 +40,17 @@ public class BeatAnalysisNonRTEditor : Editor { // extend the Editor class
 //				EditorUtility.ClearProgressBar ();
 //			}
 			// add a custom button to the Inspector component
-			if (BeatAnalysisManager.MAL.Count > 1) {
+
+
+			//if (BeatAnalysisManager.MAL.Count > 1) {
+			if (BAnonRT.DataComplete ) {
 				if (GUILayout.Button ("start beat analysis")) {
 					BAnonRT.StartAnaBeat ();
 //					BALe.Clear();
 //					BALe.AddRange (BeatAnalysisManager.BAL );
 				}
 			}
-//			if (BeatAnalysisManager.BAL .Count <BALe.Count ) {
-//				if (GUILayout.Button ("copyto")) {
-//					BeatAnalysisManager.BAL.Clear ();//.CopyTo (MALe);
-//					BeatAnalysisManager.BAL.AddRange(BALe);
-//				}
-//			}
+//			
 		}
 	
 

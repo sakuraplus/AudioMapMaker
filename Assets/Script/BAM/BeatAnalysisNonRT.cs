@@ -3,7 +3,7 @@ using System.Collections;
 using System.IO;
 using UnityEngine.UI;
 using AForge.Math ; 
-
+using System.Threading ;
 
 
 /// <summary>
@@ -12,6 +12,12 @@ using AForge.Math ;
 /// </summary>
 [RequireComponent (typeof (BeatAnalysisManager ) )]/// 
 public class BeatAnalysisNonRT : MonoBehaviour {
+	//Thread thDataProcess;
+	[HideInInspector ]
+	public bool DataComplete=false;
+	[HideInInspector ]
+	public bool AnalysisComplete=false;
+
 	[SerializeField]
 	Text TxTProcess;
 
@@ -34,12 +40,30 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 	int freqlength;//在fft结果中，有效频率的数
 	FFT fft=new FFT ();
 
+	/// <summary>
+	/// 保存get data的数据
+	/// </summary>
 	float[] samples;//存getdata
 
+	/// <summary>
+	/// 衰减The decay.
+	/// </summary>
 	float _decay = 0.997f;//衰减?
-	public static int bandlength = 32;//节拍间隔
 
+	/// <summary>
+	/// 分析数据使用的节拍间隔
+	/// </summary>
+	int bandlength = 32;//节拍间隔
 
+	/// <summary>
+	/// _audio.clip.frequency
+	/// </summary>
+	int freq;//_audio.clip.frequency
+
+	/// <summary>
+	/// AudioSettings.outputSampleRate 
+	/// </summary>
+	int sampleRate;
 
 	//int outputindex=0;//测试
 	void Start () {
@@ -82,20 +106,62 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 		//aud.clip.SetData(samples, 0);
 	}
 
+	void OnGUI()  
+	{  
+		//因为在异步读取场景，  
+		//所以这里我们可以刷新UI  
+		TxTProcess.text="processing  "+processbar+" %"; 
 
+	}  
 
 
 		
-
+	//Thread thDataProcess;
 	public void Btnseparatedata()
 	{
 		//BeatAnalysisManager.MAL.Clear ();//初始化mal
 		ParaInit ();
 		GetMusicData (channel);//获取——audiosource，声道1	
-		DataProcess (_sampletime,_SpecSize);
-		Debug.Log ("sanple="+samples.Length +"spt="+_sampletime+"bfs="+_bufferSize +"dec="+_decay +"Mal=" + BeatAnalysisManager.MAL.Count);
+		Debug.LogError ("start thread"+Time.realtimeSinceStartup);
+		//***
+		Thread thDataProcess=new Thread (new ThreadStart (dataProcessWithThread));
+		thDataProcess.Start();
+		thDataProcess.IsBackground = true;
+//		Thread thProcessBar=new Thread (new ThreadStart (dataProcessBar));
+//		thProcessBar.Start();
+//		thProcessBar.IsBackground = true;
+		//***
+//		DataProcess (_sampletime,_SpecSize);
+		//***
+		Debug.LogError ("end thread process--systemtime="+Time.realtimeSinceStartup );
+		Debug.Log ("sample="+samples.Length +"spt="+_sampletime+"bfs="+_bufferSize +"dec="+_decay +"Mal=" + BeatAnalysisManager.MAL.Count);
 
 	}
+	void dataProcessWithThread(){
+		print ("DPWT-in thread");
+		DataProcess (_sampletime,_SpecSize);
+
+		print ("DWT-end thread"+processbar);
+	}
+	void dataProcessBar(){
+		
+
+		print ("DPB-in thread");
+		if (TxTProcess != null) {
+			while (true) {
+				TxTProcess.text="processing  "+processbar+" %";
+				Thread.Sleep (1000);
+				if (processbar > 100) {
+					print ("DPB-end thread"+processbar);
+					break;
+				}
+			}
+		//processbar= Mathf.Min ( Mathf.RoundToInt  ( 90f*i / NumOfFrame)+ 10, 100);
+		
+		}
+
+	}
+
 
 	public void GetMusicData(int channel=0)
 	{		
@@ -103,8 +169,8 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 		//获取每帧的数据，取单声道存入samples，channel 获取的声道
 		samples=new float[_audio.clip.samples ] ;
 		BeatAnalysisManager.MAL.Clear ();//初始化mal
-
-
+		freq=_audio.clip.frequency;
+		sampleRate = AudioSettings.outputSampleRate;
 		if (channel >= _audio.clip.channels) {
 			Debug.Log ("channel out of range");
 			channel = _audio.clip.channels - 1;
@@ -122,10 +188,16 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 				samples [i] = sourcesamples [i * NumChannels + channel];
 			}
 		}
+		Debug.Log ("GetMusicData length="+samples.Length );
+		if (TxTProcess != null) {
+			TxTProcess.text="processing  5 %";
+		}
 	}
+	[SerializeField ]
 	int processbar=0;
 	public void DataProcess(int time=100,int samplesize=128 )
 	{	
+		DataComplete = false;
 		processbar=10;
 		//拆分数据，time即采样间隔时间，单位毫秒，samplesize为fft结果的数据数量=_spec，采样数据数量为sanplesize*2，取每个间隔分段的钱samplesize位
 		int SamplePerFrame = time;//Mathf.FloorToInt ( time*_audio.clip.frequency / 1000);//每帧间隔的数据数量
@@ -140,16 +212,13 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 			}
 		}
 
-		if (TxTProcess != null) {
-			TxTProcess.text="processing  10 %";
-		}
-		float offset = si * _audio.clip.frequency;/////////////////第一个非0数据所在的时间
+		float offset = si *freq;/////////////////第一个非0数据所在的时间_audio.clip.frequency
 
 		int NumOfFrame =Mathf.FloorToInt ((samples.Length-si) / SamplePerFrame);//拆分出的数据数量，相当于帧数
 
-		freqlength=Mathf.FloorToInt (samplesize *_audio.clip.frequency/AudioSettings.outputSampleRate  );//有效频率数量
+		freqlength=Mathf.FloorToInt (samplesize *freq/sampleRate  );//有效频率数量
 		fft.FFTManagerinit (samplesize*2,FFT.datafilter.unityspec);//初始化fft
-		Debug.LogError ("offset="+si+"  =  "+offset +"SamplePerFrame= "+SamplePerFrame+"--systemtime="+Time.realtimeSinceStartup);
+		//Debug.LogError ("offset="+si+"  =  "+offset +"SamplePerFrame= "+SamplePerFrame+"--systemtime="+Time.realtimeSinceStartup);
 		for (int i = 0; i < NumOfFrame; i++) {
 			//帧数
 			float[] separatedData = new float[ samplesize*2];//每次采样的数据数量，为了保证fft结果数量为samplesize，数量取两倍
@@ -170,18 +239,17 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 
 			float[] bands =new float[_numBands +1];
 			bands =CalcCurrentFrameAvg (result);//按频段拆分，计算当前帧平均值，存入band		
-			bands [_numBands] = (float)startindex / _audio.clip.frequency;//startindex所在时间，单位为秒	
+			bands [_numBands] = (float)startindex /freq;//startindex所在时间，单位为秒	
 
 
 			BeatAnalysisManager.MAL.Add (bands);//存入MAL
-			if (TxTProcess != null) {
-				
-				processbar= Mathf.Min ( Mathf.RoundToInt  ( 90f*i / NumOfFrame)+ 10, 100);
-				TxTProcess.text="processing  "+processbar+" %";
-			}
+
+			processbar = Mathf.Min ( Mathf.RoundToInt  ( 90f*i / NumOfFrame)+ 10, 100);
+
 
 		}//end 采样samplesize*2次	
-		Debug.LogError ("end process--systemtime="+Time.realtimeSinceStartup );
+		DataComplete=true;
+		print ("mal"+BeatAnalysisManager.MAL.Count);
 	}//end dataprocess ，band存入MAL
 
 
@@ -237,6 +305,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 		//同步manager中的各参数
 		ParaInit();
 		beatArrindex=0;//池，暂时不用
+		AnalysisComplete=false;
 
 		CalcIncrement ();//计算并保存增长值，将增长值及绝对值list存为数组
 		CalcWavelength ();//将完整音乐细分，计算每段波长
@@ -246,7 +315,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 		//	Debug.LogError (j);
 			CheckBeatInClip (j);///////单频段检测节拍
 		}
-
+		AnalysisComplete=true;
 
 	}
 

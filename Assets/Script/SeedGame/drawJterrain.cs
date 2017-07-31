@@ -377,7 +377,7 @@ public class drawJterrain : MonoBehaviour {
 		for (int i = 0; i <= segment.y; i++) {
 			for (int j = 0; j <= segment.x ; j++) {
 				int ind = i * (int)(segment.x + 1) + j;
-				float a=UnityEngine. Random.Range(0f,10f);
+				float a=UnityEngine. Random.Range(0f,20f);
 
 				vertives [ind].y =a;//Vpos.x +0.1f*Vpos.y;// // Mathf.Floor (centerlat)*0.01f + Mathf.Floor (centerlng) * 0.00001f;// Vpos.x +0.1f*Vpos.y  ;
 				vertives [ind].x =j * TerrainManager.MeshSize.x / segment.x;
@@ -784,20 +784,20 @@ public class drawJterrain : MonoBehaviour {
 		string uvtest = "uv= ";
 		int sum = vertives.Length;
 		uvs = new Vector2[sum];
-		float u = 0.5f;//2*1.0F / segment.x;
-		float v = 0.5f;//2*1.0F / segment.y;
+		float u = 1.0F / segment.x;
+		float v = 1.0F / segment.y;
 		uint index = 0;
 		for (int i = 0; i < segment.y + 1; i++)
 		{
 			for (int j = 0; j < segment.x + 1; j++)
 			{
-				//uvs[index] = new Vector2(j * u, i * v);
+				uvs[index] = new Vector2(j * u, i * v);
 				//**********
-				float modU=j*u;
-				modU = (Mathf.FloorToInt (modU) % 2 == 0) ? modU % 1 : (1 + Mathf.FloorToInt (modU) - modU) % 2;
-				float modV=i*v;
-				modV = (Mathf.FloorToInt (modV) % 2 == 0) ? modV % 1 : (1 + Mathf.FloorToInt (modV) - modV) % 2;
-				uvs[index] = new Vector2(modU, modV);
+				//float modU=j*u;
+				//modU = (Mathf.FloorToInt (modU) % 2 == 0) ? modU % 1 : (1 + Mathf.FloorToInt (modU) - modU) % 2;
+				//float modV=i*v;
+				//modV = (Mathf.FloorToInt (modV) % 2 == 0) ? modV % 1 : (1 + Mathf.FloorToInt (modV) - modV) % 2;
+				//uvs[index] = new Vector2(modU, modV);
 				//********
 				uvtest+=uvs[index]+",";
 				index++;

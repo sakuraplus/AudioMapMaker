@@ -15,18 +15,18 @@ public class mainHelperEditor : Editor { // extend the Editor class
 		DrawDefaultInspector();
 
 		if (GUILayout.Button ("test?")) {
-			Debug.Log (Mathf.Log (3));
-			float northwestlat = 45;
-			float sinnorthlat=Mathf.Sin(northwestlat *Mathf.PI /180);
-			sinnorthlat = Mathf.Min (Mathf.Max (sinnorthlat, -0.99f), 0.99f);
-			float pointnorthlat=(0.5f - Mathf.Log ((1 + sinnorthlat) / (1 - sinnorthlat)) / (4 * Mathf.PI));
+//			Debug.Log (Mathf.Log (3));
+//			float northwestlat = 45;
+//			float sinnorthlat=Mathf.Sin(northwestlat *Mathf.PI /180);
+//			sinnorthlat = Mathf.Min (Mathf.Max (sinnorthlat, -0.99f), 0.99f);
+//			float pointnorthlat=(0.5f - Mathf.Log ((1 + sinnorthlat) / (1 - sinnorthlat)) / (4 * Mathf.PI));
 			/// 
 			// south，南端纬度所在完整地图上的位置（比例）
 			float southeastlat=30;
 			float sinsouthlat=Mathf.Sin(southeastlat  *Mathf.PI /180);
 			sinsouthlat = Mathf.Min (Mathf.Max (sinsouthlat, -0.99f), 0.99f);
 			float pointsouthlat=(0.5f - Mathf.Log ((1 + sinsouthlat) / (1 - sinsouthlat)) / (4 * Mathf.PI));
-			Debug.Log (pointnorthlat+","+pointsouthlat+">>"+pointnorthlat*512+","+pointsouthlat*512);
+			Debug.Log ("pointsouthlat="+pointsouthlat+">>"+pointsouthlat*512);
 
 			Debug.Log (Mathf.Epsilon+System.Math.E );
 			Debug.Log(Mathf.Pow(3,2));

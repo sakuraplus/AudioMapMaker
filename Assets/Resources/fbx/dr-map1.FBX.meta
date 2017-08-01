@@ -1,19 +1,15 @@
 fileFormatVersion: 2
-guid: 093278bc56d644849845c93251699cc0
-timeCreated: 1500630305
+guid: 3cd87243d66e1ab42ac6fc1cdc4840df
+timeCreated: 1501578589
 licenseType: Pro
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
     100000: //RootNode
-    100002: NGon01
-    100004: objGeoSphere01
     400000: //RootNode
-    400002: NGon01
-    400004: objGeoSphere01
-    2300000: objGeoSphere01
-    3300000: objGeoSphere01
-    4300000: objGeoSphere01
+    2300000: //RootNode
+    3300000: //RootNode
+    4300000: Plane001
     9500000: //RootNode
   materials:
     importMaterials: 1

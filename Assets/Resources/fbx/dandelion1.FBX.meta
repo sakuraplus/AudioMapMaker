@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 0ae148dd59a67bf42b296427e28bd5b5
-timeCreated: 1500630305
+guid: 3b7b6a0df812a2d4381e1fdd945404ca
+timeCreated: 1501578589
 licenseType: Pro
 ModelImporter:
   serializedVersion: 19
@@ -9,7 +9,7 @@ ModelImporter:
     400000: //RootNode
     2300000: //RootNode
     3300000: //RootNode
-    4300000: Plane001
+    4300000: GeoSphere001
     9500000: //RootNode
   materials:
     importMaterials: 1
@@ -35,7 +35,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 100
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     importBlendShapes: 1

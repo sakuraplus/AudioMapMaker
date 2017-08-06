@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEditor; // this is needed since this script references the Unity Editor
 
-[CustomEditor(typeof(camMap   ))]
+[CustomEditor(typeof(TestTest))]
 public class mainHelperEditor : Editor { // extend the Editor class
 
 	float[,][] fff=new float[2,3][] ;
@@ -69,6 +69,15 @@ public class mainHelperEditor : Editor { // extend the Editor class
 
 
 		}
-
+		if (GUILayout.Button ("test latlng")) {
+			Debug.LogWarning ("test latlng\t"+TerrainManager.lat +","+TerrainManager.lng );
+		}
+		if (GUILayout.Button ("test aus")) {
+			Debug.LogWarning ("test aus\t"+BeatAnalysisManager._audio.clip .name );
+		}
+		if (GUILayout.Button ("test BAL")) {
+			Debug.LogWarning ("test bal\t"+BeatAnalysisManager.BAL.Count  );
+			Debug.LogWarning ("test mal\t"+BeatAnalysisManager.MAL .Count  );
+		}
 	}
 }

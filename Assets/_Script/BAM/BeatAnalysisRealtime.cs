@@ -144,10 +144,12 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 	void recordmusicdata()
 	{
 	////////////////////////////////////////
-		_audio .GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
-	
+	//	_audio .GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
+		//_AL  .
+		AudioListener .GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
 		//AudioListener.GetSpectrumData (spectrum, 0, FFTWindow.Rectangular);
 		//CurrentFrameAvg =
+
 		CalcCurrentFrameAvg (spectrum);// musicenergy;
 
 		recordAvgInBand ();
@@ -667,11 +669,31 @@ public class BeatAnalysisRealtime : MonoBehaviour {
 
 
 //	//测试用
-//	//beatmap下落
-//	void PlayBeatMap()
-//	{
-//				BeatMapContainer.transform.position-=new Vector3 ( 0, speed * Time.deltaTime,0);
-//	}
+
+	public  Text TGL;
+	public void testGL()
+	{
+		Debug.LogError ("***"+spectrum[Mathf.FloorToInt( spectrum .Length/3)]);
+		TGL.text = ("***" + spectrum [Mathf.FloorToInt (spectrum.Length / 3)]);
+		float[] smp=new float[128] ;
+		AudioListener.GetOutputData (smp, 0);
+		TGL.text += ">>>" + smp [64];
+		float[] gd=new float[_audio.clip.samples ] ;
+		_audio.clip.LoadAudioData();
+
+		_audio.clip.GetData (gd, 0);
+
+		string tt = ",";
+		int n = 500;
+		for (int i =1000; i <gd.Length ; i+=31111) {
+			tt+=gd[i]+",";
+			if (n < gd.Length-300) {
+				n += 235;
+			}
+		}
+		Debug.LogError (tt);
+		TGL.text += "\n"+_audio.clip.length +"**"+tt;
+	}
 //
 //	//按键
 //	public void CheckBeatMap()

@@ -372,6 +372,9 @@ public class SeedBeatMap : MonoBehaviour {
 
 		return newPos;//new Vector3 (newPosX, newPosY, newPosZ);
 	}
+
+
+
 	Vector3 groundLimit(Vector3 _nextpos){
 		Vector3 oldpos = _nextpos;
 		RaycastHit hit;

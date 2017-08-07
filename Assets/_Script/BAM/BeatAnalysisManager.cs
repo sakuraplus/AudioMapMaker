@@ -29,6 +29,7 @@ public class BeatAnalysisManager : MonoBehaviour {
 	[HideInInspector ]
 	public static  AudioSource _audio;
 	public static  AudioClip defaultAudioclip;
+	//public static  AudioListener  _AL;
 	public   AudioClip _defaultAudioclip;
 	//public static string AudioName="";
 	public static int SpecSize = 256;//采样数量
@@ -112,7 +113,8 @@ public class BeatAnalysisManager : MonoBehaviour {
 		SpecSize = _SpecSize;//获取频谱或fft的结果数量
 
 		_audio=GetComponent<AudioSource> ();
-
+		//_AL =GetComponent<AudioListener > ();
+			//GameObject.Find("_script"). GetComponent<AudioSource> ();
 		if (defaultAudioclip == null) {
 			defaultAudioclip = _defaultAudioclip;}
 		if (_audio.clip == null) {

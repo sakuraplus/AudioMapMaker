@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEditor; // this is needed since this script references the Unity Editor
 
 [CustomEditor(typeof(TestTest))]
-public class mainHelperEditor : Editor { // extend the Editor class
+public class testHelperEditor : Editor { // extend the Editor class
 
 	float[,][] fff=new float[2,3][] ;
 

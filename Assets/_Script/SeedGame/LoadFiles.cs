@@ -44,7 +44,7 @@ public class LoadFiles : MonoBehaviour {
 	/// <param name="url">URL.</param>
 	public  void FileSelected (string url) {
 		tt.text += " s ";
-		StartCoroutine(LoadTexture (url));
+		StartCoroutine(LoadMusic (url));
 	}
 	#endif 
 	/// <summary>

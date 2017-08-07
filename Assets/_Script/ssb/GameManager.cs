@@ -101,18 +101,18 @@ public class GameManager : MonoBehaviour {
 //		}
 
 		// friendly error messages
-		if (UIScore==null)
-			Debug.LogError ("Need to set UIScore on Game Manager.");
-		
-		if (UIHighScore==null)
-			Debug.LogError ("Need to set UIHighScore on Game Manager.");
-		
-		if (UILevel==null)
-			Debug.LogError ("Need to set UILevel on Game Manager.");
-		
-		if (UIGamePaused==null)
-			Debug.LogError ("Need to set UIGamePaused on Game Manager.");
-		
+//		if (UIScore==null)
+//			Debug.LogError ("Need to set UIScore on Game Manager.");
+//		
+//		if (UIHighScore==null)
+//			Debug.LogError ("Need to set UIHighScore on Game Manager.");
+//		
+//		if (UILevel==null)
+//			Debug.LogError ("Need to set UILevel on Game Manager.");
+//		
+//		if (UIGamePaused==null)
+//			Debug.LogError ("Need to set UIGamePaused on Game Manager.");
+//		
 		// get stored player prefs
 		refreshPlayerState();
 

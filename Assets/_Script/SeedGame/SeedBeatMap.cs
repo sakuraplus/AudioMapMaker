@@ -47,12 +47,14 @@ public class SeedBeatMap : MonoBehaviour {
 
 	[SerializeField ]
 	float offset=0.5f;
+	[SerializeField ]
+	GameObject [] targetposS;
 
 	void Start () {
 
 		_audio = BeatAnalysisManager ._audio;
 		readytoplay = true;
-
+		initTargetPosS ();
 
 //		PlayFab.ClientModels.GetTitleNewsRequest gtn=new PlayFab.ClientModels.GetTitleNewsRequest() ; 
 // 		gtn="POST https://E7D7.playfabapi.com/Client/GetTitleNews Content-Type: application/json X-Authentication: <user_session_ticket_value>
@@ -70,12 +72,7 @@ public class SeedBeatMap : MonoBehaviour {
 			//*******************************
 			LoadJsonAndPlay();
 			//**********************
-//			Debug.Log ("qq" );
-//			load (jsonfileAsset.text.ToString());
-//			beatmapToseedMode ();
-//			btnPlaymap ();
-//			Cursor.visible=false;
-//			Cursor.lockState=CursorLockMode.Locked ;
+
 		}
 		if (Input.GetKey (KeyCode.W)) {
 //			
@@ -271,13 +268,7 @@ public class SeedBeatMap : MonoBehaviour {
 	public void DrawBeatMapSeed(MusicData MD)
 	{
 		BeatAnalysisManager.BeatmapOffset=offset ;
-	//	Debug.Log ("BeatAnalysisManager .BAL.Count" + BeatAnalysisManager.BAL.Count);
-//		GameObject tarpos = Instantiate (beatObj [MD.BeatPos]) as GameObject;
-//		tarpos.transform.position = charPos.position ;
-//		tarpos.transform.localScale = new Vector3 (2, 1, 2);//.y = 10;
-//		tarpos.transform.parent = BeatMapContainer.transform;
-	//	GameObjBeats = new GameObject[BeatAnalysisManager .BAL.Count ];
-	//	float [] beattimes=new float[BeatAnalysisManager .BAL.Count ] ;
+
 		for (int i = 0; i < showNum; i++) {
 		//	for (int j = 0; j < MD.Average; j++) {
 				GameObject beat = Instantiate (beatObj [MD.BeatPos]) as GameObject;
@@ -292,7 +283,9 @@ public class SeedBeatMap : MonoBehaviour {
 				}
 
 				beat.transform.parent = BeatMapContainer.transform;
-				beat.transform.localPosition = nextSeedPos (MD,0);
+				//beat.transform.localPosition = nextSeedPos (MD,0);
+			beat.transform.localPosition = nextSeedPosS (MD,0);
+			Debug.LogError ("!");
 			//	beat.transform.localPosition = nextSeedPos (MD,j);
 				// new Vector3 (BeatAnalysisManager.BAL [i].BeatPos * 10, BeatAnalysisManager.BAL [i].playtime * speed, 0);
 		
@@ -312,6 +305,53 @@ public class SeedBeatMap : MonoBehaviour {
 	float angleRange=45;
 	[SerializeField ]
 	float yRange=0.2f;
+
+
+	//***
+	[SerializeField ]
+	Vector3[] targetDri;//=new Vector3[] ;
+	void initTargetPosS(){
+		targetDri=new Vector3[targetposS .Length ] ;
+		for (int i = 0; i < targetposS.Length; i++) {
+			targetDri [i] = targetposS [i].transform.position - charPos.position;
+		}
+	}
+	GameObject[] goo;
+	//***
+	public  Vector3  nextSeedPosS(MusicData MD,float offset)
+	{
+		float R = speed*(MD.playtime - _audio.time + BeatAnalysisManager.BeatmapOffset-0.5f);
+		if (offset > 0) {
+			R += speed * offset / 100;
+		}
+		R = 1;
+	//	float charA = 0;
+		Vector3 charAxis = charPos.forward;
+
+
+		//**
+	
+		Vector3[] targetVecS=new Vector3[targetposS.Length ] ;
+		string sttt=">>>";
+		for(int i=0;i<targetposS.Length;i++){
+			targetVecS [i] =targetDri[i]; //targetposS [i].transform.position - charPos.position;//targetDri[i];
+			sttt+=targetVecS[i]+",";
+
+			float rr = Mathf.Sqrt (targetVecS[i].x*targetVecS[i].x+targetVecS[i].z*targetVecS[i].z+targetVecS[i].y*targetVecS[i].y);
+			if (rr != 0) {
+				targetVecS[i].x *=  R / rr;
+				targetVecS[i].y *=  R / rr;
+				targetVecS[i].z *=  R / rr;
+			}
+			goo [i].transform.position = charPos.transform.position + targetVecS [i];
+		}
+		int ind = Mathf.FloorToInt (Random.Range (0, 6));
+		Debug.Log (sttt);
+		return charPos.transform.position + targetVecS [ind];
+
+
+	}
+
 	Vector3  nextSeedPos(MusicData MD,float offset)
 	{
 		float R = speed*(MD.playtime - _audio.time + BeatAnalysisManager.BeatmapOffset-0.5f);
@@ -319,10 +359,11 @@ public class SeedBeatMap : MonoBehaviour {
 			R += speed * offset / 100;
 		}
 
-	//	float charA = 0;
+		//	float charA = 0;
 		Vector3 charAxis = charPos.forward;
 
-		/////////////////////////
+
+		/////////////////////////****
 		// float newX=charAxis.x* Random.Range (0.7f,2f);
 		float newX=charAxis.x* Random.Range (1-angleRange,1+angleRange);
 		float newY= Random.Range (0-yRange,yRange);
@@ -337,42 +378,41 @@ public class SeedBeatMap : MonoBehaviour {
 
 		/// 
 		/// //////////////////
-//		charPos.localRotation.ToAngleAxis (out charA, out charAxis);
-//		if (charAxis.x >= 0 && charAxis.z >= 0 && charAxis.y < 0) {
-//			charA = 360 - charA;
-//
-//		}
-//		float A = angleWind - charA;
-//		if (A > 180) {
-//			A = A-360;
-//		} else if (A < -180) {
-//			A = A + 360;
-//		}
-//		A = Mathf.Clamp (A / 5, -1, 1);
-//
-//		A+=charA+ Random.Range (0,angleRange )-angleRange/2;//风向范围
-//		
-//		float newlengthX = R * Mathf.Sin (Mathf.Deg2Rad *A);
-//		float newlengthZ = R * Mathf.Cos  (Mathf.Deg2Rad * A);
-//		float	newPosX = newlengthX +charPos.position.x;
-//		float	newPosZ=newlengthZ+ charPos.position.z;
-//		float newPosY = charPos.position.y + Random.Range (0, yRange) - yRange / 2;
-//		
-//		Debug.LogWarning ("make seed time="+MD.playtime+" // "+_audio.time +"pos="+new Vector3 (newPosX, newPosY, newPosZ)
-//			+"//"+charPos .position +" A="+A+"//CA="+charA+"R="+R );
+		//		charPos.localRotation.ToAngleAxis (out charA, out charAxis);
+		//		if (charAxis.x >= 0 && charAxis.z >= 0 && charAxis.y < 0) {
+		//			charA = 360 - charA;
+		//
+		//		}
+		//		float A = angleWind - charA;
+		//		if (A > 180) {
+		//			A = A-360;
+		//		} else if (A < -180) {
+		//			A = A + 360;
+		//		}
+		//		A = Mathf.Clamp (A / 5, -1, 1);
+		//
+		//		A+=charA+ Random.Range (0,angleRange )-angleRange/2;//风向范围
+		//		
+		//		float newlengthX = R * Mathf.Sin (Mathf.Deg2Rad *A);
+		//		float newlengthZ = R * Mathf.Cos  (Mathf.Deg2Rad * A);
+		//		float	newPosX = newlengthX +charPos.position.x;
+		//		float	newPosZ=newlengthZ+ charPos.position.z;
+		//		float newPosY = charPos.position.y + Random.Range (0, yRange) - yRange / 2;
+		//		
+		//		Debug.LogWarning ("make seed time="+MD.playtime+" // "+_audio.time +"pos="+new Vector3 (newPosX, newPosY, newPosZ)
+		//			+"//"+charPos .position +" A="+A+"//CA="+charA+"R="+R );
 		///////////////////////////////////////////////////
-	//	Vector3 newPos=new Vector3 (newPosX, newPosY, newPosZ);
+		//	Vector3 newPos=new Vector3 (newPosX, newPosY, newPosZ);
 		Vector3 newPos=new Vector3 (newX+charPos.position.x, newY+charPos.position.y, newZ+charPos.position.z);
-//		if(charAxis.z/newlengthZ<0||charAxis.x/newlengthX<0)
-//		{
-//			Debug.LogError  ("wrong D "+charAxis+"/"+newlengthX+","+newlengthZ);
-//		}
+		//		if(charAxis.z/newlengthZ<0||charAxis.x/newlengthX<0)
+		//		{
+		//			Debug.LogError  ("wrong D "+charAxis+"/"+newlengthX+","+newlengthZ);
+		//		}
 		newPos = groundLimit (newPos);
 
 
 		return newPos;//new Vector3 (newPosX, newPosY, newPosZ);
 	}
-
 
 
 	Vector3 groundLimit(Vector3 _nextpos){

@@ -25,11 +25,7 @@ public class SeedmapEditor : Editor
 		}
 
 				// add a custom button to the Inspector component
-				if (SBM.readytoplay ) {
-					if (GUILayout.Button ("play beatmap waterfall")) {
-						SBM.btnPlaymap ();
-					}
-				}
+				
 	
 	}
 

@@ -1,0 +1,532 @@
+fileFormatVersion: 2
+guid: bc596bd3d0ead194d89e40ea7de2cd12
+timeCreated: 1502168424
+licenseType: Pro
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: ' Pyramid034'
+    100002: ' Pyramid035'
+    100004: ' Pyramid036'
+    100006: ' Pyramid037'
+    100008: ' Pyramid038'
+    100010: Pyramid001
+    100012: Pyramid003
+    100014: Pyramid004
+    100016: Pyramid005
+    100018: Pyramid006
+    100020: Pyramid007
+    100022: Pyramid008
+    100024: Pyramid009
+    100026: Pyramid010
+    100028: Pyramid011
+    100030: Pyramid012
+    100032: Pyramid013
+    100034: Pyramid014
+    100036: Pyramid015
+    100038: Pyramid016
+    100040: Pyramid017
+    100042: Pyramid018
+    100044: Pyramid019
+    100046: Pyramid020
+    100048: Pyramid021
+    100050: Pyramid022
+    100052: Pyramid023
+    100054: Pyramid024
+    100056: Pyramid025
+    100058: Pyramid026
+    100060: Pyramid027
+    100062: Pyramid028
+    100064: Pyramid029
+    100066: Pyramid030
+    100068: Pyramid031
+    100070: Pyramid032
+    100072: Pyramid033
+    100074: Pyramid034
+    100076: Pyramid035
+    100078: Pyramid036
+    100080: Pyramid037
+    100082: Pyramid038
+    100084: Pyramid039
+    100086: Pyramid040
+    100088: //RootNode
+    400000: ' Pyramid034'
+    400002: ' Pyramid035'
+    400004: ' Pyramid036'
+    400006: ' Pyramid037'
+    400008: ' Pyramid038'
+    400010: Pyramid001
+    400012: Pyramid003
+    400014: Pyramid004
+    400016: Pyramid005
+    400018: Pyramid006
+    400020: Pyramid007
+    400022: Pyramid008
+    400024: Pyramid009
+    400026: Pyramid010
+    400028: Pyramid011
+    400030: Pyramid012
+    400032: Pyramid013
+    400034: Pyramid014
+    400036: Pyramid015
+    400038: Pyramid016
+    400040: Pyramid017
+    400042: Pyramid018
+    400044: Pyramid019
+    400046: Pyramid020
+    400048: Pyramid021
+    400050: Pyramid022
+    400052: Pyramid023
+    400054: Pyramid024
+    400056: Pyramid025
+    400058: Pyramid026
+    400060: Pyramid027
+    400062: Pyramid028
+    400064: Pyramid029
+    400066: Pyramid030
+    400068: Pyramid031
+    400070: Pyramid032
+    400072: Pyramid033
+    400074: Pyramid034
+    400076: Pyramid035
+    400078: Pyramid036
+    400080: Pyramid037
+    400082: Pyramid038
+    400084: Pyramid039
+    400086: Pyramid040
+    400088: //RootNode
+    2300000: ' Pyramid034'
+    2300002: ' Pyramid035'
+    2300004: ' Pyramid036'
+    2300006: ' Pyramid037'
+    2300008: ' Pyramid038'
+    2300010: Pyramid001
+    2300012: Pyramid003
+    2300014: Pyramid004
+    2300016: Pyramid005
+    2300018: Pyramid006
+    2300020: Pyramid007
+    2300022: Pyramid008
+    2300024: Pyramid009
+    2300026: Pyramid010
+    2300028: Pyramid011
+    2300030: Pyramid012
+    2300032: Pyramid013
+    2300034: Pyramid014
+    2300036: Pyramid015
+    2300038: Pyramid016
+    2300040: Pyramid017
+    2300042: Pyramid018
+    2300044: Pyramid019
+    2300046: Pyramid020
+    2300048: Pyramid021
+    2300050: Pyramid022
+    2300052: Pyramid023
+    2300054: Pyramid024
+    2300056: Pyramid025
+    2300058: Pyramid026
+    2300060: Pyramid027
+    2300062: Pyramid028
+    2300064: Pyramid029
+    2300066: Pyramid030
+    2300068: Pyramid031
+    2300070: Pyramid032
+    2300072: Pyramid033
+    2300074: Pyramid034
+    2300076: Pyramid035
+    2300078: Pyramid036
+    2300080: Pyramid037
+    2300082: Pyramid038
+    2300084: Pyramid039
+    2300086: Pyramid040
+    3300000: ' Pyramid034'
+    3300002: ' Pyramid035'
+    3300004: ' Pyramid036'
+    3300006: ' Pyramid037'
+    3300008: ' Pyramid038'
+    3300010: Pyramid001
+    3300012: Pyramid003
+    3300014: Pyramid004
+    3300016: Pyramid005
+    3300018: Pyramid006
+    3300020: Pyramid007
+    3300022: Pyramid008
+    3300024: Pyramid009
+    3300026: Pyramid010
+    3300028: Pyramid011
+    3300030: Pyramid012
+    3300032: Pyramid013
+    3300034: Pyramid014
+    3300036: Pyramid015
+    3300038: Pyramid016
+    3300040: Pyramid017
+    3300042: Pyramid018
+    3300044: Pyramid019
+    3300046: Pyramid020
+    3300048: Pyramid021
+    3300050: Pyramid022
+    3300052: Pyramid023
+    3300054: Pyramid024
+    3300056: Pyramid025
+    3300058: Pyramid026
+    3300060: Pyramid027
+    3300062: Pyramid028
+    3300064: Pyramid029
+    3300066: Pyramid030
+    3300068: Pyramid031
+    3300070: Pyramid032
+    3300072: Pyramid033
+    3300074: Pyramid034
+    3300076: Pyramid035
+    3300078: Pyramid036
+    3300080: Pyramid037
+    3300082: Pyramid038
+    3300084: Pyramid039
+    3300086: Pyramid040
+    4300000: Pyramid001
+    4300002: Pyramid003
+    4300004: Pyramid004
+    4300006: Pyramid005
+    4300008: Pyramid006
+    4300010: Pyramid007
+    4300012: Pyramid008
+    4300014: Pyramid009
+    4300016: Pyramid010
+    4300018: Pyramid011
+    4300020: Pyramid012
+    4300022: Pyramid013
+    4300024: Pyramid023
+    4300026: Pyramid024
+    4300028: Pyramid025
+    4300030: Pyramid026
+    4300032: Pyramid027
+    4300034: Pyramid028
+    4300036: Pyramid029
+    4300038: Pyramid022
+    4300040: Pyramid031
+    4300042: Pyramid040
+    4300044: Pyramid039
+    4300046: Pyramid038
+    4300048: Pyramid037
+    4300050: Pyramid036
+    4300052: Pyramid035
+    4300054: Pyramid034
+    4300056: Pyramid014
+    4300058: Pyramid021
+    4300060: Pyramid020
+    4300062: Pyramid019
+    4300064: Pyramid018
+    4300066: Pyramid017
+    4300068: Pyramid016
+    4300070: Pyramid015
+    4300072: Pyramid030
+    4300074: ' Pyramid038'
+    4300076: ' Pyramid037'
+    4300078: ' Pyramid036'
+    4300080: ' Pyramid035'
+    4300082: ' Pyramid034'
+    4300084: Pyramid033
+    4300086: Pyramid032
+    7400000: close
+    7400002: open
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleRotations: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: close
+      takeName: Take 001
+      firstFrame: 10
+      lastFrame: 30
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: ' Pyramid034'
+        weight: 1
+      - path: ' Pyramid035'
+        weight: 1
+      - path: ' Pyramid036'
+        weight: 1
+      - path: ' Pyramid037'
+        weight: 1
+      - path: ' Pyramid038'
+        weight: 1
+      - path: Pyramid001
+        weight: 1
+      - path: Pyramid003
+        weight: 1
+      - path: Pyramid004
+        weight: 1
+      - path: Pyramid005
+        weight: 1
+      - path: Pyramid006
+        weight: 1
+      - path: Pyramid007
+        weight: 1
+      - path: Pyramid008
+        weight: 1
+      - path: Pyramid009
+        weight: 1
+      - path: Pyramid010
+        weight: 1
+      - path: Pyramid011
+        weight: 1
+      - path: Pyramid012
+        weight: 1
+      - path: Pyramid013
+        weight: 1
+      - path: Pyramid014
+        weight: 1
+      - path: Pyramid015
+        weight: 1
+      - path: Pyramid016
+        weight: 1
+      - path: Pyramid017
+        weight: 1
+      - path: Pyramid018
+        weight: 1
+      - path: Pyramid019
+        weight: 1
+      - path: Pyramid020
+        weight: 1
+      - path: Pyramid021
+        weight: 1
+      - path: Pyramid022
+        weight: 1
+      - path: Pyramid023
+        weight: 1
+      - path: Pyramid024
+        weight: 1
+      - path: Pyramid025
+        weight: 1
+      - path: Pyramid026
+        weight: 1
+      - path: Pyramid027
+        weight: 1
+      - path: Pyramid028
+        weight: 1
+      - path: Pyramid029
+        weight: 1
+      - path: Pyramid030
+        weight: 1
+      - path: Pyramid031
+        weight: 1
+      - path: Pyramid032
+        weight: 1
+      - path: Pyramid033
+        weight: 1
+      - path: Pyramid034
+        weight: 1
+      - path: Pyramid035
+        weight: 1
+      - path: Pyramid036
+        weight: 1
+      - path: Pyramid037
+        weight: 1
+      - path: Pyramid038
+        weight: 1
+      - path: Pyramid039
+        weight: 1
+      - path: Pyramid040
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 10
+    - serializedVersion: 16
+      name: open
+      takeName: Take 001
+      firstFrame: 30
+      lastFrame: 50
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: ' Pyramid034'
+        weight: 1
+      - path: ' Pyramid035'
+        weight: 1
+      - path: ' Pyramid036'
+        weight: 1
+      - path: ' Pyramid037'
+        weight: 1
+      - path: ' Pyramid038'
+        weight: 1
+      - path: Pyramid001
+        weight: 1
+      - path: Pyramid003
+        weight: 1
+      - path: Pyramid004
+        weight: 1
+      - path: Pyramid005
+        weight: 1
+      - path: Pyramid006
+        weight: 1
+      - path: Pyramid007
+        weight: 1
+      - path: Pyramid008
+        weight: 1
+      - path: Pyramid009
+        weight: 1
+      - path: Pyramid010
+        weight: 1
+      - path: Pyramid011
+        weight: 1
+      - path: Pyramid012
+        weight: 1
+      - path: Pyramid013
+        weight: 1
+      - path: Pyramid014
+        weight: 1
+      - path: Pyramid015
+        weight: 1
+      - path: Pyramid016
+        weight: 1
+      - path: Pyramid017
+        weight: 1
+      - path: Pyramid018
+        weight: 1
+      - path: Pyramid019
+        weight: 1
+      - path: Pyramid020
+        weight: 1
+      - path: Pyramid021
+        weight: 1
+      - path: Pyramid022
+        weight: 1
+      - path: Pyramid023
+        weight: 1
+      - path: Pyramid024
+        weight: 1
+      - path: Pyramid025
+        weight: 1
+      - path: Pyramid026
+        weight: 1
+      - path: Pyramid027
+        weight: 1
+      - path: Pyramid028
+        weight: 1
+      - path: Pyramid029
+        weight: 1
+      - path: Pyramid030
+        weight: 1
+      - path: Pyramid031
+        weight: 1
+      - path: Pyramid032
+        weight: 1
+      - path: Pyramid033
+        weight: 1
+      - path: Pyramid034
+        weight: 1
+      - path: Pyramid035
+        weight: 1
+      - path: Pyramid036
+        weight: 1
+      - path: Pyramid037
+        weight: 1
+      - path: Pyramid038
+        weight: 1
+      - path: Pyramid039
+        weight: 1
+      - path: Pyramid040
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 10
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 4
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

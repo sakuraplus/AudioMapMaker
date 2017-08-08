@@ -98,7 +98,7 @@ public class ShowBeatMap : MonoBehaviour {
 			if (!beat.GetComponent <Beat > ()) {
 				beat.AddComponent <Beat> ();
 			}
-			beat.GetComponent<Beat> ().Destorytime  = BeatAnalysisManager .BAL[i].playtime;
+			beat.GetComponent<Beat> ().Beattime  = BeatAnalysisManager .BAL[i].playtime;
 			if (beat.GetComponent<Beat> ().AC == null) {
 				beat.GetComponent<Beat> ().AC = beatsoundFX [BeatAnalysisManager.BAL [i].BeatPos];
 			}
@@ -209,7 +209,7 @@ public class ShowBeatMap : MonoBehaviour {
 			if (!beat.GetComponent <Beat > ()) {
 				beat.AddComponent <Beat> ();
 			}
-			beat.GetComponent<Beat> ().Destorytime  = md.playtime;
+			beat.GetComponent<Beat> ().Beattime  = md.playtime;
 			if (beat.GetComponent<Beat> ().AC == null) {
 				beat.GetComponent<Beat> ().AC = beatsoundFX [md.BeatPos];
 			}
@@ -294,7 +294,7 @@ public class ShowBeatMap : MonoBehaviour {
 			GameObject  b = BeatMapContainer.transform.GetChild (i).gameObject ; //<Beat> ();
 			if (b.GetComponent<Beat> ().CheckState) {
 				b.transform.localScale = new Vector3 (10, 1, 1);
-				Debug.Log (_audio.time +"///"+ b.GetComponent<Beat> ().Destorytime+">  "+(_audio.time -b.GetComponent<Beat> ().Destorytime ));
+				Debug.Log (_audio.time +"///"+ b.GetComponent<Beat> ().Beattime+">  "+(_audio.time -b.GetComponent<Beat> ().Beattime ));
 				_audio.PlayOneShot (b.GetComponent<Beat> ().AC);
 				b.GetComponent<Beat> ().CheckState = false;
 				Destroy (b );		

@@ -276,7 +276,7 @@ public class SeedBeatMap : MonoBehaviour {
 					beat.AddComponent <Beat> ();
 				}
 
-				beat.GetComponent<Beat> ().Destorytime = MD.playtime ;
+				beat.GetComponent<Beat> ().Beattime = MD.playtime ;
 				beat.GetComponent<Beat> ().Borntime  = _audio.time  ;
 				if (beat.GetComponent<Beat> ().AC == null) {
 					beat.GetComponent<Beat> ().AC = beatsoundFX [MD.BeatPos];
@@ -316,15 +316,28 @@ public class SeedBeatMap : MonoBehaviour {
 			targetDri [i] = targetposS [i].transform.position - charPos.position;
 		}
 	}
+	[SerializeField ]
 	GameObject[] goo;
+	[SerializeField ]
+	float targetFormGround=2;
 	//***
 	public  Vector3  nextSeedPosS(MusicData MD,float offset)
 	{
-		float R = speed*(MD.playtime - _audio.time + BeatAnalysisManager.BeatmapOffset-0.5f);
+		RaycastHit hit;
+		float offsetY=0;
+		if(Physics.Raycast (charPos.transform.position  ,Vector3.down ,out hit ))
+		{
+			if(hit.collider.tag =="Ground"){
+				offsetY = charPos.transform.position.y - hit.distance+targetFormGround;
+
+			}
+		}
+
+		float R = speed;// *(MD.playtime - _audio.time + BeatAnalysisManager.BeatmapOffset-0.5f);
 		if (offset > 0) {
 			R += speed * offset / 100;
 		}
-		R = 1;
+		//R = 1;
 	//	float charA = 0;
 		Vector3 charAxis = charPos.forward;
 
@@ -334,19 +347,25 @@ public class SeedBeatMap : MonoBehaviour {
 		Vector3[] targetVecS=new Vector3[targetposS.Length ] ;
 		string sttt=">>>";
 		for(int i=0;i<targetposS.Length;i++){
-			targetVecS [i] =targetDri[i]; //targetposS [i].transform.position - charPos.position;//targetDri[i];
+			targetVecS [i].x =targetposS [i].transform.position.x - charPos.position.x;//targetDri[i];
+			targetVecS [i].y =offsetY+Random.Range(-0.5f,0.5f)-charPos.position.y;//targetposS [i].transform.position.y - charPos.position.y;
+			targetVecS [i].z = targetposS [i].transform.position.z - charPos.position.z;
 			sttt+=targetVecS[i]+",";
 
-			float rr = Mathf.Sqrt (targetVecS[i].x*targetVecS[i].x+targetVecS[i].z*targetVecS[i].z+targetVecS[i].y*targetVecS[i].y);
+			float rr = Mathf.Sqrt (targetVecS [i].x * targetVecS [i].x + targetVecS [i].z * targetVecS [i].z+targetVecS[i].y*targetVecS[i].y);
+			//y=0，高度不变
+			//+targetVecS[i].y*targetVecS[i].y);
 			if (rr != 0) {
 				targetVecS[i].x *=  R / rr;
-				targetVecS[i].y *=  R / rr;
+				targetVecS [i].y *=  R / rr;
 				targetVecS[i].z *=  R / rr;
 			}
 			goo [i].transform.position = charPos.transform.position + targetVecS [i];
+			//goo [i].transform.position.y = Mathf.Clamp (goo [i].transform.position.y, charPos.transform.position.y-0.5f,charPos.transform.position.y+0.5f);
 		}
 		int ind = Mathf.FloorToInt (Random.Range (0, 6));
 		Debug.Log (sttt);
+		Vector3 newpos=charPos.transform.position + targetVecS [ind];
 		return charPos.transform.position + targetVecS [ind];
 
 
@@ -445,11 +464,11 @@ public class SeedBeatMap : MonoBehaviour {
 		int ic=BeatMapContainer.transform.childCount ;
 		for (int i = 0; i < ic; i++) {
 			GameObject  b = BeatMapContainer.transform.GetChild (i).gameObject ; //<Beat> ();
-			if (b.GetComponent<Beat> ().Destorytime<_audio.time*1.2f) {
+			if (b.GetComponent<Beat> ().Beattime<_audio.time*1.2f) {
 			//	b.transform.localScale = new Vector3 (0.5f, 0.4f, 0.4f);
 					
 			}
-			if (b.GetComponent<Beat> ().CheckState||(b.GetComponent<Beat> ().Destorytime<_audio.time-killtime )) {
+			if (b.GetComponent<Beat> ().CheckState||(b.GetComponent<Beat> ().Beattime<_audio.time-killtime )) {
 				//b.transform.localScale = new Vector3 (4, 4, 4);
 			//	Debug.Log (_audio.time +"///"+ b.GetComponent<Beat> ().Destorytime+">  "+(_audio.time -b.GetComponent<Beat> ().Destorytime ));
 			//	_audio.PlayOneShot (b.GetComponent<Beat> ().AC);

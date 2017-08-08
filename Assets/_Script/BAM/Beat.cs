@@ -28,6 +28,8 @@ public class Beat : MonoBehaviour {
 	/// 碰撞后特效
 	/// </summary>
 	public GameObject ExpoPart;
+	public GameObject MoveUpPart;
+	 Animator _animator;
 	/// <summary>
 	/// 计时器
 	/// </summary>
@@ -49,27 +51,44 @@ public class Beat : MonoBehaviour {
 		if (onPos) {
 			if (speedRotate == 0) {
 				speedRotate =360/(_audio.time -Beattime) ;
+				if (MoveUpPart) {
+					Debug.Log ("Destroy (MoveUpPart)");
+					Destroy (MoveUpPart);
+				}
+			//	if (_animator) {
+					_animator.SetTrigger ("posReady");
+				//}
 			}
-			this.transform .LookAt (lookatCamera.position);
-			float A = 1; //(Destorytime- _audio .time )*360 / speedRotate;
-			Debug.Log(A+" / "+speedRotate );
+		//	this.transform .LookAt (lookatCamera.position);
+			//float A = 1; //(Destorytime- _audio .time )*360 / speedRotate;
+		//	Debug.Log(A+" / "+speedRotate );
 		//	A++;
 			Timer.transform.RotateAround (Timer.transform.position, Timer.transform.forward  ,  Time.deltaTime*speedRotate );
 		} else {
-			this.transform.Translate(new Vector3(0,speedMove*Time.deltaTime ,0));
+			sttt = Time.deltaTime;
+			this.transform.position+=new Vector3(0,speedMove*Time.deltaTime ,0);//Translate(new Vector3(0,speedMove*Time.deltaTime ,0));
 			if (this.transform.position .y >= TargPos.y) {
 			
 				onPos = true;
 			}
 		}
 	}
-
+	[SerializeField ]
+	float sttt;
 	void Awake () {
+		_animator = GetComponent<Animator> ();
+		//StartPos = transform.position;
 		if(	GameObject.Find("_script")!=null){
 			_audio=GameObject.Find("_script"). GetComponent<AudioSource> ();
 		}
-
-		speedMove =0.2f* (TargPos.y - this.transform.position.y) / (Beattime-Borntime ); 
+		if(	GameObject.Find("_script")!=null){
+			lookatCamera =GameObject.Find("_script"). GetComponent<CharacterControllerSeed > ().followCamera.transform  ;
+		}
+		//speedMove =0.2f* (TargPos.y -StartPos.y) / (Beattime-Borntime ); 
+		if (MoveUpPart ) {
+			// Instantiate an explosion effect at the gameObjects position and rotation
+			Instantiate (MoveUpPart, transform.position,transform.rotation  );
+		}
 
 		// invote the DestroyNow funtion to run after timeOut seconds
 		//Invoke ("DestroyNow", time);
@@ -80,15 +99,20 @@ public class Beat : MonoBehaviour {
 		
 		if (collider.tag == "destoryzone") {
 			Destroy (gameObject);
-			Debug.Log ("kkkkkkkkk  "+collider.name );
+
 		}
 		if (collider.tag == "checkzone" ||collider.tag == "Player" ) {
+			Debug.Log ("kkkkkkkkk  "+collider.name );
 			CheckState = true;
 			//AudioClip ac = GameObject.Find ("MCamera").GetComponent<BeatAnalysisManager > ().beatsoundDefault  as AudioClip;
 			_audio.PlayOneShot  (AC);
 			if (ExpoPart) {
 				// Instantiate an explosion effect at the gameObjects position and rotation
 				Instantiate (ExpoPart, transform.position, transform.rotation);
+			}
+			if (MoveUpPart) {
+				Debug.Log ("Destroy (MoveUpPart)");
+				DestroyImmediate (MoveUpPart);
 			}
 			GameObject.Find ("_script").GetComponent < GameManager>().AddPoints (1);
 			Destroy (gameObject);
@@ -105,6 +129,10 @@ public class Beat : MonoBehaviour {
 	{
 
 		// destory the game Object
+		if (MoveUpPart) {
+			Debug.Log ("Destroy (MoveUpPart)");
+			Destroy (MoveUpPart);
+		}
 		Destroy(gameObject);
 	}
 }

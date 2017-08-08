@@ -284,7 +284,11 @@ public class SeedBeatMap : MonoBehaviour {
 
 				beat.transform.parent = BeatMapContainer.transform;
 				//beat.transform.localPosition = nextSeedPos (MD,0);
-			beat.transform.localPosition = nextSeedPosS (MD,0);
+			Vector3 TarPos=nextSeedPosS (MD,0);
+			beat.GetComponent<Beat> ().TargPos = TarPos;
+			Vector3  stPos= nextSeedStartPos (TarPos);// nextSeedPosS (MD,0);
+			beat.transform.position  =TarPos;//stPos;
+			beat.GetComponent<Beat> ().StartPos  = stPos;
 			Debug.LogError ("!");
 			//	beat.transform.localPosition = nextSeedPos (MD,j);
 				// new Vector3 (BeatAnalysisManager.BAL [i].BeatPos * 10, BeatAnalysisManager.BAL [i].playtime * speed, 0);
@@ -333,7 +337,7 @@ public class SeedBeatMap : MonoBehaviour {
 			}
 		}
 
-		float R = speed;// *(MD.playtime - _audio.time + BeatAnalysisManager.BeatmapOffset-0.5f);
+		float R = speed *(MD.playtime - _audio.time + BeatAnalysisManager.BeatmapOffset-0.5f);
 		if (offset > 0) {
 			R += speed * offset / 100;
 		}
@@ -348,7 +352,7 @@ public class SeedBeatMap : MonoBehaviour {
 		string sttt=">>>";
 		for(int i=0;i<targetposS.Length;i++){
 			targetVecS [i].x =targetposS [i].transform.position.x - charPos.position.x;//targetDri[i];
-			targetVecS [i].y =offsetY+Random.Range(-0.5f,0.5f)-charPos.position.y;//targetposS [i].transform.position.y - charPos.position.y;
+			targetVecS [i].y =0;//offsetY+Random.Range(-0.5f,0.5f)-charPos.position.y;//targetposS [i].transform.position.y - charPos.position.y;
 			targetVecS [i].z = targetposS [i].transform.position.z - charPos.position.z;
 			sttt+=targetVecS[i]+",";
 
@@ -369,6 +373,19 @@ public class SeedBeatMap : MonoBehaviour {
 		return charPos.transform.position + targetVecS [ind];
 
 
+	}
+	Vector3  nextSeedStartPos(Vector3 _tarPos)
+	{
+		RaycastHit hit;
+
+		if(Physics.Raycast (charPos.transform.position  ,Vector3.down ,out hit ))
+		{
+			if(hit.collider.tag =="Ground"){
+				//offsetY = charPos.transform.position.y - hit.distance+targetFormGround;
+				_tarPos=  hit.point ;
+			}
+		}
+		return _tarPos;
 	}
 
 	Vector3  nextSeedPos(MusicData MD,float offset)
@@ -394,32 +411,6 @@ public class SeedBeatMap : MonoBehaviour {
 			newY = newY * R / r;
 			newZ = newZ * R / r;
 		}
-
-		/// 
-		/// //////////////////
-		//		charPos.localRotation.ToAngleAxis (out charA, out charAxis);
-		//		if (charAxis.x >= 0 && charAxis.z >= 0 && charAxis.y < 0) {
-		//			charA = 360 - charA;
-		//
-		//		}
-		//		float A = angleWind - charA;
-		//		if (A > 180) {
-		//			A = A-360;
-		//		} else if (A < -180) {
-		//			A = A + 360;
-		//		}
-		//		A = Mathf.Clamp (A / 5, -1, 1);
-		//
-		//		A+=charA+ Random.Range (0,angleRange )-angleRange/2;//风向范围
-		//		
-		//		float newlengthX = R * Mathf.Sin (Mathf.Deg2Rad *A);
-		//		float newlengthZ = R * Mathf.Cos  (Mathf.Deg2Rad * A);
-		//		float	newPosX = newlengthX +charPos.position.x;
-		//		float	newPosZ=newlengthZ+ charPos.position.z;
-		//		float newPosY = charPos.position.y + Random.Range (0, yRange) - yRange / 2;
-		//		
-		//		Debug.LogWarning ("make seed time="+MD.playtime+" // "+_audio.time +"pos="+new Vector3 (newPosX, newPosY, newPosZ)
-		//			+"//"+charPos .position +" A="+A+"//CA="+charA+"R="+R );
 		///////////////////////////////////////////////////
 		//	Vector3 newPos=new Vector3 (newPosX, newPosY, newPosZ);
 		Vector3 newPos=new Vector3 (newX+charPos.position.x, newY+charPos.position.y, newZ+charPos.position.z);
@@ -479,4 +470,70 @@ public class SeedBeatMap : MonoBehaviour {
 				
 
 	}
+
+
+
+
+//	Vector3  nextSeedPos(MusicData MD,float offset)
+//	{
+//		float R = speed*(MD.playtime - _audio.time + BeatAnalysisManager.BeatmapOffset-0.5f);
+//		if (offset > 0) {
+//			R += speed * offset / 100;
+//		}
+//
+//		//	float charA = 0;
+//		Vector3 charAxis = charPos.forward;
+//
+//
+//		/////////////////////////****
+//		// float newX=charAxis.x* Random.Range (0.7f,2f);
+//		float newX=charAxis.x* Random.Range (1-angleRange,1+angleRange);
+//		float newY= Random.Range (0-yRange,yRange);
+//		//float newZ=charAxis.z* Random.Range (0.7f,2f);
+//		float newZ=charAxis.z* Random.Range (1-angleRange,1+angleRange);
+//		float r = Mathf.Sqrt (newX*newX+newZ*newZ+newY*newY);
+//		if (r != 0) {
+//			newX = newX * R / r;
+//			newY = newY * R / r;
+//			newZ = newZ * R / r;
+//		}
+//
+//		/// 
+//		/// //////////////////
+//		//		charPos.localRotation.ToAngleAxis (out charA, out charAxis);
+//		//		if (charAxis.x >= 0 && charAxis.z >= 0 && charAxis.y < 0) {
+//		//			charA = 360 - charA;
+//		//
+//		//		}
+//		//		float A = angleWind - charA;
+//		//		if (A > 180) {
+//		//			A = A-360;
+//		//		} else if (A < -180) {
+//		//			A = A + 360;
+//		//		}
+//		//		A = Mathf.Clamp (A / 5, -1, 1);
+//		//
+//		//		A+=charA+ Random.Range (0,angleRange )-angleRange/2;//风向范围
+//		//		
+//		//		float newlengthX = R * Mathf.Sin (Mathf.Deg2Rad *A);
+//		//		float newlengthZ = R * Mathf.Cos  (Mathf.Deg2Rad * A);
+//		//		float	newPosX = newlengthX +charPos.position.x;
+//		//		float	newPosZ=newlengthZ+ charPos.position.z;
+//		//		float newPosY = charPos.position.y + Random.Range (0, yRange) - yRange / 2;
+//		//		
+//		//		Debug.LogWarning ("make seed time="+MD.playtime+" // "+_audio.time +"pos="+new Vector3 (newPosX, newPosY, newPosZ)
+//		//			+"//"+charPos .position +" A="+A+"//CA="+charA+"R="+R );
+//		///////////////////////////////////////////////////
+//		//	Vector3 newPos=new Vector3 (newPosX, newPosY, newPosZ);
+//		Vector3 newPos=new Vector3 (newX+charPos.position.x, newY+charPos.position.y, newZ+charPos.position.z);
+//		//		if(charAxis.z/newlengthZ<0||charAxis.x/newlengthX<0)
+//		//		{
+//		//			Debug.LogError  ("wrong D "+charAxis+"/"+newlengthX+","+newlengthZ);
+//		//		}
+//		newPos = groundLimit (newPos);
+//
+//
+//		return newPos;//new Vector3 (newPosX, newPosY, newPosZ);
+//	}
+//
 }

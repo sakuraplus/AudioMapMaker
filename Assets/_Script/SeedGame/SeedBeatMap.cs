@@ -96,7 +96,8 @@ public class SeedBeatMap : MonoBehaviour {
 			CCS.canmove = false;
 			Cursor.visible=true;
 			Cursor.lockState=CursorLockMode.None ;
-			GetComponent<GameManager> ().LevelCompete ();
+		//	GetComponent<GameManager> ().
+			GameManager.gm. LevelCompete ();
 
 		}
 
@@ -178,7 +179,7 @@ public class SeedBeatMap : MonoBehaviour {
 		}
 		beatmapToseedMode ();
 		btnPlaymap ();
-		GameManager.fullPoint = BeatAnalysisManager.BAL.Count;
+		GameManager.gm .fullPoint = BeatAnalysisManager.BAL.Count;
 		Cursor.visible=false;
 		Cursor.lockState=CursorLockMode.Locked ;
 		CharacterControllerSeed   CCS = FindObjectOfType<CharacterControllerSeed > ();
@@ -384,7 +385,7 @@ public class SeedBeatMap : MonoBehaviour {
 		if (targetVecSInds.Count > 0) {
 			int ind = Mathf.FloorToInt (Random.Range (0, targetVecSInds.Count));
 			ind = targetVecSInds [ind];
-			Debug.Log (sttt);
+//			Debug.Log (sttt);
 			Vector3 newpos = charPos.transform.position + targetVecS [ind];
 			return targetVecS [ind];
 		} else {

@@ -27,7 +27,11 @@ public class Beat : MonoBehaviour {
 	/// <summary>
 	/// 碰撞后特效
 	/// </summary>
-	public GameObject ExpoPart;
+	public GameObject ExpoPartPerfect;
+	public GameObject ExpoPartCool;
+	public GameObject ExpoPartGood;
+	public GameObject ExpoPartMiss;
+
 	public GameObject MoveUpPart;
 	 Animator _animator;
 	/// <summary>
@@ -49,17 +53,20 @@ public class Beat : MonoBehaviour {
 	[SerializeField ]
 	GameObject  fbx;
 	// Update is called once per frame
+	[SerializeField ]
+	float timerRot=0;
 	void Update () {
 		if (onPos) {
 			
 			if (speedRotate == 0) {
 				_animator.SetTrigger ("posReady");
-				speedRotate =360/(_audio.time -Beattime) ;
+				speedRotate =360/(Beattime-_audio.time ) ;
 		
 			}
 		//	this.transform .LookAt (lookatCamera.position);
-			Timer.transform.RotateAround (Timer.transform.position, Timer.transform.forward  ,  Time.deltaTime*speedRotate );
-
+			float rotA= Time.deltaTime*speedRotate ;
+			Timer.transform.RotateAround (Timer.transform.position, Timer.transform.forward  , rotA );
+			timerRot += rotA;
 		} else {
 			sttt = Time.deltaTime;
 			this.transform.position+=new Vector3(0,speedMove*Time.deltaTime ,0);//Translate(new Vector3(0,speedMove*Time.deltaTime ,0));
@@ -105,26 +112,60 @@ public class Beat : MonoBehaviour {
 			Destroy (gameObject);
 
 		}
+		if(timerRot>100){
 		if (collider.tag == "checkzone" ||collider.tag == "Player" ) {
 			Debug.Log ("kkkkkkkkk  "+collider.name );
 			CheckState = true;
 			//AudioClip ac = GameObject.Find ("MCamera").GetComponent<BeatAnalysisManager > ().beatsoundDefault  as AudioClip;
 			_audio.PlayOneShot  (AC);
-			if (ExpoPart) {
-				// Instantiate an explosion effect at the gameObjects position and rotation
-				Instantiate (ExpoPart, transform.position, transform.rotation);
-			}
 
-			GameObject.Find ("_script").GetComponent < GameManager>().AddPoints (1);
+
+			//GameObject.Find ("_script").GetComponent < GameManager>()
+			calcPoints ();
 			DestroyNow ();
 			Debug.Log ("ttt  "+collider.name );
 		}
 
 		//Debug.Log ("ttt  "+collider.name );
 
+		}
 	}
 
-
+	/// <summary>
+	/// 计算得分Calculates the points.
+	/// </summary>
+	/// <returns>The points.</returns>
+	void calcPoints(){
+		float ii = 360 - timerRot;
+		int point;
+		if (Mathf.Abs (ii) <= GameManager.gm.RotationRangePerfect) {
+			point = 10;
+			if (ExpoPartPerfect) {
+				Instantiate (ExpoPartPerfect, transform.position, transform.rotation);
+			}
+		} else if (ii < 0 - GameManager.gm.RotationRangePerfect) {
+			if (ExpoPartMiss) {
+				Instantiate (ExpoPartMiss, transform.position, transform.rotation);
+			}
+			point = 1;
+		} else if (ii > GameManager.gm.RotationRangePerfect && ii <= GameManager.gm.RotationRangeCool) {
+			if (ExpoPartCool) {
+				Instantiate (ExpoPartCool, transform.position, transform.rotation);
+			}
+			point = 5;
+		} else if (ii > GameManager.gm.RotationRangeCool && ii <= GameManager.gm.RotationRangeGood) {
+			if (ExpoPartGood) {
+				Instantiate (ExpoPartGood, transform.position, transform.rotation);
+			}
+			point = 3;
+		} else  {
+			point = 0;
+		}
+		Debug.LogError ("point>>"+ii+">>"+point);
+		if (point > 0) {
+			GameManager.gm.AddPoints (point);
+		}
+	}
 
 	void DestroyNow ()
 	{

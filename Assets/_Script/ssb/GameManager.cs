@@ -8,13 +8,16 @@ public class GameManager : MonoBehaviour {
 	// static reference to game manager so can be called from other scripts directly (not just through gameobject component)
 	public static GameManager gm;
 
+	public float RotationRangePerfect;
+	public float RotationRangeCool;
+	public float RotationRangeGood;
 	// levels to move to on victory and lose
 	public string levelAfterVictory;
 	public string levelAfterGameOver;
 
 	// game performance
-	public  int score = 0;
-	public   int highscore = 0;
+	public int score = 0;
+	public int highscore = 0;
 	public int startLives = 3;
 	public int lives = 3;
 
@@ -32,7 +35,7 @@ public class GameManager : MonoBehaviour {
 	Vector3 _endPos;
 	Scene _scene;
 
-	public  static  int fullPoint=0;
+	public   int fullPoint=0;
 
 	public GameObject[] _resetObj;
 	Vector3[] _resetObjPos;

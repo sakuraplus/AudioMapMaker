@@ -113,8 +113,8 @@ public class CharacterControllerSeed : MonoBehaviour {
 
 		followCamera.transform.LookAt(TargetObj.transform);
 	}
-	[SerializeField ]
-	LayerMask layerGround;
+//	[SerializeField ]
+//	LayerMask layerGround;
 	Vector3 groundLimit(Vector3 _nextpos){
 		RaycastHit hit;
 		//if(Physics.Raycast (followCamera.transform.position ,Vector3.down ,out hit ,Mathf.Infinity,layerGround ))

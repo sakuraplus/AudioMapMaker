@@ -54,7 +54,9 @@ public class SeedBeatMap : MonoBehaviour {
 
 		_audio = BeatAnalysisManager ._audio;
 		readytoplay = true;
-		initTargetPosS ();
+		targetVecS=new Vector3[targetposS.Length ] ;
+
+		//initTargetPosS ();
 
 //		PlayFab.ClientModels.GetTitleNewsRequest gtn=new PlayFab.ClientModels.GetTitleNewsRequest() ; 
 // 		gtn="POST https://E7D7.playfabapi.com/Client/GetTitleNews Content-Type: application/json X-Authentication: <user_session_ticket_value>
@@ -285,11 +287,13 @@ public class SeedBeatMap : MonoBehaviour {
 				beat.transform.parent = BeatMapContainer.transform;
 				//beat.transform.localPosition = nextSeedPos (MD,0);
 			Vector3 TarPos=nextSeedPosS (MD,0);
-			beat.GetComponent<Beat> ().TargPos = TarPos;
-			Vector3  stPos= nextSeedStartPos (TarPos);// nextSeedPosS (MD,0);
-			beat.transform.position  =TarPos;//stPos;
-			beat.GetComponent<Beat> ().StartPos  = stPos;
-			Debug.LogError ("!");
+			if (TarPos != Vector3.zero ) {
+				beat.GetComponent<Beat> ().TargPos = TarPos;
+				Vector3 stPos = nextSeedStartPos (TarPos);// nextSeedPosS (MD,0);
+				beat.transform.position = stPos;//TarPos;
+				beat.GetComponent<Beat> ().StartPos = stPos;
+			}
+			//Debug.LogError ("!");
 			//	beat.transform.localPosition = nextSeedPos (MD,j);
 				// new Vector3 (BeatAnalysisManager.BAL [i].BeatPos * 10, BeatAnalysisManager.BAL [i].playtime * speed, 0);
 		
@@ -313,17 +317,12 @@ public class SeedBeatMap : MonoBehaviour {
 
 	//***
 	[SerializeField ]
-	Vector3[] targetDri;//=new Vector3[] ;
-	void initTargetPosS(){
-		targetDri=new Vector3[targetposS .Length ] ;
-		for (int i = 0; i < targetposS.Length; i++) {
-			targetDri [i] = targetposS [i].transform.position - charPos.position;
-		}
-	}
+	Vector3[] targetVecS;//=new Vector3[] ;
+
 	[SerializeField ]
 	GameObject[] goo;
 	[SerializeField ]
-	float targetFormGround=2;
+	float maxHeight=2;
 	//***
 	public  Vector3  nextSeedPosS(MusicData MD,float offset)
 	{
@@ -332,8 +331,9 @@ public class SeedBeatMap : MonoBehaviour {
 		if(Physics.Raycast (charPos.transform.position  ,Vector3.down ,out hit ))
 		{
 			if(hit.collider.tag =="Ground"){
-				offsetY = charPos.transform.position.y - hit.distance+targetFormGround;
-
+				if (hit.distance > maxHeight) {
+					offsetY = Mathf.Min  ( hit.distance / maxHeight,1f);// (maxHeight - hit.distance)/hit.distance;// 
+				}
 			}
 		}
 
@@ -347,12 +347,12 @@ public class SeedBeatMap : MonoBehaviour {
 
 
 		//**
-	
-		Vector3[] targetVecS=new Vector3[targetposS.Length ] ;
+		List<int> targetVecSInds=new List<int> ();
+
 		string sttt=">>>";
 		for(int i=0;i<targetposS.Length;i++){
 			targetVecS [i].x =targetposS [i].transform.position.x - charPos.position.x;//targetDri[i];
-			targetVecS [i].y =0;//offsetY+Random.Range(-0.5f,0.5f)-charPos.position.y;//targetposS [i].transform.position.y - charPos.position.y;
+			targetVecS [i].y =0-offsetY+targetposS [i].transform.position.y - charPos.position.y;;//0;//offsetY+Random.Range(-0.5f,0.5f)-charPos.position.y;//targetposS [i].transform.position.y - charPos.position.y;
 			targetVecS [i].z = targetposS [i].transform.position.z - charPos.position.z;
 			sttt+=targetVecS[i]+",";
 
@@ -364,26 +364,49 @@ public class SeedBeatMap : MonoBehaviour {
 				targetVecS [i].y *=  R / rr;
 				targetVecS[i].z *=  R / rr;
 			}
-			goo [i].transform.position = charPos.transform.position + targetVecS [i];
+			targetVecS [i] += charPos.transform.position;
+			if (Physics.Raycast (targetVecS [i], Vector3.down, out hit)) {
+				//on ground
+				if (hit.collider.tag == "Ground") {
+					Debug.LogWarning ("add " + i+">>"+targetVecS [i].y+","+hit.point.y);
+					targetVecS [i].y = Mathf.Min  (targetVecS [i].y, hit.point.y + maxHeight);
+				
+					targetVecSInds.Add (i);
+					goo [i].transform.position = targetVecS [i];
+				}
+			} else {
+				//Debug.Log ("---underground  "+targetVecS[i]);
+			}
+
+
 			//goo [i].transform.position.y = Mathf.Clamp (goo [i].transform.position.y, charPos.transform.position.y-0.5f,charPos.transform.position.y+0.5f);
 		}
-		int ind = Mathf.FloorToInt (Random.Range (0, 6));
-		Debug.Log (sttt);
-		Vector3 newpos=charPos.transform.position + targetVecS [ind];
-		return charPos.transform.position + targetVecS [ind];
-
-
+		if (targetVecSInds.Count > 0) {
+			int ind = Mathf.FloorToInt (Random.Range (0, targetVecSInds.Count));
+			ind = targetVecSInds [ind];
+			Debug.Log (sttt);
+			Vector3 newpos = charPos.transform.position + targetVecS [ind];
+			return targetVecS [ind];
+		} else {
+			Debug.LogWarning ("no! "+targetVecSInds.Count );
+			return Vector3.zero;
+		}
 	}
+
 	Vector3  nextSeedStartPos(Vector3 _tarPos)
 	{
 		RaycastHit hit;
 
-		if(Physics.Raycast (charPos.transform.position  ,Vector3.down ,out hit ))
-		{
-			if(hit.collider.tag =="Ground"){
+		if (Physics.Raycast (_tarPos, Vector3.down, out hit)) {
+			if (hit.collider.tag == "Ground") {
 				//offsetY = charPos.transform.position.y - hit.distance+targetFormGround;
-				_tarPos=  hit.point ;
+				_tarPos = hit.point;
+				//if(hit.distance 
+
 			}
+		} else {
+			Debug.LogError ("underground");
+			_tarPos.y = charPos.transform.position .y;
 		}
 		return _tarPos;
 	}

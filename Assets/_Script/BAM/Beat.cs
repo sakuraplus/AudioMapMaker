@@ -46,37 +46,39 @@ public class Beat : MonoBehaviour {
 	float speedRotate=0;
 	[SerializeField ]
 	float speedMove=0;
+	[SerializeField ]
+	GameObject  fbx;
 	// Update is called once per frame
 	void Update () {
 		if (onPos) {
+			
 			if (speedRotate == 0) {
+				_animator.SetTrigger ("posReady");
 				speedRotate =360/(_audio.time -Beattime) ;
-				if (MoveUpPart) {
-					Debug.Log ("Destroy (MoveUpPart)");
-					Destroy (MoveUpPart);
-				}
-			//	if (_animator) {
-					_animator.SetTrigger ("posReady");
-				//}
+		
 			}
 		//	this.transform .LookAt (lookatCamera.position);
-			//float A = 1; //(Destorytime- _audio .time )*360 / speedRotate;
-		//	Debug.Log(A+" / "+speedRotate );
-		//	A++;
 			Timer.transform.RotateAround (Timer.transform.position, Timer.transform.forward  ,  Time.deltaTime*speedRotate );
+
 		} else {
 			sttt = Time.deltaTime;
 			this.transform.position+=new Vector3(0,speedMove*Time.deltaTime ,0);//Translate(new Vector3(0,speedMove*Time.deltaTime ,0));
+			speedMove*=1.1f;
 			if (this.transform.position .y >= TargPos.y) {
-			
+				
 				onPos = true;
+				if (MoveUpPart) {
+					Debug.LogError ("T!!!");
+					Debug.Log ("Destroy (MoveUpPart)");
+					Destroy (MoveUpPart);
+				}
 			}
 		}
 	}
 	[SerializeField ]
 	float sttt;
 	void Awake () {
-		_animator = GetComponent<Animator> ();
+		_animator =fbx. GetComponent<Animator> ();
 		//StartPos = transform.position;
 		if(	GameObject.Find("_script")!=null){
 			_audio=GameObject.Find("_script"). GetComponent<AudioSource> ();
@@ -89,9 +91,11 @@ public class Beat : MonoBehaviour {
 			// Instantiate an explosion effect at the gameObjects position and rotation
 			Instantiate (MoveUpPart, transform.position,transform.rotation  );
 		}
-
+		//Debug.LogError ("B!!");
 		// invote the DestroyNow funtion to run after timeOut seconds
 		//Invoke ("DestroyNow", time);
+
+
 	}
 
 	void OnTriggerEnter(Collider collider) 
@@ -110,12 +114,9 @@ public class Beat : MonoBehaviour {
 				// Instantiate an explosion effect at the gameObjects position and rotation
 				Instantiate (ExpoPart, transform.position, transform.rotation);
 			}
-			if (MoveUpPart) {
-				Debug.Log ("Destroy (MoveUpPart)");
-				DestroyImmediate (MoveUpPart);
-			}
+
 			GameObject.Find ("_script").GetComponent < GameManager>().AddPoints (1);
-			Destroy (gameObject);
+			DestroyNow ();
 			Debug.Log ("ttt  "+collider.name );
 		}
 

@@ -193,23 +193,25 @@ public class CharacterControllerSeed : MonoBehaviour {
 			if (objFound) {
 				//if(hit.collider.tag =="Ground"){
 				sttd = "distance=" + hit.distance;
-				float speedy = maxHeight - TargetObj.transform.position.y + hit.point.y;
-				if (speedy > 3) {
-					speedy = 5;
+
+
+				if(hit.distance>maxHeight){
+					addv.y =Mathf.Max(addv.y, 0);// addv.y * speedy / 5;
 				}
-				speedy = Mathf.Clamp (speedy, -1, 5);
-				addv.y = addv.y * speedy / 5;
-			//	Debug.Log (TargetObj.transform.forward+"--to addv="+addv);
-				//}
+		
 			}
 			//	
 		}
 		nv += (addv * moveSpeed * Time.deltaTime);
+		if (hit.distance > maxHeight) {
+			nv.y-=(hit.distance - maxHeight)/maxHeight;//(hit.distance - maxHeight);
+			//Debug.Log ("high!");
+		}
 		TargetObj.transform.position=nv;
 	}
 
 	[SerializeField ]
-	float maxHeight=5;
+	 float maxHeight=5;
 	/// <summary>
 	/// char平滑跟随target.
 	/// </summary>

@@ -4,7 +4,7 @@ using System.Collections;
 
 public class camMap : MonoBehaviour {
 
-	//public float distanceH = 7f;
+	public float distanceH = 7f;
 	public float distanceV = 4f;
 	public bool cameragroundlimit;
 
@@ -13,7 +13,7 @@ public class camMap : MonoBehaviour {
 
 
 	void Start() {
-		//distanceH = TargetObj.position.z - followCamera.position.z;
+		distanceH = followCamera.position.x-TargetObj.position.x ;
 		distanceV = followCamera.position.y-TargetObj.position.y ;
 		//followCamera.LookAt (Vector3.down);
 
@@ -27,7 +27,7 @@ public class camMap : MonoBehaviour {
 	}
 	void LateUpdate()
 	{
-		Vector3 nextpos = new Vector3(TargetObj.position.x, TargetObj.position.y+distanceV ,TargetObj.position.z);
+		Vector3 nextpos = new Vector3(TargetObj.position.x+distanceH, TargetObj.position.y+distanceV ,TargetObj.position.z);
 
 		followCamera.transform.position = nextpos;
 

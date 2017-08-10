@@ -5,10 +5,10 @@ using System.Collections.Generic ;
 using System;
 using System.Text;
 using System.IO;
-
+using UnityEngine.Assertions;
 public  enum datasource
 {
-	google,bing,random,test
+	none,random,google,bing,test
 }
 [Serializable]
 public class Vector2Int
@@ -81,10 +81,12 @@ public class TerrainManager : MonoBehaviour {
 	//	public  GameObject[] arrTrr;//= new GameObject[9];
 	public static  GameObject[,] MapObjs= new GameObject[3,3];
 	[Header("latitude and longitude of the northwest")]
-	[Range (-90,90)]
-	public  static  float lat = 30;			//起点纬度，北极90，南极-90
-	[Range (-180,180)]
-	public  static  float lng = 70;			//起点经度，英国东方为正，应该西方为负
+	[SerializeField, Range (-90,90)]
+	float _lat;
+	public  static  float lat= 999;			//起点纬度，北极90，南极-90
+	[SerializeField,Range (-180,180)]
+	float _lng;
+	public  static  float lng= 999;			//起点经度，英国东方为正，应该西方为负
 //	public string  txtlatlng;
 //	[Header ("latitude and longitude of the southeast")]
 //	[Range (-90,90)]
@@ -98,8 +100,11 @@ public class TerrainManager : MonoBehaviour {
 	public static datasource DataSource;
 	[SerializeField,HeaderAttribute ("Default material of each block")]
 	//[HideInInspector]
+	/// <summary>
+	/// 地形预设材质
+	/// </summary>
 	public Material matTrr;	
-	//地形预设材质
+	public Color  ColTrr;
 
 	[SerializeField,Header ("API KEY of google elevation service")]
 	[Tooltip("Get a ELE KEY at developers.google.com/maps/documentation/elevation")]
@@ -160,6 +165,11 @@ public class TerrainManager : MonoBehaviour {
 		NumError = 0;
 		SegmentInPiece =new Vector2Int( _SegmentInPiece);
 		Pieces =new Vector2Int( _Pieces);
+		if (lat == 999) {
+			Debug.Log ("null>>");
+			lat = _lat;
+			lng = _lng;
+		}
 //		Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
 //		Vertives=new Vector3[(int)(Pieces.x*Pieces.y),(int)(SegmentInPiece.x+1)*(int)(SegmentInPiece.y+1)] ;
 		Vertives=new Vector3[(int)Pieces.y,(int)Pieces.x][] ;
@@ -196,8 +206,10 @@ public class TerrainManager : MonoBehaviour {
 	public static  float stepLat;//以赤道为基础
 	void makeTrr()
 	{
-		if (DataSource == null) {
+		if (DataSource == datasource.none ) {
 			DataSource = _datasource;
+		} else {
+			Debug.Log ("????????????????"+DataSource);
 		}
 		if (DataSource == datasource.google) {
 			ELEAPIkey = googleELEAPIKey;
@@ -249,7 +261,7 @@ public class TerrainManager : MonoBehaviour {
 				GameObject g = new GameObject ();
 				g.tag="Ground";
 				g.name = nameT;
-				g.AddComponent<drawJterrain>().initTrr( nameT,SegmentInPiece,matTrr);
+				g.AddComponent<drawJterrain>().initTrr( nameT,SegmentInPiece,matTrr,ColTrr );
 //				float _slat = lat+((offsety-i) * 2 + 1) * stepLat;
 //				float _slng = lng+((j-offsetx )* 2 - 1) * stepLng;
 //				float _elat = lat+((offsety-i) * 2 - 1) * stepLat;

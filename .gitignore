@@ -87,3 +87,4 @@ $RECYCLE.BIN/
 *.pk.meta
 ~$*.*
 Assets/Photon Unity Networking/Demos/
+/Assets/Photon Unity Networking/Demos.meta

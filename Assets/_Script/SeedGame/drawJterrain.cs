@@ -56,19 +56,23 @@ public class drawJterrain : MonoBehaviour {
 	//	float additionheight=1;
 
 	public Material diffuseMap;
+	public Color  meshcolor;
 	/// <summary>
 	/// 绘制mesh，顶点数据
 	/// </summary>
 	Vector3[] vertives;
+	Vector3[] vertives6;
 	/// <summary>
 	/// 绘制mesh，uv顶点数据.
 	/// </summary>
 	private Vector2[] uvs;
+	private Vector2[] uvs6;
 	/// <summary>
 	/// 绘制mesh，三角面数据
 	/// </summary>
-	private int[] triangles;
-
+	private int[] _triangles;
+	Vector3[] _normals;
+	Color[] _colors;
 	/// <summary>
 	/// The error samples.
 	/// </summary>
@@ -79,9 +83,11 @@ public class drawJterrain : MonoBehaviour {
 	[SerializeField]
 	Texture2D mapTexture;
 
+	void xxx(Color c){
+		Debug.Log ("xxxxxxxxxxxxxxxxxx-"+c);
+	}
 
-
-	public void initTrr( string _Trrname,Vector2Int _segment, Material _matTrr = null)
+	public void initTrr( string _Trrname,Vector2Int _segment, Material _matTrr, Color _colTrr)
 	{
 		  edgeUp = false;
 		  edgeDown = false;
@@ -89,14 +95,15 @@ public class drawJterrain : MonoBehaviour {
 		  edgeRight = false;
 
 		diffuseMap = _matTrr;
+		meshcolor = _colTrr;
 		Trrname = _Trrname;
 		segment=_segment;
 		int leng = ((int)segment.x + 1) * ((int)segment.y + 1);
 		vertives = new Vector3[leng];//用于存每个点的坐标
 		//testVertives=new Vector2 [leng];
 		GetUV();
-		GetTriangles();
-		DrawTexture ();
+//		GetTriangles();
+//		DrawTexture ();
 	}
 
 
@@ -377,9 +384,9 @@ public class drawJterrain : MonoBehaviour {
 		for (int i = 0; i <= segment.y; i++) {
 			for (int j = 0; j <= segment.x ; j++) {
 				int ind = i * (int)(segment.x + 1) + j;
-				float a=UnityEngine. Random.Range(0f,20f);
-
-				vertives [ind].y =a;//Vpos.x +0.1f*Vpos.y;// // Mathf.Floor (centerlat)*0.01f + Mathf.Floor (centerlng) * 0.00001f;// Vpos.x +0.1f*Vpos.y  ;
+				float a=UnityEngine. Random.Range(0f,30);
+				//(i % 2 + j % 3)*5;
+				vertives [ind].y =a; //(i % 2 + j % 3)*5;//Vpos.x +0.1f*Vpos.y;// // Mathf.Floor (centerlat)*0.01f + Mathf.Floor (centerlng) * 0.00001f;// Vpos.x +0.1f*Vpos.y  ;
 				vertives [ind].x =j * TerrainManager.MeshSize.x / segment.x;
 				vertives [ind].z = i * +TerrainManager.MeshSize.z / segment.y;
 			stt +=","+i+","+j+","+ind+ vertives [ind];
@@ -736,14 +743,30 @@ public class drawJterrain : MonoBehaviour {
 	//
 	private void DrawMesh()
 	{
+		setMeshPoly();
+		DrawTexture ();
+		string stt = "V6= ";
+		string stg = "TG= ";
+		string stn = "TN= ";
+		for (int i = 0; i < vertives6.Length; i++) {
+			stt += vertives6 [i];
+			stg += _triangles [i]+",";
+			stn += _normals [i];
+		}
+		Debug.Log (stt);
+		Debug.Log (stg);
+		Debug.Log (stn);
+		//*****************
 		if (gameObject.GetComponent <MeshFilter> () == null) {
 			mesh = gameObject.AddComponent<MeshFilter> ().mesh;
 		} 
 		//给mesh 赋值
 		mesh.Clear();
-		mesh.vertices = vertives;//,pos);
-		mesh.uv = uvs;
-		mesh.triangles = triangles;
+		mesh.vertices = vertives6;//,pos);vertives
+		mesh.uv = uvs6;//uvs;
+		mesh.normals = _normals;
+		mesh.colors = _colors;
+		mesh.triangles = _triangles;
 		//重置法线
 		mesh.RecalculateNormals();
 		//重置范围
@@ -793,6 +816,7 @@ public class drawJterrain : MonoBehaviour {
 			{
 				uvs[index] = new Vector2(j * u, i * v);
 				//**********
+				//测试uv，循环使用贴图
 				//float modU=j*u;
 				//modU = (Mathf.FloorToInt (modU) % 2 == 0) ? modU % 1 : (1 + Mathf.FloorToInt (modU) - modU) % 2;
 				//float modV=i*v;
@@ -803,38 +827,157 @@ public class drawJterrain : MonoBehaviour {
 				index++;
 			}
 		}
-		Debug.Log (uvtest);
 		return uvs;
 	}
 
+	//*********************
 
-	private int[] GetTriangles()
+	private int[] GetTrianglesO()
 	{
 		int sum = Mathf.FloorToInt(segment.x * segment.y * 6);//每格两个三角形，6个顶点
-		triangles = new int[sum];
-		uint index = 0;
+		_triangles = new int[sum];
+		int index = 0;
 		for (int i = 0; i < segment.y; i++)
 		{
 			//y对应z方向
 			for (int j = 0; j < segment.x; j++)
 			{
+				int index1 = index + 1;
+				int index2 = index + 2;
+				int index3 = index + 3;
+				int index4 = index + 4;
+				int index5 = index + 5;
+				//*****
+
 				int role = Mathf.FloorToInt(segment.x) + 1;
 				int self = j +( i*role);                
 				int next = j + ((i+1) * role);
-				triangles[index] = self;
-				triangles[index + 1] = next + 1;
-				triangles[index + 2] = self + 1;
-				triangles[index + 3] = self;
-				triangles[index + 4] = next;
-				triangles[index + 5] = next + 1;
+
+				_triangles[index] = self;
+				_triangles[index1] = next + 1;
+				_triangles[index2] = self + 1;
+				_triangles[index3] = self;
+				_triangles[index4] = next;
+				_triangles[index5] = next + 1;
+
+			
 				index += 6;
 				//
 			}
 		}
-		return triangles;
+		return _triangles;
 	}
+	//********************
+	/// <summary>
+	/// Sets the mesh poly. 设置uv和vertives6为*6形式，设置三角面，法线，颜色
+	/// </summary>
+	/// <returns>The mesh poly.</returns>
+	private void setMeshPoly()
+	{
+		int sum = Mathf.FloorToInt(segment.x * segment.y * 6);//每格两个三角形，6个顶点
+		_triangles = new int[sum];
+		//******************
+		_normals =new Vector3[sum];// new Vector3[vertives.Length ];// new Vector3[sum];
+		_colors  = new Color[sum];// new Color[vertives.Length ];//
+		vertives6=new Vector3[sum]; 
+		uvs6=new Vector2[sum] ;
+		//*********************
+		var noiseOffset = new Vector2(UnityEngine. Random.Range(0f, 100f), UnityEngine.Random.Range(0f, 100f));
+
+		//int xSegments = Mathf.FloorToInt(config.terrainSize.x/config.cellSize);
+		//int zSegments = Mathf.FloorToInt(config.terrainSize.z/config.cellSize);
+
+		float xStep = TerrainManager.MeshSize.x / segment.x;// meshs/xSegments;
+		float zStep = TerrainManager.MeshSize.z / segment.y;//config.terrainSize.z/zSegments;
+		//******************
+		int index = 0;
+		for (int i = 0; i < segment.y; i++)
+		{
+			//y对应z方向
+			for (int j = 0; j < segment.x; j++)
+			{
+
+				//****
+				int index1 = index + 1;
+				int index2 = index + 2;
+				int index3 = index + 3;
+				int index4 = index + 4;
+				int index5 = index + 5;
+				//*****
+
+				int role = Mathf.FloorToInt(segment.x) + 1;
+				int self = j +( i*role);                
+				int next = j + ((i+1) * role);
+
+				_triangles [index] = index;// self;
+				_triangles[index1] =index1;// next + 1;
+				_triangles[index2] =index2;// self + 1;
+				_triangles[index3] = index3;
+				_triangles[index4] = index4;
+				_triangles[index5] = index5;
+
+				//***********************************
+				Vector3 vertex00 = GetFromVertives(j + 0, i + 0);//, segment.x, segment.y, noiseOffset, 1);
+				Vector3 vertex01 = GetFromVertives(j + 0, i + 1);//, segment.x, segment.y, noiseOffset, 1);
+				Vector3 vertex10 = GetFromVertives(j + 1, i + 0);//, segment.x, segment.y, noiseOffset, 1);
+				Vector3 vertex11 = GetFromVertives(j + 1, i + 1);//, segment.x, segment.y, noiseOffset, 1);
+
+				Vector2 uv00 = GetFromUVs(j + 0, i + 0);//, segment.x, segment.y, noiseOffset, 1);
+				Vector2 uv01 = GetFromUVs(j + 0, i + 1);//, segment.x, segment.y, noiseOffset, 1);
+				Vector2 uv10 = GetFromUVs(j + 1, i + 0);//, segment.x, segment.y, noiseOffset, 1);
+				Vector2 uv11 = GetFromUVs(j + 1, i + 1);//, segment.x, segment.y, noiseOffset, 1);
+
+				Vector3 normal000111 = Vector3.Cross(vertex10 - vertex00, vertex11 - vertex00).normalized;
+				Vector3 normal001011 = Vector3.Cross(vertex01 - vertex00, vertex11 - vertex00).normalized;
 
 
+				vertives6 [index] = vertex00;
+				vertives6[index1] = vertex01;
+				vertives6[index2] = vertex11;
+				vertives6[index3] = vertex00;
+				vertives6[index4] = vertex11;
+				vertives6[index5] = vertex10;
+
+				uvs6 [index] = uv00;
+				uvs6[index1] = uv01;
+				uvs6[index2] = uv11;
+				uvs6[index3] = uv00;
+				uvs6[index4] = uv11;
+				uvs6[index5] = uv10;
+
+				if(meshcolor!=null ){
+				_colors [index] =meshcolor ;//new Color (0.5f, 0.5f, 0.2f);//
+				_colors[index1] =meshcolor ;//new Color (0.5f, 0.4f, 0.2f); //TerrainManager.gradient.Evaluate(height01);
+				_colors[index2] =meshcolor;// new Color (0.4f, 0.5f, 0.2f);//TerrainManager.gradient.Evaluate(height11);
+				_colors[index3] =meshcolor;//new Color (0.5f, 0.5f, 0.2f);// TerrainManager.gradient.Evaluate(height00);
+				_colors[index4] =meshcolor; //new Color (0.5f, 0.4f, 0.2f);//TerrainManager.gradient.Evaluate(height11);
+				_colors[index5] =meshcolor;// new Color (0.4f, 0.5f, 0.2f); //TerrainManager.gradient.Evaluate(height10);
+				}
+
+				_normals [index] =normal000111;// new Vector3 (0,0.5f,0);// normal000111;
+				_normals[index1] =normal000111;// new Vector3 (0,0.5f,0);//normal000111;
+				_normals[index2] =normal000111;// new Vector3 (0,0.5f,0);//normal000111;
+				_normals[index3] =normal001011;// new Vector3 (0,-0.5f,0);//normal001011;
+				_normals[index4] =normal001011;//new Vector3 (0,-0.5f,0);//normal001011;
+				_normals[index5] =normal001011;// new Vector3 (0,-0.5f,0);//normal001011;
+
+
+				//***********************************
+				index += 6;
+				//
+			}
+		}
+	}
+	//********************
+	Vector3 GetFromVertives(int x, int z)
+	{
+		return vertives [x+z*(segment.y+1)];
+	}
+	Vector2 GetFromUVs(int x, int z)
+	{
+		return uvs  [x+z*(segment.y+1)];
+	}
+	//************************
 	 
 	/// <summary>
 	/// 处理经度数值.将超过180度的经度转换为正常值

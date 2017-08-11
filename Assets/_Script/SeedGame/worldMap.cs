@@ -5,32 +5,71 @@ using UnityEngine.SceneManagement; // include so we can load new scenes
 //using UnityStandardAssets.CrossPlatformInput ;
 
 public class worldMap : MonoBehaviour {
-	public  Vector2 x;
-	public  Vector2Int xxx;
-	public  Text ttt;
-	public  Image  imm;
-	public  Image  iLL;
+	/// <summary>
+	/// The text of panel.
+	/// </summary>
+	public  Text txtPanel;
+	/// <summary>
+	/// The text of location icon.
+	/// </summary>
+	public  Text txtLoc;
+
+	/// <summary>
+	/// img of map
+	/// </summary>
+	public  Image  imgMap;
+	/// <summary>
+	/// location icon
+	/// </summary>
+	public  Image  imgIcon;
+	/// <summary>
+	/// the black/white map 
+	/// </summary>
 	public Texture2D map;
 
+	/// <summary>
+	/// height of imgMap
+	/// </summary>
+	public int imgH;
+	/// <summary>
+	/// width of imgMap
+	/// </summary>
+	public int imgW;
 
 	float slat,slng;
 	bool selectLoc=true;
-	public GameObject _MainMenu;
+	public GameObject _MenuPanel;
+
 	void Update(){
-		if (Input.GetMouseButton (0) &&selectLoc ) {
-			
+		if(Input.GetKey(KeyCode.Z)){
+			Debug.Log(imgMap.preferredHeight +"/"+imgMap.preferredWidth );
+			Debug.Log ("imgScale="+imgMap.transform.lossyScale+"center="+imgMap.transform.position);
+			Debug.Log ("imgScale="+imgMap.transform.lossyScale+"center="+imgMap.transform.position);
+		}
+		Vector3 illsc = imgIcon.transform.localScale;
+		illsc *= 2;
+		if (illsc .x > 1) {
+			illsc = Vector2.one;
+		} 
+		imgIcon.transform.localScale = illsc;
+
+		if (Input.GetMouseButton (0) ) {
+			//&&selectLoc 
 			 
-			Vector3  imgScale = imm.transform.lossyScale;
-			Vector3 imgCenter = imm.transform.position;
-			Vector3 imgUpLeft = new Vector3 (imgCenter.x - 500 * imgScale.x, imgCenter.y + 256 * imgScale.y, 0);
-			Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-			//Vector3 posOnImg = new Vector3 (mousePos.x-imgUpLeft.x,mousePos.y-imgUpLeft.y,0);
+			Vector3  imgScale = imgMap.transform.lossyScale;
+			Vector3 imgCenter = imgMap.transform.position;
+			Vector3 imgUpLeft = new Vector3 (imgCenter.x - imgW * imgScale.x, imgCenter.y + imgH * imgScale.y, 0);
+
+
+
 			float posonimgx = Input.mousePosition .x - imgUpLeft.x;
 			float posonimgy = Input.mousePosition .y - imgUpLeft.y;
-			Vector3 localPosOnImg =new Vector3 (0.5f* posonimgx / imgScale.x, 512+posonimgy / imgScale.y,0);
-			//Vector3 localPosOnImg =new Vector3 ( posonimgx / imgScale.x, posonimgy / imgScale.y,0);
-			string sttt = "mouse=" + Input.mousePosition;
-			//sttt += "\nmousepos= " + mousePos;
+			Vector3 localPosOnImg =new Vector3 (512* posonimgx / (imgScale.x*imgW*2), 512+512*posonimgy / (imgScale.y*imgH*2),0);
+
+//			Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+//			Vector3 posOnImg = new Vector3 (mousePos.x-imgUpLeft.x,mousePos.y-imgUpLeft.y,0);
+//			string sttt = "mouse=" + Input.mousePosition;
+//			sttt += "\nmousepos= " + mousePos;
 //			sttt += "\nimgScale=" + imgScale + "\nimgUpLeft(" + imgUpLeft.x + "," + imgUpLeft.y + ") ";
 //			sttt += "\nposOnImg=(" + posonimgx + "," + posonimgy + ")  \nlocalPosOnImg=" + posonimgx/imgScale.x+","+posonimgy/imgScale .y;
 //			sttt += "\nposOnImg input=(" + (Input.mousePosition.x - imgUpLeft.x) + "," + (Input.mousePosition.y - imgUpLeft.y);
@@ -38,19 +77,27 @@ public class worldMap : MonoBehaviour {
 //			sttt += "\nlocalPosOnImg input int=" + Mathf.FloorToInt (localPosOnImg.x) + "," + Mathf.FloorToInt (localPosOnImg.y);
 //			sttt += "\n " + (localPosOnImg.y / 512) + "," + localPosOnImg.x / 512;
 //			sttt += "\n getp=" + map.GetPixel (Mathf.FloorToInt (localPosOnImg.x), Mathf.FloorToInt (localPosOnImg.y));
-			Color c = map.GetPixel (Mathf.FloorToInt (localPosOnImg.x), Mathf.FloorToInt (localPosOnImg.y));
 
+			Color c = map.GetPixel (Mathf.FloorToInt (localPosOnImg.x), Mathf.FloorToInt (localPosOnImg.y));
+			Debug.Log ("color" + c);
 
 			if (c != Color.black) {
-				iLL.transform.position = Input.mousePosition;
-				slat=calcLatLng (localPosOnImg).x;
-				slng=calcLatLng (localPosOnImg).y;
-				ttt.text="you will start at"+ calcLatLng (localPosOnImg);
-				//sttt += "\nlatlng=" + calcLatLng (localPosOnImg);
-				showMenu();
+				slat = calcLatLng (localPosOnImg).x;
+				slng = calcLatLng (localPosOnImg).y;
+
+				imgIcon.transform.position = Input.mousePosition;
+				txtLoc .text =  calcLatLng (localPosOnImg).ToString();
+				imgIcon.transform.localScale = new Vector3 (0.2f, 0.2f, 0.2f);
+
+				txtPanel.text = "you will start at" + calcLatLng (localPosOnImg);
+//				sttt += "\nlatlng=" + calcLatLng (localPosOnImg);
+				showMenu ();
+			} else {
+				hideMenu ();
+				imgIcon.transform.position = new Vector3 (-10,-10,-10);
 			}
 
-			//ttt.text = sttt;
+//			ttt.text = sttt;
 			}
 	}
 
@@ -70,14 +117,17 @@ public class worldMap : MonoBehaviour {
 
 		float pointlng=posonimg.x/512;
 		float calclng=(pointlng-0.5f)*360 ;
-		Debug.Log (pointlat + "," + pointlng);
+		//Debug.Log (pointlat + "," + pointlng+">> "+(-1*calclat)+" , "+calclng);
 		//Debug.Log((pp-1)/(pp+1)+">>srcs="+Mathf.Asin((pp-1)/(pp+1))+"deg="+calclat);
 		return new Vector2 (-1*calclat, calclng);
 	}
-
+	void hideMenu(){
+		selectLoc = true ;
+		_MenuPanel.SetActive (false);
+	}
 	void showMenu(){
 		selectLoc = false;
-		_MainMenu.SetActive (true);
+		_MenuPanel.SetActive (true);
 	}
 
 	// load the specified Unity level
@@ -96,6 +146,6 @@ public class worldMap : MonoBehaviour {
 	public void BtnCancel()
 	{
 		selectLoc = true;
-		_MainMenu.SetActive (false);
+		_MenuPanel.SetActive (false);
 	}
 }

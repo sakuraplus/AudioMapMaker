@@ -29,7 +29,7 @@ public class InfiniteMap : MonoBehaviour {
 	//public static Vector3[,] Vertives;
 	//[SerializeField ]
 	Vector2Int vpnow;
-	Vector2Int vplast;//测试用
+	//Vector2Int vplast;//测试用
 	[SerializeField]
 	GameObject onchunk;
 	float onchunkLat,onchunkLng;
@@ -109,7 +109,7 @@ public class InfiniteMap : MonoBehaviour {
 		int stepX =(int) vp.y -Mathf.FloorToInt( NumChunk .x/2);
 		int stepY = (int)vp.x - Mathf.FloorToInt( NumChunk .y/2);
 //		Debug.LogWarning (vp+"/"+vplast +" stepxy="+stepX+","+stepY );
-		vplast = vp;//测试用
+		//vplast = vp;//测试用
 		if (stepX> 0) {
 			//右,j
 			for (int i = 0; i < NumChunk.y; i++) {

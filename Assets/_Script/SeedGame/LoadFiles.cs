@@ -11,31 +11,31 @@ public class LoadFiles : MonoBehaviour {
 	//private static extern void ImageUploaderInit();
 	private static extern void ImageUploaderCaptureClick();
 
-	public  Text tt;	
-	public  Text txtt;
-	public  GameObject  go;
+	//public  Text tt;	
+	//public  Text txtt;
+	//public  GameObject  go;
 	AudioSource aus;
 	WWW www;
 	string  filepath;
 	string []paths;
-	public AudioClip ac;
+	//public AudioClip ac;
 
 	void Start () {
 
-		tt.text += " > ";
+		//tt.text += " > ";
 		//ImageUploaderInit ();
 		aus=BeatAnalysisManager._audio ;//<AudioSource>();
 	}
 	/// <summary>
 	///  测试
 	/// </summary>
-	public void Update(){
-		if (www != null) {
-			if (www.progress < 1) {
-				txtt.text = www.bytesDownloaded + ">>" + www.progress + "<<" + Time.realtimeSinceStartup;
-			}
-		}
-	}
+//	public void Update(){
+//		if (www != null) {
+//			if (www.progress < 1) {
+//				txtt.text = www.bytesDownloaded + ">>" + www.progress + "<<" + Time.realtimeSinceStartup;
+//			}
+//		}
+//	}
 
 	#if UNITY_WEBGL 
 	/// <summary>
@@ -53,10 +53,10 @@ public class LoadFiles : MonoBehaviour {
 	/// <returns>The texture.</returns>
 	/// <param name="url">URL.</param>
 	IEnumerator LoadMusic (string url) {
-		tt.text += "\n!" + url;
+		//tt.text += "\n!" + url;
 		www = new WWW (url);
 		yield return www;
-		tt.text+="\n OK";
+		//tt.text+="\n OK";
 		Tplaymus ();
 	}
 
@@ -89,29 +89,29 @@ public class LoadFiles : MonoBehaviour {
 		try {
 			ac = www.GetAudioClip (false, false,AudioType.WAV);
 			ac.name =s+"_wav";
-			tt.text+="\nwav";
+			//tt.text+="\nwav";
 			return ac;
 		}catch ( System.Exception  ex  ) {
 			Debug.Log( ex);
-			tt.text+="wav-f  ";
+			//tt.text+="wav-f  ";
 		}
 		try {
 			ac = www.GetAudioClip (false, false,AudioType.MPEG );
 			ac.name =s+"_mp3";
-			tt.text+="\nmp3";
+			//tt.text+="\nmp3";
 			return ac;
 		}catch ( System.Exception  ex  ) {
 			Debug.Log( ex);
-			tt.text+="mp3-f  ";
+			//tt.text+="mp3-f  ";
 		}
 		try {
 			ac = www.GetAudioClip (false, false,AudioType.OGGVORBIS  );
 			ac.name =s+"_ogg";
-			tt.text+="\nogg";
+			//tt.text+="\nogg";
 			return ac;
 		}catch ( System.Exception  ex  ) {
 			Debug.Log( ex);
-			tt.text+="ogg-f  ";
+			//tt.text+="ogg-f  ";
 		}
 		return ac;
 	}
@@ -125,14 +125,14 @@ public class LoadFiles : MonoBehaviour {
 
 		AudioClip ac=tryAudioType();
 		if (ac == null) {
-			tt.text+="\n acfail>>";
+			//tt.text+="\n acfail>>";
 		}else{
 
-		tt.text +="  length="+ ac.length;
+		//tt.text +="  length="+ ac.length;
 		//Debug.Log("ac="+ac.length  );
-		tt.text += "loadType=" + ac.loadType  +"--samples="+ac.samples+"\n";
+		//tt.text += "loadType=" + ac.loadType  +"--samples="+ac.samples+"\n";
 		aus.clip =ac;
-		tt.text += "\nname=" + aus.clip.name;
+		//tt.text += "\nname=" + aus.clip.name;
 		aus.clip.LoadAudioData ();
 
 		//aus.Play ();
@@ -142,7 +142,7 @@ public class LoadFiles : MonoBehaviour {
 	/// Raises the button pointer down event.
 	/// </summary>
 	public void BtnPointerDown () {
-		tt.text+= ">";
+		//tt.text+= ">";
 		#if UNITY_STANDALONE
 		PCopenDialog();
 		#else 
@@ -218,11 +218,11 @@ public class LoadFiles : MonoBehaviour {
 	/// 测试
 	/// </summary>
 	public void ttt(){
-		tt.text = www.bytesDownloaded+","+tt.text;
+		//tt.text = www.bytesDownloaded+","+tt.text;
 		if (aus.clip != null) {
 			float[] d=new float[aus.clip.samples ] ;
 			aus.clip.GetData (d, 0);
-			tt.text += "\naus=" + aus.clip.length + "," + d.Length + "," + aus.clip.name;
+			//tt.text += "\naus=" + aus.clip.length + "," + d.Length + "," + aus.clip.name;
 		}
 	}
 }

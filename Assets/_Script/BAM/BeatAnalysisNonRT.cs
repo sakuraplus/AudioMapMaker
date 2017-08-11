@@ -219,17 +219,17 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 		//拆分数据，time即采样间隔时间，单位毫秒，samplesize为fft结果的数据数量=_spec，采样数据数量为sanplesize*2，取每个间隔分段的钱samplesize位
 		int SamplePerFrame = time;//Mathf.FloorToInt ( time*_audio.clip.frequency / 1000);//每帧间隔的数据数量
 
-		//从第一个非0数据开始
-		//int si=0;
-		bool offsetfound = false;
-		while (!offsetfound && firstDataInd<samples.Length ) {
-			firstDataInd++;
-			if (samples [firstDataInd] != 0) {
-				offsetfound = true;
-			}
-		}
-
-		float  offset = firstDataInd *freq;/////////////////第一个非0数据所在的时间_audio.clip.frequency
+//		//从第一个非0数据开始
+//		//int si=0;
+//		bool offsetfound = false;
+//		while (!offsetfound && firstDataInd<samples.Length ) {
+//			firstDataInd++;
+//			if (samples [firstDataInd] != 0) {
+//				offsetfound = true;
+//			}
+//		}
+//
+//		float  offset = firstDataInd *freq;/////////////////第一个非0数据所在的时间_audio.clip.frequency
 
 		NumOfFrame =Mathf.FloorToInt ((samples.Length-firstDataInd) / SamplePerFrame);//拆分出的数据数量，相当于帧数
 
@@ -291,7 +291,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 			}
 		}
 
-		float offset = si *freq;/////////////////第一个非0数据所在的时间_audio.clip.frequency
+		//float offset = si *freq;/////////////////第一个非0数据所在的时间_audio.clip.frequency
 
 		int NumOfFrame =Mathf.FloorToInt ((samples.Length-si) / SamplePerFrame);//拆分出的数据数量，相当于帧数
 

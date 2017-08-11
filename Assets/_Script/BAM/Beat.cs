@@ -54,22 +54,36 @@ public class Beat : MonoBehaviour {
 	GameObject  fbx;
 	// Update is called once per frame
 	[SerializeField ]
-	float timerRot=0;
+	public  float timerRot=0;
+	[SerializeField ]
+	public  float timerOut=10;
 	void Update () {
 		if (onPos) {
 			
 			if (speedRotate == 0) {
 				_animator.SetTrigger ("posReady");
-				speedRotate =360/(Beattime-_audio.time ) ;
+
 		
 			}
-		//	this.transform .LookAt (lookatCamera.position);
+			//speedRotate =(360-timerRot)/(Beattime-_audio.time ) ;
+			speedRotate =(360)/(Beattime-Borntime ) ;
+			this.transform .LookAt (lookatCamera.position);
 			float rotA= Time.deltaTime*speedRotate ;
+
 			Timer.transform.RotateAround (Timer.transform.position, Timer.transform.forward  , rotA );
 			timerRot += rotA;
 		} else {
-			sttt = Time.deltaTime;
-			this.transform.position+=new Vector3(0,speedMove*Time.deltaTime ,0);//Translate(new Vector3(0,speedMove*Time.deltaTime ,0));
+			//sttt = Time.deltaTime;
+			//this.transform.position+=new Vector3(0,speedMove*Time.deltaTime ,0);//Translate(new Vector3(0,speedMove*Time.deltaTime ,0));
+			Vector3 sc=this.transform.localScale ;
+			if (sc.x * 3f > 1) {
+				sc = Vector3.one ;
+				onPos = true;
+			} else {
+				sc *= 3f;
+			}
+			this.transform.localScale = sc;//+=new Vector3(0,speedMove*Time.deltaTime ,0);//
+
 			speedMove*=1.1f;
 			if (this.transform.position .y >= TargPos.y) {
 				
@@ -82,10 +96,12 @@ public class Beat : MonoBehaviour {
 			}
 		}
 	}
-	[SerializeField ]
-	float sttt;
+	//[SerializeField ]
+	//float sttt;
 	void Awake () {
-		_animator =fbx. GetComponent<Animator> ();
+		if (fbx) {
+			_animator = fbx.GetComponent<Animator> ();
+		}
 		//StartPos = transform.position;
 		if(	GameObject.Find("_script")!=null){
 			_audio=GameObject.Find("_script"). GetComponent<AudioSource> ();
@@ -98,9 +114,16 @@ public class Beat : MonoBehaviour {
 			// Instantiate an explosion effect at the gameObjects position and rotation
 			Instantiate (MoveUpPart, transform.position,transform.rotation  );
 		}
+
+//		if (CheckState) {
+//			if (ExpoPartPerfect) {
+//				Instantiate (ExpoPartPerfect, transform.position, transform.rotation);
+//			}
+//			DestroyNow ();
+//		}
 		//Debug.LogError ("B!!");
 		// invote the DestroyNow funtion to run after timeOut seconds
-		//Invoke ("DestroyNow", time);
+		Invoke ("DestroyNow", timerOut );
 
 
 	}
@@ -114,10 +137,10 @@ public class Beat : MonoBehaviour {
 		}
 		if(timerRot>100){
 		if (collider.tag == "checkzone" ||collider.tag == "Player" ) {
-			Debug.Log ("kkkkkkkkk  "+collider.name );
-			CheckState = true;
+		//	Debug.Log ("kkkkkkkkk  "+collider.name );
+			//CheckState = true;
 			//AudioClip ac = GameObject.Find ("MCamera").GetComponent<BeatAnalysisManager > ().beatsoundDefault  as AudioClip;
-			_audio.PlayOneShot  (AC);
+			//_audio.PlayOneShot  (AC);
 
 
 			//GameObject.Find ("_script").GetComponent < GameManager>()
@@ -161,20 +184,21 @@ public class Beat : MonoBehaviour {
 		} else  {
 			point = 0;
 		}
-		Debug.LogError ("point>>"+ii+">>"+point);
+		Debug.LogError ("point>>"+ii+">>"+point+"<"+GameManager.gm.RotationRangePerfect+","+GameManager.gm.RotationRangeGood+">");
+
 		if (point > 0) {
+			CheckState = true;
+			_audio.PlayOneShot  (AC);
+			DestroyNow ();
+
 			GameManager.gm.AddPoints (point);
 		}
 	}
 
 	void DestroyNow ()
 	{
+		Debug.Log ("Destroy (born "+Borntime +"- beat "+Beattime+"="+(Beattime-Borntime));
 
-		// destory the game Object
-		if (MoveUpPart) {
-			Debug.Log ("Destroy (MoveUpPart)");
-			Destroy (MoveUpPart);
-		}
 		Destroy(gameObject);
 	}
 }

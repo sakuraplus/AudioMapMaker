@@ -2,7 +2,8 @@
 using System.Collections;
 using UnityEngine.UI; // include UI namespace so can reference UI elements
 using UnityEngine.SceneManagement; // include so we can manipulate SceneManager
-
+[RequireComponent (typeof (SeedBeatMap ) )]//
+[RequireComponent (typeof (TerrainManager ) )]//
 public class GameManager : MonoBehaviour {
 
 	// static reference to game manager so can be called from other scripts directly (not just through gameobject component)
@@ -18,27 +19,28 @@ public class GameManager : MonoBehaviour {
 	// game performance
 	public int score = 0;
 	public int highscore = 0;
-	public int startLives = 3;
-	public int lives = 3;
+
+	//public int lives = 3;
 
 	// UI elements to control
 	public Text UIScore;
 	public Text UIHighScore;
 	public Text UILevel;
-	public GameObject[] UIExtraLives;
+	//public GameObject[] UIExtraLives;
 	public GameObject UIGamePaused;
-
+	public GameObject UIGameLoading;
+	public Text UIPreLoad;
 	// private variables
 	public GameObject _player;
 	//GameObject _player;
 	Vector3 _startPos;
 	Vector3 _endPos;
-	Scene _scene;
+	//Scene _scene;
 
 	public   int fullPoint=0;
 
-	public GameObject[] _resetObj;
-	Vector3[] _resetObjPos;
+//	public GameObject[] _resetObj;
+//	Vector3[] _resetObjPos;
 
 
 	// set things up here
@@ -52,15 +54,16 @@ public class GameManager : MonoBehaviour {
 		}
 		// setup all the variables, the UI, and provide errors if things not setup properly.
 		setupDefaults();
-		setupResets ();
-		fullPoint = BeatAnalysisManager.BAL.Count;
+		//setupResets ();
+	//	fullPoint = BeatAnalysisManager.BAL.Count;
 	}
-
+	bool preloaded=false;
 	// game loop
 	void Update() {
 		// if ESC pressed then pause the game
 		if (Input.GetKeyDown(KeyCode.Escape)) {
 			if (Time.timeScale > 0f) {
+				Debug.Log (">>>pause");
 				UIGamePaused.SetActive(true); // this brings up the pause UI
 				Time.timeScale = 0f; // this pauses the game action
 			} else {
@@ -68,13 +71,43 @@ public class GameManager : MonoBehaviour {
 				UIGamePaused.SetActive(false); // remove the pause UI
 			}
 		}
-
-		if (Input.GetButtonDown ("Submit")) {
-			print ("submit  "+_resetObjPos[0]  );
+		if (Input.GetKey (KeyCode.W)) {
+			//			
+			Cursor.visible=true;
+			Cursor.lockState=CursorLockMode.None ;
 		}
+		if (Input.GetKeyDown(KeyCode.A)) {
+			Debug.LogWarning("key A!");
+			GetComponent<SeedBeatMap>().LoadJsonAndPlay();
+		}
+		if (!preloaded) {
+			UIGameLoading.SetActive(true); // this brings up the pause UI
 
+			if (TerrainManager.MapObjs.Length > 0) {
+				int numComplete = 0;
+				foreach(GameObject  b in TerrainManager.MapObjs ){
+					if (b.GetComponent<drawJterrain>().complete ) {
+						numComplete++;	
+					}
+				}
+				UIPreLoad.text = "ELE Data Loading: " + numComplete + "/" + TerrainManager.MapObjs.Length;
+				if (numComplete<TerrainManager.MapObjs.Length ) {
+					preloaded = false;
+				} else {
+					preloaded = true;
+
+					Invoke ("INactiveLoading", 3 );
+
+				}
+
+			}
+		}
 	}
-
+	void INactiveLoading(){
+		UIGameLoading.SetActive(false); // this brings up the pause UI
+		Debug.LogWarning("preload ok!");
+		GetComponent<SeedBeatMap>().LoadJsonAndPlay();
+	}
 	// setup all the variables, the UI, and provide errors if things not setup properly.
 	void setupDefaults() {
 		// setup reference to player
@@ -85,13 +118,13 @@ public class GameManager : MonoBehaviour {
 			Debug.LogError("Player not found in Game Manager");
 
 		// get current scene
-		_scene = SceneManager.GetActiveScene();
+		//_scene = SceneManager.GetActiveScene();
 
 		// get initial _spawnLocation based on initial position of player
 		_startPos  = _player.transform.position;
-
-
-		print ("set _startPos=" + _startPos);		//setupResets ();
+//
+//
+//		print ("set _startPos=" + _startPos);		//setupResets ();
 		// if levels not specified, default to current level
 //		if (levelAfterVictory=="") {
 //			Debug.LogWarning("levelAfterVictory not specified, defaulted to current level");
@@ -139,16 +172,17 @@ public class GameManager : MonoBehaviour {
 		//UIScore.text = "Score: "+score.ToString();
 		UIScore.text = "Score: "+score.ToString()+"//"+fullPoint;
 		UIHighScore.text = "Highscore: "+highscore.ToString ();
-		UILevel.text = BeatAnalysisManager._audio.clip.name;
-		
-		// turn on the appropriate number of life indicators in the UI based on the number of lives left
-		for(int i=0;i<UIExtraLives.Length;i++) {
-			if (i<(lives-1)) { // show one less than the number of lives since you only typically show lifes after the current life in UI
-				UIExtraLives[i].SetActive(true);
-			} else {
-				UIExtraLives[i].SetActive(false);
-			}
+		if (BeatAnalysisManager._audio!=null ) {
+			UILevel.text = BeatAnalysisManager._audio.clip.name;
 		}
+		// turn on the appropriate number of life indicators in the UI based on the number of lives left
+//		for(int i=0;i<UIExtraLives.Length;i++) {
+//			if (i<(lives-1)) { // show one less than the number of lives since you only typically show lifes after the current life in UI
+//				UIExtraLives[i].SetActive(true);
+//			} else {
+//				UIExtraLives[i].SetActive(false);
+//			}
+//		}
 	}
 
 	// public function to add points and update the gui and highscore player prefs accordingly
@@ -225,29 +259,29 @@ public class GameManager : MonoBehaviour {
 		SceneManager.LoadScene(levelAfterVictory);
 	}
 
-	public void AddHeart()
-	{
-		lives++;
-		refreshGUI();
-	}
+//	public void AddHeart()
+//	{
+//		lives++;
+//		refreshGUI();
+//	}
 
 //	public void checkpoint(Vector3 pos)
 //	{
 //		_spawnLocation = pos;
 //	}
-	void setupResets()
-	{
-		//save the obj position which need reset
-		if (_resetObj.Length != 0) 
-		{
-			_resetObjPos=new Vector3[_resetObj.Length];
-			for (int i = 0; i < _resetObj.Length; i++) {
-				_resetObjPos [i] = _resetObj [i].transform.position;
-				print ("set-"+ _resetObj [i].name+"//"+_resetObjPos [i]+"///"+_resetObjPos.Length );
-			}
-
-		}
-	}
+//	void setupResets()
+//	{
+//		//save the obj position which need reset
+//		if (_resetObj.Length != 0) 
+//		{
+//			_resetObjPos=new Vector3[_resetObj.Length];
+//			for (int i = 0; i < _resetObj.Length; i++) {
+//				_resetObjPos [i] = _resetObj [i].transform.position;
+//				print ("set-"+ _resetObj [i].name+"//"+_resetObjPos [i]+"///"+_resetObjPos.Length );
+//			}
+//
+//		}
+//	}
 //	void ResetObjs()
 //	{
 //		_resetObj [0].transform.position = _lavaLocation;

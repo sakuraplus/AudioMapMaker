@@ -11,9 +11,9 @@ public class CharacterControllerSeed : MonoBehaviour {
 	private float yRot ;//鼠标控制时，存xy角度
 	private float xRot ;
 	[SerializeField ]
-	private float xSensitivity = 2f;//鼠标控制，xy灵敏度
+	private float xSensitivity = 1f;//鼠标控制，xy灵敏度
 	[SerializeField ]
-	private float ySensitivity = 2f;
+	private float ySensitivity = 1f;
 	[SerializeField ]
 	private Quaternion m_CharacterTargetRot;//鼠标/加速度控制，保存target角度
 
@@ -148,7 +148,15 @@ public class CharacterControllerSeed : MonoBehaviour {
 
 	}
 	//bool onground=false;
+	public void resetPlayerPos(){
+		RaycastHit hit;
 
+		if( Physics.Raycast (TargetObj.transform.position ,Vector3.down ,out hit  )||Physics.Raycast (TargetObj.transform.position ,Vector3.up ,out hit  ))
+		{	//LayerMask.NameToLayer("Ground")
+			Debug.LogWarning ("resetPlayerPos>>"+TargetObj.transform.position+"//"+hit.point );
+			TargetObj.transform.position =hit.point+new Vector3(0, maxHeight,0);
+		}
+	}
 	bool gameover=false;
 	void targetMove()
 	{
@@ -265,34 +273,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 		TargetObj.transform.localRotation =targetrot;
 	}
 
-	//	Vector3 lastAcc=Vector3.zero;
-	//	public void LookRotationAcc(Vector3 gy)
-	//	{
-	//		
-	//		xRot = Mathf.Abs (gy.y+1) * YSensitivity;
-	//		if (gy.z > 0) {
-	//			xRot *= -1;
-	//		} 
-	//		if (Mathf.Abs (gy.x) > Mathf.Abs(lastAcc.x)||Mathf.Abs (gy.x)>0.5) {
-	//			yRot = (gy.x) * XSensitivity;
-	//		} else {
-	//			yRot = 0;
-	//		}
-	//		lastAcc = gy;
-	//		tttt.text =st+"\nAcc    "+ gy+"xy="+yRot+","+xRot ;
-	//
-	//		m_CharacterTargetRot *= Quaternion.Euler (0, yRot, 0f);
-	//
-	//		if(clampVerticalRotation)
-	//		{
-	//			m_CharacterTargetRot = ClampRotationAroundXAxis (m_CharacterTargetRot);
-	//		}
-	//
-	//		TargetObj.transform.localRotation  = m_CharacterTargetRot;
-	//		TargetObj.transform.RotateAround (TargetObj.transform.position, TargetObj.transform.right,Mathf.LerpAngle ( 0,xRot,0.2f));// ;
-	//	}
-	//
-	//
+
 
 	#region [math]
 	private Quaternion cameraBase = Quaternion.identity;
@@ -301,10 +282,11 @@ public class CharacterControllerSeed : MonoBehaviour {
 	private Quaternion baseOrientationRotationFix = Quaternion.identity;
 
 	Quaternion baseIdentity = Quaternion.Euler(90, 0, 0);
+	#if UNITY_STANDALONE || UNITY_WEBGL 
 	Quaternion landscapeRight = Quaternion.Euler(0, 0, 90);
 	Quaternion landscapeLeft = Quaternion.Euler(0, 0, -90);
 	Quaternion upsideDown = Quaternion.Euler(0, 0, 180);
-
+	#endif 
 
 	private Quaternion referanceRotation = Quaternion.identity;
 
@@ -397,7 +379,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 	/// </returns>
 	private Quaternion GetRotFix()
 	{
-		#if UNITY_3_5
+		#if UNITY_STANDALONE || UNITY_WEBGL 
 		if (Screen.orientation == ScreenOrientation.Portrait)
 		return Quaternion.identity;
 
@@ -456,3 +438,33 @@ public class CharacterControllerSeed : MonoBehaviour {
 	}
 	#endregion
 }
+
+
+//	Vector3 lastAcc=Vector3.zero;
+//	public void LookRotationAcc(Vector3 gy)
+//	{
+//		
+//		xRot = Mathf.Abs (gy.y+1) * YSensitivity;
+//		if (gy.z > 0) {
+//			xRot *= -1;
+//		} 
+//		if (Mathf.Abs (gy.x) > Mathf.Abs(lastAcc.x)||Mathf.Abs (gy.x)>0.5) {
+//			yRot = (gy.x) * XSensitivity;
+//		} else {
+//			yRot = 0;
+//		}
+//		lastAcc = gy;
+//		tttt.text =st+"\nAcc    "+ gy+"xy="+yRot+","+xRot ;
+//
+//		m_CharacterTargetRot *= Quaternion.Euler (0, yRot, 0f);
+//
+//		if(clampVerticalRotation)
+//		{
+//			m_CharacterTargetRot = ClampRotationAroundXAxis (m_CharacterTargetRot);
+//		}
+//
+//		TargetObj.transform.localRotation  = m_CharacterTargetRot;
+//		TargetObj.transform.RotateAround (TargetObj.transform.position, TargetObj.transform.right,Mathf.LerpAngle ( 0,xRot,0.2f));// ;
+//	}
+//
+//

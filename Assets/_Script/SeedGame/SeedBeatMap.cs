@@ -70,24 +70,23 @@ public class SeedBeatMap : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetKey (KeyCode.A )) {
-			//*******************************
-			LoadJsonAndPlay();
-			//**********************
-
-		}
-		if (Input.GetKey (KeyCode.W)) {
+//		if (Input.GetKey (KeyCode.A )) {
+//
+//			LoadJsonAndPlay();
+//	
+//		}
+//		if (Input.GetKey (KeyCode.W)) {
 //			
-			Cursor.visible=true;
-			Cursor.lockState=CursorLockMode.None ;
-		}
+//			Cursor.visible=true;
+//			Cursor.lockState=CursorLockMode.None ;
+//		}
 		if (!playmap) {
 			return;
 		}
 		PlayBeatMap  ();
 
-//		if(Input.GetKeyDown( KeyCode.Z ) ||beatmapauto){
-		CheckBeatMap();
+
+		//CheckBeatMap();
 
 		if (!_audio.isPlaying) {
 			playmap = false;
@@ -96,7 +95,6 @@ public class SeedBeatMap : MonoBehaviour {
 			CCS.canmove = false;
 			Cursor.visible=true;
 			Cursor.lockState=CursorLockMode.None ;
-		//	GetComponent<GameManager> ().
 			GameManager.gm. LevelCompete ();
 
 		}
@@ -185,6 +183,8 @@ public class SeedBeatMap : MonoBehaviour {
 		CharacterControllerSeed   CCS = FindObjectOfType<CharacterControllerSeed > ();
 		CCS.canmove  = true;//.onBeat.AddListener  (onOnbeatDetected);
 		CCS.startFall=  false ;
+		CCS.resetPlayerPos ();
+		Debug.LogWarning ("LoadJsonAndPlay count="+BeatAnalysisManager.BAL.Count);
 	}
 	void load(string jsonstr) {  
 		savedBeatMap  smdread = JsonUtility.FromJson<savedBeatMap> (jsonstr);
@@ -216,6 +216,7 @@ public class SeedBeatMap : MonoBehaviour {
 			Debug.Log ("playmap ");
 	//	}
 	}
+	float ToseedModeDegree=0.5f;
 	public  void beatmapToseedMode()
 	{
 		Debug.Log ("to seed mode" + BeatAnalysisManager.BAL.Count); 
@@ -223,7 +224,8 @@ public class SeedBeatMap : MonoBehaviour {
 			
 			for (int j =  BeatAnalysisManager.BAL.Count-1; j >i; j--) {
 
-				if (Mathf.Abs (BeatAnalysisManager.BAL[j].playtime - BeatAnalysisManager.BAL[i].playtime)<0.1f && (BeatAnalysisManager.BAL[j].BeatPos !=BeatAnalysisManager.BAL[i].BeatPos) ) {
+				//if (Mathf.Abs (BeatAnalysisManager.BAL[j].playtime - BeatAnalysisManager.BAL[i].playtime)<ToseedModeDegree && (BeatAnalysisManager.BAL[j].BeatPos !=BeatAnalysisManager.BAL[i].BeatPos) ) {
+				if (Mathf.Abs (BeatAnalysisManager.BAL[j].playtime - BeatAnalysisManager.BAL[i].playtime)<ToseedModeDegree ){ 
 					BeatAnalysisManager.BAL.RemoveAt (j);// (BeatAnalysisManager.BAL[j].playtime);
 					BeatAnalysisManager.BAL[i].Average ++;
 				} 
@@ -291,7 +293,8 @@ public class SeedBeatMap : MonoBehaviour {
 			if (TarPos != Vector3.zero ) {
 				beat.GetComponent<Beat> ().TargPos = TarPos;
 				Vector3 stPos = nextSeedStartPos (TarPos);// nextSeedPosS (MD,0);
-				beat.transform.position = stPos;//TarPos;
+				beat.transform.position =TarPos;// stPos;//;
+				beat.transform.localScale =new Vector3(0.2f,0.2f,0.2f) ;
 				beat.GetComponent<Beat> ().StartPos = stPos;
 			}
 			//Debug.LogError ("!");
@@ -343,9 +346,6 @@ public class SeedBeatMap : MonoBehaviour {
 			R += speed * offset / 100;
 		}
 		//R = 1;
-	//	float charA = 0;
-		Vector3 charAxis = charPos.forward;
-
 
 		//**
 		List<int> targetVecSInds=new List<int> ();
@@ -353,7 +353,10 @@ public class SeedBeatMap : MonoBehaviour {
 		string sttt=">>>";
 		for(int i=0;i<targetposS.Length;i++){
 			targetVecS [i].x =targetposS [i].transform.position.x - charPos.position.x;//targetDri[i];
-			targetVecS [i].y =0-offsetY+targetposS [i].transform.position.y - charPos.position.y;;//0;//offsetY+Random.Range(-0.5f,0.5f)-charPos.position.y;//targetposS [i].transform.position.y - charPos.position.y;
+			targetVecS [i].y =0;//
+			//targetVecS [i].y=offsetY+Random.Range(-0.5f,0.5f)-charPos.position.y;//
+			//targetVecS [i].y=0-offsetY+targetposS [i].transform.position.y - charPos.position.y;
+			//targetVecS [i].y=targetposS [i].transform.position.y - charPos.position.y;
 			targetVecS [i].z = targetposS [i].transform.position.z - charPos.position.z;
 			sttt+=targetVecS[i]+",";
 
@@ -369,11 +372,14 @@ public class SeedBeatMap : MonoBehaviour {
 			if (Physics.Raycast (targetVecS [i], Vector3.down, out hit)) {
 				//on ground
 				if (hit.collider.tag == "Ground") {
-					Debug.LogWarning ("add " + i+">>"+targetVecS [i].y+","+hit.point.y);
+					//Debug.LogWarning ("add " + i+">>"+targetVecS [i].y+","+hit.point.y);
 					targetVecS [i].y = Mathf.Min  (targetVecS [i].y, hit.point.y + maxHeight);
 				
+					if (hit.distance < maxHeight / 2) {
+						targetVecS [i].y += hit.distance / 3;
+					}
 					targetVecSInds.Add (i);
-					goo [i].transform.position = targetVecS [i];
+					//goo [i].transform.position = targetVecS [i];
 				}
 			} else {
 				//Debug.Log ("---underground  "+targetVecS[i]);
@@ -385,11 +391,11 @@ public class SeedBeatMap : MonoBehaviour {
 		if (targetVecSInds.Count > 0) {
 			int ind = Mathf.FloorToInt (Random.Range (0, targetVecSInds.Count));
 			ind = targetVecSInds [ind];
-//			Debug.Log (sttt);
-			Vector3 newpos = charPos.transform.position + targetVecS [ind];
+			Debug.Log (sttt);
+
 			return targetVecS [ind];
 		} else {
-			Debug.LogWarning ("no! "+targetVecSInds.Count );
+			//Debug.LogWarning ("no! "+targetVecSInds.Count );
 			return Vector3.zero;
 		}
 	}
@@ -479,16 +485,14 @@ public class SeedBeatMap : MonoBehaviour {
 		int ic=BeatMapContainer.transform.childCount ;
 		for (int i = 0; i < ic; i++) {
 			GameObject  b = BeatMapContainer.transform.GetChild (i).gameObject ; //<Beat> ();
-			if (b.GetComponent<Beat> ().Beattime<_audio.time*1.2f) {
+			//if (b.GetComponent<Beat> ().Beattime<_audio.time*1.2f) {
 			//	b.transform.localScale = new Vector3 (0.5f, 0.4f, 0.4f);
 					
-			}
+			//}
 			if (b.GetComponent<Beat> ().CheckState||(b.GetComponent<Beat> ().Beattime<_audio.time-killtime )) {
-				//b.transform.localScale = new Vector3 (4, 4, 4);
-			//	Debug.Log (_audio.time +"///"+ b.GetComponent<Beat> ().Destorytime+">  "+(_audio.time -b.GetComponent<Beat> ().Destorytime ));
-			//	_audio.PlayOneShot (b.GetComponent<Beat> ().AC);
+				Debug.Log ("dest Beat>"+(360-b.GetComponent<Beat> ().timerRot )+ ">bt=" + b.GetComponent<Beat> ().Beattime+"A-b="+(_audio.time-b.GetComponent<Beat> ().Beattime));
 				b.GetComponent<Beat> ().CheckState = false;
-				Destroy (b );		
+				//Destroy (b );		
 			}
 		}
 				

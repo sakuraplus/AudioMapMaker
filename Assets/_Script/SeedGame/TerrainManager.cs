@@ -301,36 +301,7 @@ public class TerrainManager : MonoBehaviour {
 
 
 
-//	public void Trimlatlng()
-//	{
-//		Vector2 vecnorthwest;
-//		Vector2 vecsoutheast;
-//		vecnorthwest.y = Mathf.Max (lat, endlat);
-//		vecsoutheast.y = Mathf.Min (lat, endlat);
-//		//if (Mathf.Sign (lng) == Mathf.Sign (endlng)) 
-//		if(Math.Abs (endlng - lng) < 180){
-//			// 内角不跨+-180度则经度小的为西侧
-//			vecnorthwest.x = Mathf.Min (lng, endlng);
-//			vecsoutheast.x = Mathf.Max (lng, endlng);
-//		} else if(Math.Abs (endlng - lng) ==180){
-//			if (lat > endlat) {
-//				vecnorthwest.x = lng;
-//				vecsoutheast.x = endlng;
-//			} else {
-//				vecnorthwest.x = endlng;
-//				vecsoutheast.x = lng;
-//			}
-//		}else {
-//			//内角跨+-180度，经度为负的为东侧
-//			vecnorthwest.x = Mathf.Max  (lng, endlng);
-//			vecsoutheast.x = Mathf.Min  (lng, endlng);
-//		}
-//		lat = vecnorthwest.y;
-//		lng = vecnorthwest.x;
-//		endlat = vecsoutheast.y;
-//		endlng = vecsoutheast.x;
-//		//	Debug.Log ("trim" + lat + "," + lng + "|" + endlat + "," + endlng);
-//	}
+
 
 	/// <summary>
 	/// Calculates the size of the mesh.
@@ -563,4 +534,33 @@ public class TerrainManager : MonoBehaviour {
 //
 //	}
 //
-
+//	public void Trimlatlng()
+//	{
+//		Vector2 vecnorthwest;
+//		Vector2 vecsoutheast;
+//		vecnorthwest.y = Mathf.Max (lat, endlat);
+//		vecsoutheast.y = Mathf.Min (lat, endlat);
+//		//if (Mathf.Sign (lng) == Mathf.Sign (endlng)) 
+//		if(Math.Abs (endlng - lng) < 180){
+//			// 内角不跨+-180度则经度小的为西侧
+//			vecnorthwest.x = Mathf.Min (lng, endlng);
+//			vecsoutheast.x = Mathf.Max (lng, endlng);
+//		} else if(Math.Abs (endlng - lng) ==180){
+//			if (lat > endlat) {
+//				vecnorthwest.x = lng;
+//				vecsoutheast.x = endlng;
+//			} else {
+//				vecnorthwest.x = endlng;
+//				vecsoutheast.x = lng;
+//			}
+//		}else {
+//			//内角跨+-180度，经度为负的为东侧
+//			vecnorthwest.x = Mathf.Max  (lng, endlng);
+//			vecsoutheast.x = Mathf.Min  (lng, endlng);
+//		}
+//		lat = vecnorthwest.y;
+//		lng = vecnorthwest.x;
+//		endlat = vecsoutheast.y;
+//		endlng = vecsoutheast.x;
+//		//	Debug.Log ("trim" + lat + "," + lng + "|" + endlat + "," + endlng);
+//	}

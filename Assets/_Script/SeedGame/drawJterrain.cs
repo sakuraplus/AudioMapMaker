@@ -45,16 +45,6 @@ public class drawJterrain : MonoBehaviour {
 	Vector2Int segment=new Vector2Int(3,3);//每块分段数量
 
 
-
-
-
-	// private Vector3[] vtest;///////////////////////////
-	//	[SerializeField ]
-	//	float sizelat=100;
-	//	[SerializeField]
-	//	float  sizelng=100;
-	//	float additionheight=1;
-
 	public Material diffuseMap;
 	public Color  meshcolor;
 	/// <summary>
@@ -66,6 +56,9 @@ public class drawJterrain : MonoBehaviour {
 	/// 绘制mesh，uv顶点数据.
 	/// </summary>
 	private Vector2[] uvs;
+	/// <summary>
+	/// 转换为6点数据，用于计算法线及颜色The uvs6.
+	/// </summary>
 	private Vector2[] uvs6;
 	/// <summary>
 	/// 绘制mesh，三角面数据
@@ -79,9 +72,7 @@ public class drawJterrain : MonoBehaviour {
 	List<int> errorSamples = new List<int> ();
 
 
-	//private GameObject terrain;
-	[SerializeField]
-	Texture2D mapTexture;
+
 
 	void xxx(Color c){
 		Debug.Log ("xxxxxxxxxxxxxxxxxx-"+c);
@@ -150,15 +141,15 @@ public class drawJterrain : MonoBehaviour {
 			StartCoroutine(LoadJsonBingLng(northwestlng));//按精度取值，差值为南北方向
 			break;
 		case(datasource.random):
-//			syncMainEdge ();//同步边界
+
 			fakeloadjson ();//随机地形
-//			DrawMesh ();
-//		
+		
 			testsampleError ();//随机增加错误数据
 			sampleLerp ();//修正错误数据
 			syncMainEdge ();//同步边界
-			syncMainVertives();//更新main数据
+			syncMainVertives ();//更新main数据
 			DrawMesh ();
+			complete = true;
 			break;
 		case(datasource.test):
 			break;
@@ -245,7 +236,7 @@ public class drawJterrain : MonoBehaviour {
 		}
 
 		errorSamples.Clear ();
-		Debug.LogWarning (stlerp);
+	//	Debug.LogWarning (stlerp);
 
 	}
 
@@ -326,7 +317,7 @@ public class drawJterrain : MonoBehaviour {
 			}
 			stvG+="\n";
 		}
-		Debug.Log (Trrname +synct+"\n"+ stvG );
+		//Debug.Log (Trrname +synct+"\n"+ stvG );
 	}
 	/// <summary>
 	/// 更新main。vertives.
@@ -348,7 +339,7 @@ public class drawJterrain : MonoBehaviour {
 			}
 			stvG+="\n";
 		}
-		Debug.Log (Trrname + stvG );
+		//Debug.Log (Trrname + stvG );
 	}
 	 
 
@@ -384,7 +375,7 @@ public class drawJterrain : MonoBehaviour {
 		for (int i = 0; i <= segment.y; i++) {
 			for (int j = 0; j <= segment.x ; j++) {
 				int ind = i * (int)(segment.x + 1) + j;
-				float a=UnityEngine. Random.Range(0f,30);
+				float a=UnityEngine. Random.Range(0f,200*TerrainManager.MeshSize.y);
 				//(i % 2 + j % 3)*5;
 				vertives [ind].y =a; //(i % 2 + j % 3)*5;//Vpos.x +0.1f*Vpos.y;// // Mathf.Floor (centerlat)*0.01f + Mathf.Floor (centerlng) * 0.00001f;// Vpos.x +0.1f*Vpos.y  ;
 				vertives [ind].x =j * TerrainManager.MeshSize.x / segment.x;
@@ -408,11 +399,12 @@ public class drawJterrain : MonoBehaviour {
 		{
 			/////////////////(indVertives*(segment.y+1) >= vertives.Length)		
 			Debug.Log (Trrname + "Data complete!!!!!!!"+tempstr );
-			complete = true;
+
 			sampleLerp ();//修正错误数据
 			syncMainEdge ();//同步边界
 			syncMainVertives();//更新main数据
 			DrawMesh();
+			complete = true;
 			yield break;
 		}
 
@@ -488,11 +480,12 @@ public class drawJterrain : MonoBehaviour {
 		{
 			/////////////////(indVertives*(segment.y+1) >= vertives.Length)		
 			Debug.Log (Trrname + "Data complete!!!!!!!"+tempstr );
-			complete = true;
+
 			sampleLerp ();//修正错误数据
 			syncMainEdge ();//同步边界
 			syncMainVertives();//更新main数据
 			DrawMesh();
+			complete = true;
 			yield break;
 		}
 		//https://dev.virtualearth.net/REST/v1/Elevation/Polyline?points=30,60,30,65&heights=ellipsoid&samples=3&key=Alx3lnaKPAchj200vPlB4UXk2UY6JXCm2FNO8LzAzjrftFyzS_2fJGmR_nii9VL_
@@ -753,9 +746,9 @@ public class drawJterrain : MonoBehaviour {
 			stg += _triangles [i]+",";
 			stn += _normals [i];
 		}
-		Debug.Log (stt);
-		Debug.Log (stg);
-		Debug.Log (stn);
+		//Debug.Log (stt);
+		//Debug.Log (stg);
+		//Debug.Log (stn);
 		//*****************
 		if (gameObject.GetComponent <MeshFilter> () == null) {
 			mesh = gameObject.AddComponent<MeshFilter> ().mesh;
@@ -784,16 +777,13 @@ public class drawJterrain : MonoBehaviour {
 
 	private void DrawTexture(){
 
-		gameObject .AddComponent<MeshRenderer>();
-
+		if (!gameObject.GetComponent <MeshRenderer> ()) {
+			gameObject.AddComponent<MeshRenderer> ();
+		}
 
 		if (diffuseMap == null)
 		{
 			diffuseMap = new Material(Shader.Find("Standard"));
-			if(mapTexture!=null){
-				diffuseMap.SetTexture ("_MainTex",mapTexture);
-			}
-
 		}
 		gameObject .GetComponent<Renderer>().material = diffuseMap;
 	}
@@ -881,15 +871,7 @@ public class drawJterrain : MonoBehaviour {
 		_colors  = new Color[sum];// new Color[vertives.Length ];//
 		vertives6=new Vector3[sum]; 
 		uvs6=new Vector2[sum] ;
-		//*********************
-		var noiseOffset = new Vector2(UnityEngine. Random.Range(0f, 100f), UnityEngine.Random.Range(0f, 100f));
 
-		//int xSegments = Mathf.FloorToInt(config.terrainSize.x/config.cellSize);
-		//int zSegments = Mathf.FloorToInt(config.terrainSize.z/config.cellSize);
-
-		float xStep = TerrainManager.MeshSize.x / segment.x;// meshs/xSegments;
-		float zStep = TerrainManager.MeshSize.z / segment.y;//config.terrainSize.z/zSegments;
-		//******************
 		int index = 0;
 		for (int i = 0; i < segment.y; i++)
 		{
@@ -904,10 +886,6 @@ public class drawJterrain : MonoBehaviour {
 				int index4 = index + 4;
 				int index5 = index + 5;
 				//*****
-
-				int role = Mathf.FloorToInt(segment.x) + 1;
-				int self = j +( i*role);                
-				int next = j + ((i+1) * role);
 
 				_triangles [index] = index;// self;
 				_triangles[index1] =index1;// next + 1;
@@ -945,14 +923,14 @@ public class drawJterrain : MonoBehaviour {
 				uvs6[index4] = uv11;
 				uvs6[index5] = uv10;
 
-				if(meshcolor!=null ){
+			//	if(meshcolor!=null ){
 				_colors [index] =meshcolor ;//new Color (0.5f, 0.5f, 0.2f);//
 				_colors[index1] =meshcolor ;//new Color (0.5f, 0.4f, 0.2f); //TerrainManager.gradient.Evaluate(height01);
 				_colors[index2] =meshcolor;// new Color (0.4f, 0.5f, 0.2f);//TerrainManager.gradient.Evaluate(height11);
 				_colors[index3] =meshcolor;//new Color (0.5f, 0.5f, 0.2f);// TerrainManager.gradient.Evaluate(height00);
 				_colors[index4] =meshcolor; //new Color (0.5f, 0.4f, 0.2f);//TerrainManager.gradient.Evaluate(height11);
 				_colors[index5] =meshcolor;// new Color (0.4f, 0.5f, 0.2f); //TerrainManager.gradient.Evaluate(height10);
-				}
+			//	}
 
 				_normals [index] =normal000111;// new Vector3 (0,0.5f,0);// normal000111;
 				_normals[index1] =normal000111;// new Vector3 (0,0.5f,0);//normal000111;

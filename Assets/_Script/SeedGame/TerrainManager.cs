@@ -149,7 +149,7 @@ public class TerrainManager : MonoBehaviour {
 	/// The distance earth lat.单位距离,1000000m
 	/// </summary>
 	//public  static 
-	const  float distanceEarthLat=400000;
+	const  float distanceEarthLat=300000;
 	[SerializeField]
 	bool _havelicense=false;
 

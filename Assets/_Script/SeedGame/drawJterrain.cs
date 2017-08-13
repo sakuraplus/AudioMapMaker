@@ -77,7 +77,7 @@ public class drawJterrain : MonoBehaviour {
 	void xxx(Color c){
 		Debug.Log ("xxxxxxxxxxxxxxxxxx-"+c);
 	}
-
+	Color basemeshcolor;
 	public void initTrr( string _Trrname,Vector2Int _segment, Material _matTrr, Color _colTrr)
 	{
 		  edgeUp = false;
@@ -87,6 +87,7 @@ public class drawJterrain : MonoBehaviour {
 
 		diffuseMap = _matTrr;
 		meshcolor = _colTrr;
+		basemeshcolor = _colTrr;
 		Trrname = _Trrname;
 		segment=_segment;
 		int leng = ((int)segment.x + 1) * ((int)segment.y + 1);
@@ -122,6 +123,9 @@ public class drawJterrain : MonoBehaviour {
 		southeastlng = trimLng (southeastlng);
 		if (centerlat > 82 || centerlat < -82) {
 			outof85 = true;
+			meshcolor = new Color (basemeshcolor.r / 2, basemeshcolor.g / 2, basemeshcolor.b / 2); 
+		} else {
+			meshcolor = basemeshcolor;
 		}
 //		Debug.Log ("*2new"+Trrname+" pos="+northwestlat+","+northwestlng+"/"+southeastlat+","+southeastlng+" size="+main.MeshSize  );
 
@@ -778,8 +782,8 @@ public class drawJterrain : MonoBehaviour {
 			gameObject.AddComponent<MeshCollider> ();
 		}
 		gameObject.GetComponent<MeshCollider> ().sharedMesh = mesh;
-		gameObject.GetComponent<MeshCollider> ().convex = true;
-
+		gameObject.GetComponent<MeshCollider> ().convex = false;
+		//*******************
 
 		if (!gameObject.GetComponent<BoxCollider > ()) {
 			gameObject.AddComponent<BoxCollider> ();

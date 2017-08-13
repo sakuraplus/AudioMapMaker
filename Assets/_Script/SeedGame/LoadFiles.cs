@@ -11,9 +11,12 @@ public class LoadFiles : MonoBehaviour {
 	//private static extern void ImageUploaderInit();
 	private static extern void ImageUploaderCaptureClick();
 
-	//public  Text tt;	
-	//public  Text txtt;
-	//public  GameObject  go;
+	public  Text txtFile;	
+
+	public  GameObject  panelAnalysis;
+	public  GameObject  PanelExample;
+	public  GameObject  PanelStart;
+	public  GameObject  PanelOpenfile;
 	AudioSource aus;
 	WWW www;
 	string  filepath;
@@ -25,17 +28,17 @@ public class LoadFiles : MonoBehaviour {
 		//tt.text += " > ";
 		//ImageUploaderInit ();
 		aus=BeatAnalysisManager._audio ;//<AudioSource>();
+		if (BeatAnalysisManager.BAL.Count > 0) {
+			txtFile.text = "You have an analysised music. Start and play.";
+		}
+		#if UNITY_WEBGL 
+		PanelOpenfile.SetActive(false) ;
+		#endif 
 	}
 	/// <summary>
 	///  测试
 	/// </summary>
-//	public void Update(){
-//		if (www != null) {
-//			if (www.progress < 1) {
-//				txtt.text = www.bytesDownloaded + ">>" + www.progress + "<<" + Time.realtimeSinceStartup;
-//			}
-//		}
-//	}
+
 
 	#if UNITY_WEBGL 
 	/// <summary>
@@ -43,7 +46,7 @@ public class LoadFiles : MonoBehaviour {
 	/// </summary>
 	/// <param name="url">URL.</param>
 	public  void FileSelected (string url) {
-		tt.text += " s ";
+//		tt.text += " s ";
 		StartCoroutine(LoadMusic (url));
 	}
 	#endif 
@@ -142,6 +145,7 @@ public class LoadFiles : MonoBehaviour {
 	/// Raises the button pointer down event.
 	/// </summary>
 	public void BtnPointerDown () {
+		
 		//tt.text+= ">";
 		#if UNITY_STANDALONE
 		PCopenDialog();
@@ -158,7 +162,7 @@ public class LoadFiles : MonoBehaviour {
 	public void PCopenDialog(){
 		OpenFileName ofn = new OpenFileName();
 		ofn.structSize = Marshal.SizeOf(ofn);
-		ofn.filter = "*.wav|*.ogg";//"All Files\0*.*\0\0";
+		ofn.filter = "All Files\0*.*\0\0";//"*.wav|*.ogg";//
 		ofn.file = new string(new char[256]);
 		ofn.maxFile = ofn.file.Length;
 
@@ -168,7 +172,7 @@ public class LoadFiles : MonoBehaviour {
 
 		ofn.initialDir =UnityEngine.Application.dataPath;//默认路径
 
-		ofn.title = "Open Project";
+		ofn.title = "Music List";
 
 		ofn.defExt = "wav";//显示文件的类型
 		//注意 一下项目不一定要全选 但是0x00000008项不要缺少
@@ -179,6 +183,17 @@ public class LoadFiles : MonoBehaviour {
 			//StartCoroutine(WaitLoad(ofn.file));//加载图片到panle
 			StartCoroutine(LoadMusic("file://"+ofn.file));//加载图片到panle
 			Debug.Log( "Selected file with full path: {0}"+ofn.file );
+			txtFile.text = ("Selected file with full path:" + ofn.file);
+			if (panelAnalysis) {
+				panelAnalysis.SetActive (true);
+			}
+			if (PanelStart) {
+				PanelStart.SetActive (true);
+			}
+			if (PanelExample) {
+				PanelExample.SetActive (false);
+			}
+
 		}
 
 	}
@@ -189,19 +204,28 @@ public class LoadFiles : MonoBehaviour {
 	{
 		// start new game so initialize player state
 		//PlayerPrefManager.ResetPlayerState(startLives,false);
-
+		if (BeatAnalysisManager.BAL.Count < 1) {
+			txtFile .text="There is no Data of beatmap,Try load and analysis a music file, or load an example music.";
+			return;
+		}
+		Debug.LogError ("LOC="+TerrainManager.lat+","+TerrainManager.lng);
 		// load the specified level
 		BeatAnalysisManager._audio=aus;
 		BeatAnalysisManager.playtime = aus.clip.length;
 		BeatAnalysisManager.defaultAudioclip = aus.clip;
 		SceneManager.LoadScene(levelToLoad);
 	}
-
+	public void BtnMainMenu(string levelToLoad)
+	{
+		
+		SceneManager.LoadScene(levelToLoad);
+	}
 	public void BtnPlayMusic(){
 		//tt.text = www.bytesDownloaded+","+tt.text;
 		if (aus.clip != null) {
 			aus.Play ();
 		}
+
 	}
 	public void BtnStopMusic(){
 		//tt.text = www.bytesDownloaded+","+tt.text;
@@ -210,7 +234,12 @@ public class LoadFiles : MonoBehaviour {
 		}
 	}
 	public void BtnDefaultMusic(AudioClip acdefault){
-		
+		if (panelAnalysis) {
+			panelAnalysis.SetActive (false);
+		}
+		if (PanelExample) {
+			PanelExample.SetActive (true);
+		}
 		aus.clip=acdefault;
 
 	}

@@ -110,8 +110,9 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 	{  
 		//因为在异步读取场景，  
 		//所以这里我们可以刷新UI  
-		TxTProcess.text="processing  "+processbar+" %"; 
-
+		if (TxTProcess) {
+			TxTProcess.text = processbar; 
+		}
 	}  
 
 	#endif
@@ -119,6 +120,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 	//Thread thDataProcess;
 	public void Btnseparatedata()
 	{
+		processbar = "";
 		//BeatAnalysisManager.MAL.Clear ();//初始化mal
 		ParaInit ();
 		_sampletime=_audio.clip.frequency/ BeatAnalysisManager.samplePerSecond ;
@@ -139,12 +141,12 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 
 	}
 	void dataProcessWithThread(){
-		print ("DPWT-in thread");
+		//print ("DPWT-in thread");
 		DataProcess (_sampletime,_SpecSize);
-		print ("DPWT-in thread-p2");
+		//print ("DPWT-in thread-p2");
 		StartAnaBeat();
 
-		print ("DWT-end thread"+processbar);
+		//print ("DWT-end thread"+processbar);
 	}
 
 
@@ -176,11 +178,11 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 		}
 		Debug.LogWarning  ("GetMusicData length="+samples.Length );
 		if (TxTProcess != null) {
-			TxTProcess.text="processing  5 %";
+			processbar="processing  5 %";
 		}
 	}
 	[SerializeField ]
-	int processbar=0;
+	string processbar="";
 
 	#if UNITY_WEBGL 
 	/// <summary>
@@ -199,7 +201,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 		}
 		DataProcessWithUpdate (_sampletime, processIndex, _SpecSize);
 		processIndex++;
-		processbar = Mathf.Min ( Mathf.RoundToInt  ( 90f*processIndex / NumOfFrame)+ 10, 100);
+		processbar = Mathf.Min ( Mathf.RoundToInt  ( 90f*processIndex / NumOfFrame)+ 10, 100).ToString();
 		TxTProcess.text="processing  "+processbar+" %"; 
 		if(processIndex>NumOfFrame){
 			ProcessWithUpdate=false;
@@ -215,7 +217,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 		
 		DataComplete = false;
 		ProcessWithUpdate = true;
-		processbar=10;
+		processbar="10";
 		//拆分数据，time即采样间隔时间，单位毫秒，samplesize为fft结果的数据数量=_spec，采样数据数量为sanplesize*2，取每个间隔分段的钱samplesize位
 		int SamplePerFrame = time;//Mathf.FloorToInt ( time*_audio.clip.frequency / 1000);//每帧间隔的数据数量
 
@@ -277,7 +279,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 	public void DataProcess(int time=100,int samplesize=128 )
 	{	
 		DataComplete = false;
-		processbar=10;
+		processbar="processing  "+10+" %"; ;
 		//拆分数据，time即采样间隔时间，单位毫秒，samplesize为fft结果的数据数量=_spec，采样数据数量为sanplesize*2，取每个间隔分段的钱samplesize位
 		int SamplePerFrame = time;//Mathf.FloorToInt ( time*_audio.clip.frequency / 1000);//每帧间隔的数据数量
 
@@ -323,8 +325,8 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 
 			BeatAnalysisManager.MAL.Add (bands);//存入MAL
 
-			processbar = Mathf.Min ( Mathf.RoundToInt  ( 90f*i / NumOfFrame)+ 10, 100);
-
+			int processb = Mathf.Min ( Mathf.RoundToInt  ( 90f*i / NumOfFrame)+ 10, 100);
+			processbar= "processing  "+processb+" %"; 
 
 		}//end 采样samplesize*2次	
 		DataComplete=true;
@@ -369,11 +371,11 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 	//	isinited = true;
 		BeatAnalysisManager.BAL.Clear ();
 		_audio=BeatAnalysisManager ._audio ;//GetComponent<AudioSource> ();
-		print ("DPWT-in thread p2.5");
+	//	print ("DPWT-in thread p2.5");
 
 		_decay = BeatAnalysisManager .decay;//衰减
 		_SpecSize = BeatAnalysisManager .SpecSize;//fft后数据数量
-		print ("DPWT-in thread p2.6");
+		//print ("DPWT-in thread p2.6");
 		_bufferSize = BeatAnalysisManager.bufferSize;
 		_numBands = BeatAnalysisManager .numBands;
 		RecAvgInBandInc=new float[BeatAnalysisManager.MAL .Count  ,_numBands+1 ]; 
@@ -397,6 +399,7 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 			CheckBeatInClip (j);///////单频段检测节拍
 		}
 		AnalysisComplete=true;
+		processbar = "Analysis Complete! Go and Play!";
 
 	}
 
@@ -632,26 +635,6 @@ public class BeatAnalysisNonRT : MonoBehaviour {
 
 
 
-//
-//	void dataProcessBar(){
-//
-//
-//		print ("DPB-in thread");
-//		if (TxTProcess != null) {
-//			while (true) {
-//				TxTProcess.text="processing  "+processbar+" %";
-//				Thread.Sleep (1000);
-//				if (processbar > 100) {
-//					print ("DPB-end thread"+processbar);
-//					break;
-//				}
-//			}
-//			//processbar= Mathf.Min ( Mathf.RoundToInt  ( 90f*i / NumOfFrame)+ 10, 100);
-//
-//		}
-//
-//	}
-//
 
 
 

@@ -71,7 +71,7 @@ public class drawJterrain : MonoBehaviour {
 	/// </summary>
 	List<int> errorSamples = new List<int> ();
 
-
+	bool outof85=false;
 
 
 	void xxx(Color c){
@@ -106,6 +106,7 @@ public class drawJterrain : MonoBehaviour {
 	/// <param name="_vpos">Vpos（x，y），纬度，经度方向的索引</param>
 	public  void loadNewLoc(float _centerlat,float _centerlng, Vector2Int _vpos)
 	{		
+		outof85 = false;
 		complete = false;
 		Vpos = _vpos;
 		indVertivesLng=0;
@@ -119,7 +120,9 @@ public class drawJterrain : MonoBehaviour {
 		steplng = TerrainManager.stepLng *2 / segment.x;//每段跨越的纬度
 		northwestlng = trimLng (northwestlng);
 		southeastlng = trimLng (southeastlng);
-
+		if (centerlat > 82 || centerlat < -82) {
+			outof85 = true;
+		}
 //		Debug.Log ("*2new"+Trrname+" pos="+northwestlat+","+northwestlng+"/"+southeastlat+","+southeastlng+" size="+main.MeshSize  );
 
 		//print (Trrname+"-init-"+northwestlat+","+_northwestlng+"//"+_southeastlat+","+_southeastlng+" step="+steplat);
@@ -178,16 +181,16 @@ public class drawJterrain : MonoBehaviour {
 	}
 	void  storeErrorSample(int index){
 		if (edgeUp && index > (int)((segment.x + 1) * segment.y)) {
-			Debug.Log ("up  "+index);
+		//	Debug.Log ("up  "+index);
 			return;
 		}
 		if (edgeDown && index <=segment.x) {
-			Debug.Log ("down  "+index);
+	//		Debug.Log ("down  "+index);
 			return;
 		}
 		//if ((edgeLeft && indVertivesLng ==0) ||(edgeRight  && indVertivesLng >segment.x)) {
 		if ((edgeLeft &&index% (segment.x+1) ==0) ||(edgeRight  &&(index+1)% (segment.x+1) ==0)) {
-			Debug.Log ("leftright  "+index);
+		//	Debug.Log ("leftright  "+index);
 			return;
 		}
 		errorSamples.Add (index);
@@ -375,7 +378,7 @@ public class drawJterrain : MonoBehaviour {
 		for (int i = 0; i <= segment.y; i++) {
 			for (int j = 0; j <= segment.x ; j++) {
 				int ind = i * (int)(segment.x + 1) + j;
-				float a=UnityEngine. Random.Range(0f,200*TerrainManager.MeshSize.y);
+				float a=UnityEngine. Random.Range(0f,20);
 				//(i % 2 + j % 3)*5;
 				vertives [ind].y =a; //(i % 2 + j % 3)*5;//Vpos.x +0.1f*Vpos.y;// // Mathf.Floor (centerlat)*0.01f + Mathf.Floor (centerlng) * 0.00001f;// Vpos.x +0.1f*Vpos.y  ;
 				vertives [ind].x =j * TerrainManager.MeshSize.x / segment.x;
@@ -385,7 +388,7 @@ public class drawJterrain : MonoBehaviour {
 			//indVertivesLng++;
 			stt+="\n";
 		}
-		Debug.Log (Trrname +" fake json"+stt);
+//		Debug.Log (Trrname +" fake json"+stt);
 
 	}
 	#endregion
@@ -413,7 +416,7 @@ public class drawJterrain : MonoBehaviour {
 		ipaddress += northwestlat   +","+lng ;//获取同一纬度下，东西经度之间的数据
 		ipaddress += "&samples=" + (segment.y+1)+"&key=";
 		ipaddress +=ELEKey;//需要自己注册！！
-		//print(Trrname+"--"+ipaddress);
+		print(Trrname+"--"+ipaddress);
 		WWW www_data = new WWW(ipaddress);  
 		yield return www_data;  //获得数据后继续
 
@@ -494,7 +497,7 @@ public class drawJterrain : MonoBehaviour {
 		ipaddress += northwestlat  +","+lng ;//获取同一纬度下，东西经度之间的数据
 		ipaddress += "&heights=ellipsoid&samples=" + (segment.y+1)+"&key=";
 		ipaddress +=ELEKey;//需要自己注册！"Alx3lnaKPAchj200vPlB4UXk2UY6JXCm2FNO8LzAzjrftFyzS_2fJGmR_nii9VL_";//ELEKey;//需要自己注册！！
-		//print(Trrname+"--"+ipaddress);
+		print(Trrname+"--"+ipaddress);
 		WWW www_data = new WWW(ipaddress);  
 		yield return www_data;  //获得数据后继续
 
@@ -767,10 +770,26 @@ public class drawJterrain : MonoBehaviour {
 		TerrainManager.NumComplete++;//加载成功计数。用于计算是否所有块都完成
 		//		DrawTexture ();
 		////////////////////////
-		if (gameObject.AddComponent<MeshCollider> () == null) {
+		if (gameObject.GetComponent<MeshCollider> () ) {
+			DestroyImmediate  (gameObject.GetComponent<MeshCollider> ());
+		
+		} 
+		if (gameObject.GetComponent<MeshCollider> () == null) {
 			gameObject.AddComponent<MeshCollider> ();
-			gameObject.GetComponent<MeshCollider> ().sharedMesh = mesh;
-			gameObject.GetComponent<MeshCollider> ().convex = true;
+		}
+		gameObject.GetComponent<MeshCollider> ().sharedMesh = mesh;
+		gameObject.GetComponent<MeshCollider> ().convex = true;
+
+
+		if (!gameObject.GetComponent<BoxCollider > ()) {
+			gameObject.AddComponent<BoxCollider> ();
+			//gameObject.GetComponent<BoxCollider > ().size
+		}
+		if (outof85) {
+			gameObject.GetComponent<BoxCollider > ().enabled = true;
+
+		} else {
+			gameObject.GetComponent<BoxCollider > ().enabled = false;
 		}
 		//		SaveAsset();
 	}

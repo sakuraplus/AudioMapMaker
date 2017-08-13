@@ -12,13 +12,15 @@ public class MainMenuManager : MonoBehaviour {
 	public GameObject _MainMenu;
 	public GameObject _LevelsMenu;
 	public GameObject _AboutMenu;
+	public GameObject _SettingMenu;
+
 
 	// references to Button GameObjects
 	public GameObject MenuDefaultButton;
 	public GameObject AboutDefaultButton;
 	public GameObject LevelSelectDefaultButton;
 	public GameObject QuitButton;
-
+	public GameObject ContinueButton;
 	// list the level names
 	public string[] LevelNames;
 
@@ -41,56 +43,53 @@ public class MainMenuManager : MonoBehaviour {
 		_mainTitle = titleText.text;
 
 		// disable/enable Level buttons based on player progress
-		setLevelSelect();
-
+		//setLevelSelect();
+		setDataSource (false);
 		// determine if Quit button should be shown
 		displayQuitWhenAppropriate();
+		displayContinue();
 
 		// Show the proper menu
 		ShowMenu("MainMenu");
 	}
-
+	void displayContinue(){
+		if (PlayerPrefManager.GetRecord ().Length > 0) {
+			ContinueButton.SetActive (true);
+		} else {
+			ContinueButton.SetActive (false);
+		}
+	}
 	// loop through all the LevelButtons and set them to interactable 
 	// based on if PlayerPref key is set for the level.
-	void setLevelSelect() {
-		// turn on levels menu while setting it up so no null refs
-		_LevelsMenu.SetActive(true);
-
-		// loop through each levelName defined in the editor
-		//for(int i=0;i<LevelNames.Length;i++) {
-		if (PlayerPrefs.HasKey ("Lng")) {
-			// get the level name
-			//string levelname = LevelNames [i];
-
-			// dynamically create a button from the template
-			GameObject levelButton = Instantiate (LevelButtonPrefab, Vector3.zero, Quaternion.identity) as GameObject;
-
-			// name the game object
-			levelButton.name ="lastpoint";// levelname + " Button";
-
-			// set the parent of the button as the LevelsPanel so it will be dynamically arrange based on the defined layout
-			levelButton.transform.SetParent (LevelsPanel.transform, false);
-
-			// get the Button script attached to the button
-			Button levelButtonScript = levelButton.GetComponent<Button> ();
-
-			// setup the listener to loadlevel when clicked
-			levelButtonScript.onClick.RemoveAllListeners ();
-			levelButtonScript.onClick.AddListener (() => loadLevelselect ());
-
-			// set the label of the button
-			Text levelButtonLabel = levelButton.GetComponentInChildren<Text> ();
-			levelButtonLabel.text = "start at the last point";//levelname;
-
-			// determine if the button should be interactable based on if the level is unlocked
-//			if (PlayerPrefManager.LevelIsUnlocked (levelname)) {
-//				levelButtonScript.interactable = true;
-//			} else {
-//				levelButtonScript.interactable = false;
+//	void setLevelSelect() {
+//		_LevelsMenu.SetActive(true);
+//		string recordstr = PlayerPrefManager.GetRecord ();
+//		//recordstr="12,34|12.34,34,56|1,2|4,5|aaa,ddd|ccc,ddd|6,6|7,77|8,88|9,999|0,00|q,w|e,r|";
+//		///>>12,34/12.34,34,56/1,2/4,5/aaa,ddd/ccc,ddd/6,6/7,77/8,88/9,999/0,00/q,w/e,r//
+//		if (recordstr.Length > 0) {
+//			string sss = "|";
+//			string[] records = recordstr.Split (  sss.ToCharArray()[0]);
+//			string t = ">>";
+//			for (int i=0;i < records.Length &&i<9; i++) {
+//				t+=records[i]+"/";
+//
+//				GameObject levelButton = Instantiate (LevelButtonPrefab, Vector3.zero, Quaternion.identity) as GameObject;
+//				levelButton.name ="lastpoint"+i;// levelname + " Button";
+//
+//				levelButton.transform.SetParent (LevelsPanel.transform, false);
+//				Button levelButtonScript = levelButton.GetComponent<Button> ();
+//
+//				levelButtonScript.onClick.RemoveAllListeners ();
+//				levelButtonScript.onClick.AddListener (() => loadLevelselect (records[i]));
+//				Text levelButtonLabel = levelButton.GetComponentInChildren<Text> ();
+//				levelButtonLabel.text = records[i];//"start at the last point";//levelname;					
+//
 //			}
-		}
-		//}
-	}
+//			Debug.Log (t);
+//		}
+//
+//	}
+
 
 	// determine if the QUIT button should be present based on what platform the game is running on
 	void displayQuitWhenAppropriate() 
@@ -131,7 +130,7 @@ public class MainMenuManager : MonoBehaviour {
 		_MainMenu.SetActive (false);
 		_AboutMenu.SetActive(false);
 		_LevelsMenu.SetActive(false);
-
+		_SettingMenu.SetActive(false );
 		// turn on desired menu and set default selected button for controller input
 		switch(name) {
 		case "MainMenu":
@@ -150,47 +149,98 @@ public class MainMenuManager : MonoBehaviour {
 			EventSystem.current.SetSelectedGameObject (AboutDefaultButton);
 			titleText.text = "About";
 			break;
+		case "Setting":
+			_SettingMenu.SetActive(true);
+			EventSystem.current.SetSelectedGameObject (AboutDefaultButton);
+			titleText.text = "Setting";
+			break;
 		}
 	}
 	// load the specified Unity level
+	[SerializeField]
+	InputField keyGoogle;
+	[SerializeField]
+	InputField keyBing;
+
+	public  void setDataSource(bool settoDefault) {
+		if (!PlayerPrefs.HasKey ("KeyGoogle") || settoDefault) {
+			PlayerPrefManager.SetDataSource (2);
+			PlayerPrefManager.SetApiKey ("G", "AIzaSyD04LHgbiErZTYJMfda2epkG0YeaQHVuEE");
+			PlayerPrefManager.SetApiKey ("B", "Alx3lnaKPAchj200vPlB4UXk2UY6JXCm2FNO8LzAzjrftFyzS_2fJGmR_nii9VL_");
+			keyGoogle.text = "AIzaSyD04LHgbiErZTYJMfda2epkG0YeaQHVuEE";
+			keyBing.text = "Alx3lnaKPAchj200vPlB4UXk2UY6JXCm2FNO8LzAzjrftFyzS_2fJGmR_nii9VL_";
+			//datasTxt.text = "Default Setting";
+			//datasTxt.text += " \n  data source =  Random Map";
+			//datasTxt.text += "\nBuild a random terrain. Will not call for network resources.";
+			//datasTxt.text += "\nGet a private Apikey for a better play experience.";
+		} else {
+			keyGoogle.text = PlayerPrefManager.GetApiKey("G");
+			keyBing.text = PlayerPrefManager.GetApiKey("B");
+
+		}
+		refreshDataSourceTxt ();
+	}
+
+	void refreshDataSourceTxt(){
+		if (PlayerPrefManager.GetDataSource () == 0) {
+			TerrainManager.DataSource = datasource.bing;
+			datasTxt.text = "   data source =  Bing Map";
+			datasTxt.text += "\nBuild the terrain with Bing Map elevation data.";
+		}else if (PlayerPrefManager.GetDataSource () == 1) {
+			TerrainManager.DataSource = datasource.google ;
+			datasTxt.text = "   data source =  Google Map";
+			datasTxt.text += "\nBuild the terrain with Google Map elevation data.";
+		}else if (PlayerPrefManager.GetDataSource () == 2) {
+			TerrainManager.DataSource = datasource.random ;
+			datasTxt.text = "   data source =  Random Map";
+			datasTxt.text += "\nBuild a random terrain. Will not call for network resources.";
+		}
+	}
 	public  Text datasTxt;
 	public void setData(int deind)
 	{
-		string txt="   data source =  ";
-		if (deind == 0) {
-			TerrainManager.DataSource = datasource.bing;
-			txt+="bing";
-		}else 	if (deind == 1) {
-			TerrainManager.DataSource = datasource.google ;
-			txt+="google";
-		}else	if (deind == 2) {
-			TerrainManager.DataSource = datasource.random ;
-			txt+="random map";
-		}
-		datasTxt.text = txt;
+//		string txt="   data source =  ";
+//		if (deind == 0) {
+//			TerrainManager.DataSource = datasource.bing;
+//			txt+="bing";
+//		}else 	if (deind == 1) {
+//			TerrainManager.DataSource = datasource.google ;
+//			txt+="google";
+//		}else	if (deind == 2) {
+//			TerrainManager.DataSource = datasource.random ;
+//			txt+="random map";
+//		}
+//		datasTxt.text = txt;
 		// start new game so initialize player state
 		PlayerPrefManager.SetDataSource(deind);
-
+		PlayerPrefManager.SetApiKey ("G", keyGoogle.text );
+		PlayerPrefManager.SetApiKey ("B", keyBing .text);
+		refreshDataSourceTxt ();
 	
 	}
-	// load the specified Unity level
-	public void loadLevelselect()
+	public void setData()
 	{
-		// start new game so initialize player state
-		//PlayerPrefManager.ResetPlayerState(startLives,false);
-
-		// load the specified level
-		TerrainManager.lat=PlayerPrefManager.GetLat();
-		TerrainManager.lng=PlayerPrefManager.GetLng();
-		SceneManager.LoadScene("SelectMusic");
+		PlayerPrefManager.SetApiKey ("G", keyGoogle.text );
+		PlayerPrefManager.SetApiKey ("B", keyBing .text);
 	}
-	public void loadLevel(string levelToLoad)
+	// load the specified Unity level
+	public void LoadScene(string scenename)
 	{
-		// start new game so initialize player state
-		PlayerPrefManager.ResetPlayerState(startLives,false);
-
-		// load the specified level
-		SceneManager.LoadScene(levelToLoad);
+		//switch(name) {
+		//case "MainMenu":
+		SceneManager.LoadScene(scenename);
+	}
+	public void resetRecord(){
+		PlayerPrefManager.clearRecord (); 
+	}
+	public void testPf()
+	{
+		Debug.Log ("TEST PF---------");
+		Debug.Log ("Lat,lng="+PlayerPrefManager.GetLat()+","+PlayerPrefManager.GetLng());
+		Debug.Log ("key B="+PlayerPrefManager.GetApiKey("B"));
+		Debug.Log ("key G"+PlayerPrefManager.GetApiKey("G"));
+		Debug.Log ("DS="+PlayerPrefManager.GetDataSource());
+		Debug.Log ("rec="+PlayerPrefManager.GetRecord ());
 	}
 
 	// quit the game

@@ -53,6 +53,13 @@ public class ExampleHelp : MonoBehaviour {
 
 			_audio.clip = musics [i];
 		}
+		if (i < jsonfileAsset.Length) {
+			if (jsonfileAsset [i] == null) {
+				Debug.LogError ("wrong jsonfile!");
+				return;
+			}
+			load (jsonfileAsset [i].text.ToString());
+		}
 	}
 	public void btnloadjson(int i){
 		if (i < jsonfileAsset.Length) {

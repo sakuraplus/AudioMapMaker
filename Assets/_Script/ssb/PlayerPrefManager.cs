@@ -15,7 +15,7 @@ public static class PlayerPrefManager {
 	public static void SetLat(float  _lat) {
 		PlayerPrefs.SetFloat("Lat",_lat);
 	}
-
+	//==================================
 	public static float GetLng() {
 		if (PlayerPrefs.HasKey("Lng")) {
 			return PlayerPrefs.GetFloat ("Lng");
@@ -27,7 +27,7 @@ public static class PlayerPrefManager {
 	public static void SetLng(float  _lng) {
 		PlayerPrefs.SetFloat("Lng",_lng);
 	}
-
+	//=====================================
 	public static int GetDataSource() {
 		if (PlayerPrefs.HasKey("DataSource")) {
 			return PlayerPrefs.GetInt("DataSource");
@@ -38,8 +38,31 @@ public static class PlayerPrefManager {
 	public static void SetDataSource(int score) {
 		PlayerPrefs.SetInt("DataSource",score);
 	}
-
-
+	//=====================================
+	public static string GetApiKey(string st) {
+		if (st == "G") {
+			if (PlayerPrefs.HasKey("KeyGoogle")) {
+				return PlayerPrefs.GetString("KeyGoogle");
+			} else {
+				return "";
+			}
+		}else if (st == "B") {
+			if (PlayerPrefs.HasKey("KeyBing")) {
+				return PlayerPrefs.GetString("KeyBing");
+			} else {
+				return "";
+			}
+		}
+		return "";
+	}
+	public static void SetApiKey(string  st,string key) {
+		if (st == "G") {
+			PlayerPrefs.SetString ("KeyGoogle", key);
+		} else if (st == "B") {
+			PlayerPrefs.SetString ("KeyBing", key);
+		}
+	}
+	//=====================================
 	public static int GetScore() {
 		if (PlayerPrefs.HasKey("Score")) {
 			return PlayerPrefs.GetInt("Score");
@@ -50,28 +73,47 @@ public static class PlayerPrefManager {
 	public static void SetScore(int score) {
 		PlayerPrefs.SetInt("Score",score);
 	}
-
-	public static int GetHighscore() {
+	//=====================================
+	public static float GetHighscore() {
 		if (PlayerPrefs.HasKey("Highscore")) {
-			return PlayerPrefs.GetInt("Highscore");
+			return PlayerPrefs.GetFloat("Highscore");
 		} else {
 			return 0;
 		}
 	}
 
 	public static void SetHighscore(int highscore) {
-		PlayerPrefs.SetInt("Highscore",highscore);
+		PlayerPrefs.SetFloat("Highscore",highscore);
+	}
+	//=====================================
+	public static string  GetRecord() {
+		if (PlayerPrefs.HasKey("GameRecord")) {
+			return PlayerPrefs.GetString("GameRecord");
+		} else {
+			return "";
+		}
 	}
 
+	public static void SetRecord(string  newrecord) {
+		string s=PlayerPrefs.GetString("GameRecord");
+		PlayerPrefs.SetString("GameRecord",newrecord+"|"+s);
+	}
+	public static void clearRecord() {
+		
+		PlayerPrefs.SetString("GameRecord","");
+	}
+
+	//=====================================
 
 	// story the current player state info into PlayerPrefs
-	public static void SavePlayerState(int score, int highScore, float _lat,float _lng) {
+	public static void SavePlayerState(int score, float highScorePer, float _lat,float _lng) {
 		// save currentscore and lives to PlayerPrefs for moving to next level
 		PlayerPrefs.SetInt("Score",score);
 		//PlayerPrefs.SetInt("Lives",lives);
-		PlayerPrefs.SetInt("Highscore",highScore);
+		PlayerPrefs.SetFloat("Highscore",highScorePer);
 		PlayerPrefs.SetFloat("Lng",_lng);
 		PlayerPrefs.SetFloat("Lat",_lat);
+		SetRecord (_lat+","+_lng);
 	}
 	
 	// reset stored player state and variables back to defaults
@@ -81,7 +123,7 @@ public static class PlayerPrefManager {
 		PlayerPrefs.SetInt("Score", 0);
 
 		if (resetHighscore)
-			PlayerPrefs.SetInt("Highscore", 0);
+			PlayerPrefs.SetFloat("Highscore", 0);
 	}
 
 	// store a key for the name of the current level to indicate it is unlocked

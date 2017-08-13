@@ -199,16 +199,12 @@ public class CharacterControllerSeed : MonoBehaviour {
 			} while(objFound == false);
 
 			if (objFound) {
-				//if(hit.collider.tag =="Ground"){
+
 				sttd = "distance=" + hit.distance;
-
-
-				if(hit.distance>maxHeight){
-					addv.y =Mathf.Max(addv.y, 0);// addv.y * speedy / 5;
-				}
-		
+//				if(hit.distance>maxHeight){
+//					addv.y =Mathf.Max(addv.y, 0);// addv.y * speedy / 5;
+//				}		
 			}
-			//	
 		}
 		nv += (addv * moveSpeed * Time.deltaTime);
 		if (hit.distance > maxHeight) {

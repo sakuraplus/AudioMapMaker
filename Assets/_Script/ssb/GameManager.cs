@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour {
 
 	// game performance
 	public int score = 0;
-	public int highscore = 0;
+	public int beatNumscore = 0;
 
 	//public int lives = 3;
 
@@ -70,6 +70,12 @@ public class GameManager : MonoBehaviour {
 				Time.timeScale = 1f; // this unpauses the game action (ie. back to normal)
 				UIGamePaused.SetActive(false); // remove the pause UI
 			}
+		}
+		if (Input.GetKeyDown(KeyCode.UpArrow )) {
+			TerrainManager.MeshSize.y += 0.1f;
+		}
+		if (Input.GetKeyDown(KeyCode.DownArrow )) {
+			TerrainManager.MeshSize.y -= 0.1f;
 		}
 		if (Input.GetKey (KeyCode.W)) {
 			//			
@@ -131,24 +137,7 @@ public class GameManager : MonoBehaviour {
 //			levelAfterVictory = _scene.name;
 //		}
 //		
-//		if (levelAfterGameOver=="") {
-//			Debug.LogWarning("levelAfterGameOver not specified, defaulted to current level");
-//			levelAfterGameOver = _scene.name;
-//		}
-
-		// friendly error messages
-//		if (UIScore==null)
-//			Debug.LogError ("Need to set UIScore on Game Manager.");
-//		
-//		if (UIHighScore==null)
-//			Debug.LogError ("Need to set UIHighScore on Game Manager.");
-//		
-//		if (UILevel==null)
-//			Debug.LogError ("Need to set UILevel on Game Manager.");
-//		
-//		if (UIGamePaused==null)
-//			Debug.LogError ("Need to set UIGamePaused on Game Manager.");
-//		
+//
 		// get stored player prefs
 		refreshPlayerState();
 
@@ -160,7 +149,7 @@ public class GameManager : MonoBehaviour {
 	void refreshPlayerState() {
 		PlayerPrefManager.SetScore(0);
 		score = PlayerPrefManager.GetScore();
-		highscore = PlayerPrefManager.GetHighscore();
+		beatNumscore = 0;//= PlayerPrefManager.GetHighscore();
 		//PlayerPrefManager.set
 		// save that this level has been accessed so the MainMenu can enable it
 		PlayerPrefManager.UnlockLevel();
@@ -169,36 +158,26 @@ public class GameManager : MonoBehaviour {
 //	// refresh all the GUI elements
 	void refreshGUI() {
 		// set the text elements of the UI
-		//UIScore.text = "Score: "+score.ToString();
-		UIScore.text = "Score: "+score.ToString()+"//"+fullPoint;
-		UIHighScore.text = "Highscore: "+highscore.ToString ();
+
+		UIScore.text = "Score: "+score.ToString();
+		UIHighScore .text = beatNumscore.ToString()+"/"+fullPoint;
 		if (BeatAnalysisManager._audio!=null ) {
 			UILevel.text = BeatAnalysisManager._audio.clip.name;
 		}
-		// turn on the appropriate number of life indicators in the UI based on the number of lives left
-//		for(int i=0;i<UIExtraLives.Length;i++) {
-//			if (i<(lives-1)) { // show one less than the number of lives since you only typically show lifes after the current life in UI
-//				UIExtraLives[i].SetActive(true);
-//			} else {
-//				UIExtraLives[i].SetActive(false);
-//			}
-//		}
+
 	}
 
 	// public function to add points and update the gui and highscore player prefs accordingly
 	public  void AddPoints(int amount)
 	{
+		_player.GetComponent<Rigidbody> ().AddForce (new Vector3 (0, 30, 0));
 		// increase score
 		score+=amount;
-
+		beatNumscore++;
 		// update UI
-		UIScore.text = "Score: "+score.ToString()+"//"+fullPoint;
-
-		// if score>highscore then update the highscore UI too
-		if (score>highscore) {
-			highscore = score;
-			UIHighScore.text = "Highscore: "+score.ToString();
-		}
+		UIScore.text = "Score: "+score.ToString();
+		UIHighScore .text = beatNumscore.ToString()+"/"+fullPoint;
+	
 	}
 
 	// public function to remove player life and reset game accordingly
@@ -234,25 +213,39 @@ public class GameManager : MonoBehaviour {
 
 	// public function for level complete
 	public   void LevelCompete() {
-		print("LevelCompete");
+		Debug.LogError  ("LevelCompete");
 		// save the current player prefs before moving to the next level
 		//*************************
-		_endPos=_player.transform.position;
-		float distLat = _endPos.z - _startPos.z;
-		float distLng = _endPos.x - _startPos.x;
-		distLat = distLat *TerrainManager.stepLat / TerrainManager.MeshSize.z;
-		distLng = distLng *TerrainManager.stepLng  / TerrainManager.MeshSize.x;
-		float newlat = PlayerPrefManager.GetLat() + distLat;
-		float newlng = PlayerPrefManager.GetLng() + distLng;
-		print ("newlat/lng="+newlat+","+newlng);
+//		_endPos=_player.transform.position;
+//		float distLat = _endPos.z - _startPos.z;
+//		float distLng = _endPos.x - _startPos.x;
+//		distLat = distLat *TerrainManager.stepLat / TerrainManager.MeshSize.z;
+//		distLng = distLng *TerrainManager.stepLng  / TerrainManager.MeshSize.x;
+//		float newlat = TerrainManager.lat  + distLat;
+//		float newlng = TerrainManager.lng + distLng;
 		//*******************************
-		PlayerPrefManager.SavePlayerState(score,highscore,newlat,newlng);
-		SceneManager.LoadScene("GameWin");
+		float newlat = GetComponent<InfiniteMap> ().onchunk .GetComponent<drawJterrain> ().centerlat  ;
+		float newlng = GetComponent<InfiniteMap> ().onchunk .GetComponent<drawJterrain> ().centerlng;
+
+		if (newlng < -180) {
+			newlng += 360;
+		} else if (newlng > 180) {
+			newlng -= 360;
+		}
+		if (newlat < -85) {
+			newlat=-85;
+		} else if (newlat > 85) {
+			newlat = newlat;
+		}
+
+		print ("newlat/lng="+newlat+","+newlng);
+
+		PlayerPrefManager.SavePlayerState(score,(float)beatNumscore/fullPoint ,newlat,newlng);
+		SceneManager.LoadScene("gameWinMap");//"GameWin"
 		// use a coroutine to allow the player to get fanfare before moving to next level
 		//StartCoroutine(LoadNextLevel());
 	}
 
-	// load the nextLevel after delay
 	IEnumerator LoadNextLevel() {
 		yield return new WaitForSeconds(3.5f);
 		print("LoadScene "+levelAfterVictory);

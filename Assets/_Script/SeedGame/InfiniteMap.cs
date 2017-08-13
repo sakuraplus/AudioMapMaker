@@ -31,7 +31,7 @@ public class InfiniteMap : MonoBehaviour {
 	Vector2Int vpnow;
 	//Vector2Int vplast;//测试用
 	[SerializeField]
-	GameObject onchunk;
+	public  GameObject onchunk;
 	float onchunkLat,onchunkLng;
 	void Start() {
 
@@ -195,19 +195,7 @@ public class InfiniteMap : MonoBehaviour {
 				}
 			}
 		}
-//		string ixix="infmap  main.v=";
-//		for (int iii = 0; iii < main.Pieces.y; iii++) {
-//			for (int jjj = 0; jjj < main.Pieces.x; jjj++) {
-//				if (main.Vertives [iii, jjj] != null) {
-//					ixix += " / " + iii + "," + jjj;
-//				} else {
-//					ixix += " / [ x ]";
-//				}
-//			}
-//			ixix += "\n";
-//		}
-//		Debug.LogError (ixix);
-//		//************
+
 	
 		string ttt=     "`MapObjs.name= ";
 
@@ -225,14 +213,14 @@ public class InfiniteMap : MonoBehaviour {
 				
 					float newClng = (j - baseChunkPos.y) * 2 * TerrainManager.stepLng+onchunkLng ;
 					float newClat = (baseChunkPos.x - i) * 2 * TerrainManager.stepLat+onchunkLat ;
-					//Debug.LogError  ("set with pool "+pool [0].name+"("+i+","+j+") base="+baseChunkPos  +"lat,lng="+onchunkLat +","+onchunkLng);
-					_MapObjs [i, j].GetComponent<drawJterrain> ().loadNewLoc(newClat,newClng, new Vector2Int (i, j));//,main.stepLat,main.stepLng,main.s
+				//	if (newClat < 80 && newClat > -80) {
+						//Debug.LogError  ("set with pool "+pool [0].name+"("+i+","+j+") base="+baseChunkPos  +"lat,lng="+onchunkLat +","+onchunkLng);
+						_MapObjs [i, j].GetComponent<drawJterrain> ().loadNewLoc (newClat, newClng, new Vector2Int (i, j));//,main.stepLat,main.stepLng,main.s
 
-				//	g.GetComponent <drawJterrain>().loadNewLoc(_clat ,_clng ,stepLat ,stepLng,size,new Vector2 (i,j));
-
-					//////////////////////////////////////***
-
-					pool.RemoveAt (0);
+						pool.RemoveAt (0);
+					//} else {
+					//	Debug.LogError ("*** out of 85");
+					//}
 				}
 
 				ttt += _MapObjs [i, j].name+",";

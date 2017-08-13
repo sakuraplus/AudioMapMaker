@@ -143,13 +143,13 @@ public class TerrainManager : MonoBehaviour {
 	/// <summary>
 	/// The earth r.6371000;//地球半径
 	/// </summary>
-	const float earthR = 6371000;//地球半径
+	public const float earthR = 6371000;//地球半径
 
 	/// <summary>
 	/// The distance earth lat.单位距离,1000000m
 	/// </summary>
 	//public  static 
-	const  float distanceEarthLat=1000000;
+	const  float distanceEarthLat=400000;
 	[SerializeField]
 	bool _havelicense=false;
 
@@ -169,7 +169,11 @@ public class TerrainManager : MonoBehaviour {
 			Debug.Log ("null>>");
 			lat = _lat;
 			lng = _lng;
+		} else {
+			_lat = lat;
+			_lng = lng;
 		}
+		Debug.LogError  ("STARTLOC*****"+lat + "  ,  " + lng);
 //		Vertives=new Vector3[(int)(Pieces.x*SegmentInPiece.x+1),(int)(Pieces.y*SegmentInPiece.y+1)] ;
 //		Vertives=new Vector3[(int)(Pieces.x*Pieces.y),(int)(SegmentInPiece.x+1)*(int)(SegmentInPiece.y+1)] ;
 		Vertives=new Vector3[(int)Pieces.y,(int)Pieces.x][] ;
@@ -212,11 +216,20 @@ public class TerrainManager : MonoBehaviour {
 			Debug.Log ("????????????????"+DataSource);
 		}
 		if (DataSource == datasource.google) {
-			ELEAPIkey = googleELEAPIKey;
+			if (PlayerPrefManager.GetApiKey ("G").Length < 1) {
+				ELEAPIkey = googleELEAPIKey;
+			} else {
+				ELEAPIkey = PlayerPrefManager.GetApiKey ("G");
+			}
 		} else if (DataSource == datasource.bing) {
-			ELEAPIkey = bingELEAPIKey ;
+			if (PlayerPrefManager.GetApiKey ("B").Length < 1) {
+				ELEAPIkey = bingELEAPIKey;
+			} else {
+				ELEAPIkey = PlayerPrefManager.GetApiKey ("B");
+			}
+
 		}
-	
+		Debug.LogError("key!"+DataSource+" /// "+ELEAPIkey);
 //		if (ELEAPIkey.Length < 1) {
 //
 //			Debug.LogWarning ("you need ele key"+ELEAPIkey);
@@ -320,8 +333,9 @@ public class TerrainManager : MonoBehaviour {
 		stepLng=stepLat;
 		float ttt=Mathf.Deg2Rad*lat;// 角度转弧度=Mathf.PI * ttt / 180;//
 		ttt=  Mathf.Abs (Mathf.Cos(ttt ));//当前纬度下，1纬度与1经度之间的距离比
+		ttt=Math.Max  (ttt,0.5f);
 		size.x=sizelat*ttt;
-
+		Debug.Log ("sizeX="+size.x+"  ttt="+ttt);
 		float _scale = size.z / distanceEarthLat;//单位实际距离对应的mesh大小
 		size.y=_scale*heightScale ;
 		_meshsize = size;//测试用

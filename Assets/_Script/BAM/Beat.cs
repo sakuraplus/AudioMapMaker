@@ -24,6 +24,8 @@ public class Beat : MonoBehaviour {
 	 AudioSource _audio;
 	//[SerializeField ]
 	public  AudioClip AC;
+	public  AudioClip AC2;
+	public  AudioClip AC3;
 	/// <summary>
 	/// 碰撞后特效
 	/// </summary>
@@ -58,43 +60,46 @@ public class Beat : MonoBehaviour {
 	[SerializeField ]
 	public  float timerOut=10;
 	void Update () {
-		if (onPos) {
+		if (Timer) {
+			if (onPos) {
 			
-			if (speedRotate == 0) {
-				_animator.SetTrigger ("posReady");
+				if (speedRotate == 0) {
+					_animator.SetTrigger ("posReady");
 
 		
-			}
-			//speedRotate =(360-timerRot)/(Beattime-_audio.time ) ;
-			speedRotate =(360)/(Beattime-Borntime ) ;
-			this.transform .LookAt (lookatCamera.position);
-			float rotA= Time.deltaTime*speedRotate ;
+				}
+				//speedRotate =(360-timerRot)/(Beattime-_audio.time ) ;
+				speedRotate = (360) / (Beattime - Borntime);
+				this.transform.LookAt (lookatCamera.position);
+				float rotA = Time.deltaTime * speedRotate;
 
-			Timer.transform.RotateAround (Timer.transform.position, Timer.transform.forward  , rotA );
-			timerRot += rotA;
-		} else {
-			//sttt = Time.deltaTime;
-			//this.transform.position+=new Vector3(0,speedMove*Time.deltaTime ,0);//Translate(new Vector3(0,speedMove*Time.deltaTime ,0));
-			Vector3 sc=this.transform.localScale ;
-			if (sc.x * 3f > 1) {
-				sc = Vector3.one ;
-				onPos = true;
+				Timer.transform.RotateAround (Timer.transform.position, Timer.transform.forward, rotA);
+				timerRot += rotA;
 			} else {
-				sc *= 3f;
-			}
-			this.transform.localScale = sc;//+=new Vector3(0,speedMove*Time.deltaTime ,0);//
+				//sttt = Time.deltaTime;
+				//this.transform.position+=new Vector3(0,speedMove*Time.deltaTime ,0);//Translate(new Vector3(0,speedMove*Time.deltaTime ,0));
+				Vector3 sc = this.transform.localScale;
+				if (sc.x * 3f > 1) {
+					sc = Vector3.one;
+					onPos = true;
+				} else {
+					sc *= 3f;
+				}
+				this.transform.localScale = sc;//+=new Vector3(0,speedMove*Time.deltaTime ,0);//
 
-			speedMove*=1.1f;
-			if (this.transform.position .y >= TargPos.y) {
+				speedMove *= 1.1f;
+				if (this.transform.position.y >= TargPos.y) {
 				
-				onPos = true;
-				if (MoveUpPart) {
-					Debug.LogError ("T!!!");
-					Debug.Log ("Destroy (MoveUpPart)");
-					Destroy (MoveUpPart);
+					onPos = true;
+					if (MoveUpPart) {
+						Debug.LogError ("T!!!");
+						Debug.Log ("Destroy (MoveUpPart)");
+						Destroy (MoveUpPart);
+					}
 				}
 			}
 		}
+		
 	}
 	//[SerializeField ]
 	//float sttt;
@@ -107,7 +112,9 @@ public class Beat : MonoBehaviour {
 			_audio=GameObject.Find("_script"). GetComponent<AudioSource> ();
 		}
 		if(	GameObject.Find("_script")!=null){
-			lookatCamera =GameObject.Find("_script"). GetComponent<CharacterControllerSeed > ().followCamera.transform  ;
+			if (GameObject.Find ("_script").GetComponent<CharacterControllerSeed > ()) {
+				lookatCamera = GameObject.Find ("_script").GetComponent<CharacterControllerSeed > ().followCamera.transform;
+			}
 		}
 		//speedMove =0.2f* (TargPos.y -StartPos.y) / (Beattime-Borntime ); 
 		if (MoveUpPart ) {
@@ -115,17 +122,18 @@ public class Beat : MonoBehaviour {
 			Instantiate (MoveUpPart, transform.position,transform.rotation  );
 		}
 
-//		if (CheckState) {
+
 //			if (ExpoPartPerfect) {
 //				Instantiate (ExpoPartPerfect, transform.position, transform.rotation);
 //			}
 //			DestroyNow ();
-//		}
+
 		//Debug.LogError ("B!!");
 		// invote the DestroyNow funtion to run after timeOut seconds
-		Invoke ("DestroyNow", timerOut );
+		if (Timer) {
+			Invoke ("DestroyNow", timerOut);
 
-
+		}
 	}
 
 	void OnTriggerEnter(Collider collider) 
@@ -134,6 +142,7 @@ public class Beat : MonoBehaviour {
 		if (collider.tag == "destoryzone") {
 			Destroy (gameObject);
 
+			_audio.PlayOneShot  (AC);
 		}
 		if(timerRot>100){
 		if (collider.tag == "checkzone" ||collider.tag == "Player" ) {
@@ -163,20 +172,24 @@ public class Beat : MonoBehaviour {
 		int point;
 		if (Mathf.Abs (ii) <= GameManager.gm.RotationRangePerfect) {
 			point = 10;
+			_audio.PlayOneShot  (AC);
 			if (ExpoPartPerfect) {
 				Instantiate (ExpoPartPerfect, transform.position, transform.rotation);
 			}
 		} else if (ii < 0 - GameManager.gm.RotationRangePerfect) {
+			//_audio.PlayOneShot  (AC3);
 			if (ExpoPartMiss) {
 				Instantiate (ExpoPartMiss, transform.position, transform.rotation);
 			}
 			point = 1;
 		} else if (ii > GameManager.gm.RotationRangePerfect && ii <= GameManager.gm.RotationRangeCool) {
+			_audio.PlayOneShot  (AC2);
 			if (ExpoPartCool) {
 				Instantiate (ExpoPartCool, transform.position, transform.rotation);
 			}
 			point = 5;
 		} else if (ii > GameManager.gm.RotationRangeCool && ii <= GameManager.gm.RotationRangeGood) {
+			_audio.PlayOneShot  (AC3);
 			if (ExpoPartGood) {
 				Instantiate (ExpoPartGood, transform.position, transform.rotation);
 			}
@@ -184,11 +197,11 @@ public class Beat : MonoBehaviour {
 		} else  {
 			point = 0;
 		}
-		Debug.LogError ("point>>"+ii+">>"+point+"<"+GameManager.gm.RotationRangePerfect+","+GameManager.gm.RotationRangeGood+">");
+		//Debug.LogError ("point>>"+ii+">>"+point+"<"+GameManager.gm.RotationRangePerfect+","+GameManager.gm.RotationRangeGood+">");
 
 		if (point > 0) {
 			CheckState = true;
-			_audio.PlayOneShot  (AC);
+			//_audio.PlayOneShot  (AC);
 			DestroyNow ();
 
 			GameManager.gm.AddPoints (point);
@@ -197,7 +210,7 @@ public class Beat : MonoBehaviour {
 
 	void DestroyNow ()
 	{
-		Debug.Log ("Destroy (born "+Borntime +"- beat "+Beattime+"="+(Beattime-Borntime));
+		//Debug.Log ("Destroy (born "+Borntime +"- beat "+Beattime+"="+(Beattime-Borntime));
 
 		Destroy(gameObject);
 	}

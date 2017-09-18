@@ -183,15 +183,15 @@ public class MainMenuManager : MonoBehaviour {
 
 	void refreshDataSourceTxt(){
 		if (PlayerPrefManager.GetDataSource () == 0) {
-			TerrainManager.DataSource = datasource.bing;
+			TerrainManagerStatics.DataSource = datasource.bing;
 			datasTxt.text = "   data source =  Bing Map";
 			datasTxt.text += "\nBuild the terrain with Bing Map elevation data.";
 		}else if (PlayerPrefManager.GetDataSource () == 1) {
-			TerrainManager.DataSource = datasource.google ;
+			TerrainManagerStatics.DataSource = datasource.google ;
 			datasTxt.text = "   data source =  Google Map";
 			datasTxt.text += "\nBuild the terrain with Google Map elevation data.";
 		}else if (PlayerPrefManager.GetDataSource () == 2) {
-			TerrainManager.DataSource = datasource.random ;
+			TerrainManagerStatics.DataSource = datasource.random ;
 			datasTxt.text = "   data source =  Random Map";
 			datasTxt.text += "\nBuild a random terrain. Will not call for network resources.";
 		}

@@ -2,8 +2,7 @@
 using System.Collections;
 using UnityEngine.UI; // include UI namespace so can reference UI elements
 using UnityEngine.SceneManagement; // include so we can manipulate SceneManager
-[RequireComponent (typeof (SeedBeatMap ) )]//
-[RequireComponent (typeof (TerrainManager ) )]//
+[RequireComponent (typeof (SeedBeatMap ) )]//[RequireComponent (typeof (TerrainManager ) )]//
 public class GameManager : MonoBehaviour {
 
 	// static reference to game manager so can be called from other scripts directly (not just through gameobject component)
@@ -72,10 +71,10 @@ public class GameManager : MonoBehaviour {
 			}
 		}
 		if (Input.GetKeyDown(KeyCode.UpArrow )) {
-			TerrainManager.MeshSize.y += 0.1f;
+			TerrainManagerStatics.MeshSize.y += 0.1f;
 		}
 		if (Input.GetKeyDown(KeyCode.DownArrow )) {
-			TerrainManager.MeshSize.y -= 0.1f;
+			TerrainManagerStatics.MeshSize.y -= 0.1f;
 		}
 		if (Input.GetKey (KeyCode.W)) {
 			//			
@@ -89,15 +88,15 @@ public class GameManager : MonoBehaviour {
 		if (!preloaded) {
 			UIGameLoading.SetActive(true); // this brings up the pause UI
 
-			if (TerrainManager.MapObjs.Length > 0) {
+			if (TerrainManagerStatics.MapObjs.Length > 0) {
 				int numComplete = 0;
-				foreach(GameObject  b in TerrainManager.MapObjs ){
-					if (b.GetComponent<drawJterrain>().complete ) {
+				foreach(GameObject  b in TerrainManagerStatics.MapObjs ){
+					if (b.GetComponent<drawJterrain>().LoadState==loadState.eleComplete ||b.GetComponent<drawJterrain>().LoadState==loadState.imgComplete ) {
 						numComplete++;	
 					}
 				}
-				UIPreLoad.text = "ELE Data Loading: " + numComplete + "/" + TerrainManager.MapObjs.Length;
-				if (numComplete<TerrainManager.MapObjs.Length ) {
+				UIPreLoad.text = "ELE Data Loading: " + numComplete + "/" + TerrainManagerStatics.MapObjs.Length;
+				if (numComplete<TerrainManagerStatics.MapObjs.Length ) {
 					preloaded = false;
 				} else {
 					preloaded = true;
@@ -224,8 +223,8 @@ public class GameManager : MonoBehaviour {
 //		float newlat = TerrainManager.lat  + distLat;
 //		float newlng = TerrainManager.lng + distLng;
 		//*******************************
-		float newlat = GetComponent<InfiniteMap> ().onchunk .GetComponent<drawJterrain> ().centerlat  ;
-		float newlng = GetComponent<InfiniteMap> ().onchunk .GetComponent<drawJterrain> ().centerlng;
+		float newlat = GetComponent<InfiniteMap> ().onPiece.GetComponent<drawJterrain> ().centerlat  ;
+		float newlng = GetComponent<InfiniteMap> ().onPiece .GetComponent<drawJterrain> ().centerlng;
 
 		if (newlng < -180) {
 			newlng += 360;

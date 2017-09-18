@@ -208,7 +208,7 @@ public class LoadFiles : MonoBehaviour {
 			txtFile .text="There is no Data of beatmap,Try load and analysis a music file, or load an example music.";
 			return;
 		}
-		Debug.LogError ("LOC="+TerrainManager.lat+","+TerrainManager.lng);
+		Debug.LogError ("LOC="+TerrainManagerStatics.Lat+","+TerrainManagerStatics.Lng);
 		// load the specified level
 		BeatAnalysisManager._audio=aus;
 		BeatAnalysisManager.playtime = aus.clip.length;

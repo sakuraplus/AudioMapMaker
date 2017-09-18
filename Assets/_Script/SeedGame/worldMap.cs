@@ -175,8 +175,8 @@ public class worldMap : MonoBehaviour {
 		//PlayerPrefManager.ResetPlayerState(startLives,false);
 
 		// load the specified level
-		TerrainManager.lat=slat;
-		TerrainManager.lng=slng;
+		TerrainManagerStatics.Lat=slat;
+		TerrainManagerStatics.Lng=slng;
 		PlayerPrefManager.SetLat (slat);
 		PlayerPrefManager.SetLng (slng);
 		SceneManager.LoadScene(levelToLoad);
@@ -235,7 +235,7 @@ public class worldMap : MonoBehaviour {
 		
 
 		GameObject levelButton = Instantiate (LevelButtonPrefab, Vector3.zero, Quaternion.identity) as GameObject;
-		Vector2 latlng = new Vector2 (TerrainManager.lng,TerrainManager.lat );
+		Vector2 latlng = new Vector2 (TerrainManagerStatics.Lng,TerrainManagerStatics.Lat );
 		levelButton.name ="lastpointS";// levelname + " Button";
 		levelButton.transform.SetParent (panelbtn.transform, false);
 		levelButton.transform.position = calcPosonImg (latlng);

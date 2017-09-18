@@ -70,7 +70,7 @@ public class testHelperEditor : Editor { // extend the Editor class
 
 		}
 		if (GUILayout.Button ("test latlng")) {
-			Debug.LogWarning ("test latlng\t"+TerrainManager.lat +","+TerrainManager.lng );
+			Debug.LogWarning ("test latlng\t"+TerrainManagerStatics.Lat +","+TerrainManagerStatics.Lng );
 		}
 		if (GUILayout.Button ("test aus")) {
 			Debug.LogWarning ("test aus\t"+BeatAnalysisManager._audio.clip .name );

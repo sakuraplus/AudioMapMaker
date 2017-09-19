@@ -148,7 +148,7 @@ public class drawJterrain : MonoBehaviour {
 
 
 
-	#if UNITY_EDITOR
+	#if !(UNITY_ANDROID)||UNITY_EDITOR
 
 	//**************************************
 	/// <summary>
@@ -340,9 +340,10 @@ public class drawJterrain : MonoBehaviour {
 			EditorApplication.update += UpdateE;
 			Debug.Log("start update E");
 		}
-		#endif 
+		
 		checkSTM = TerrainManagerStatics.LoadSTM;
 		checkELE=(TerrainManagerStatics.DataSource==datasource.random )?false:true;
+		#endif
 		textureCompleted = false;
 		//outof85 = false;
 
@@ -372,7 +373,7 @@ public class drawJterrain : MonoBehaviour {
 		syncMainEdge ();//同步边界
 		prevLoad  ();//随机地形
 		if (gameObject.GetComponent <MeshFilter> () != null) {
-			Debug.Log ("pre draw mesh!!!");
+			//Debug.Log ("pre draw mesh!!!");
 			DrawMesh ();
 		} 
 		if (TerrainManagerStatics.LoadSTM) {
@@ -517,10 +518,11 @@ public class drawJterrain : MonoBehaviour {
 		edgeDown = false;
 		edgeLeft = false;
 		edgeRight = false;
-
+		#if !(UNITY_ANDROID)||UNITY_EDITOR
 		if (Application.isPlaying) {
 			updateCount = Time.timeSinceLevelLoad;
 		}
+		#endif
 		string synct="";//测试***
 
 		if (Vpos.x > 0 && TerrainManagerStatics.VerticesAll [(int)(Vpos.x - 1) ,(int) Vpos.y] != null) {
@@ -635,7 +637,9 @@ public class drawJterrain : MonoBehaviour {
 	{  
 		if (indVerticesLng > segment.x) {
 			Debug.Log (Trrname + "Data complete!!!!!!!" + tempstr);
+		#if !(UNITY_ANDROID)||UNITY_EDITOR
 			checkELE = false;
+		#endif
 			sampleLerp ();//修正错误数据
 			//syncMainEdge ();//同步边界
 			syncMainVertices ();//更新main数据
@@ -679,7 +683,9 @@ public class drawJterrain : MonoBehaviour {
 		if (indVerticesLng > segment.x) {
 
 			Debug.Log (Trrname + "Data complete!!!!!!!" + tempstr);
+		#if !(UNITY_ANDROID)||UNITY_EDITOR
 			checkELE = false;
+		#endif
 			sampleLerp ();//修正错误数据
 			//syncMainEdge ();//同步边界
 			syncMainVertices ();//更新main数据
@@ -767,7 +773,9 @@ public class drawJterrain : MonoBehaviour {
 			catch (Exception ex)  
 			{  
 				LoadState = loadState.EleError;
+			#if !(UNITY_ANDROID)||UNITY_EDITOR
 				checkELE = false;
+			#endif
 				Debug.Log(Trrname+","+indVerticesLng+"*"+ex.ToString()+"\n"+www_data_ELE.text);  
 			}  
 
@@ -829,7 +837,10 @@ public class drawJterrain : MonoBehaviour {
 			catch (Exception ex)  
 			{  
 				LoadState = loadState.EleError;
+			#if !(UNITY_ANDROID)||UNITY_EDITOR
+
 				checkELE = false;
+			#endif
 				Debug.Log(Trrname+","+indVerticesLng+"*"+ex.ToString()+"\n"+www_data_ELE.text);  
 			}  
 
@@ -885,7 +896,9 @@ public class drawJterrain : MonoBehaviour {
 			catch (Exception ex)  
 			{  
 				LoadState = loadState.EleError;
+#if !(UNITY_ANDROID)||UNITY_EDITOR
 				checkELE = false;
+#endif
 				Debug.Log(Trrname+","+indVerticesLng+"*"+ex.ToString()+"\n"+www_data_ELE.text);  
 			}  
 
@@ -945,7 +958,9 @@ public class drawJterrain : MonoBehaviour {
 			catch (Exception ex)  
 			{  
 				LoadState = loadState.EleError;
+#if !(UNITY_ANDROID)||UNITY_EDITOR
 				checkELE = false;
+#endif
 				Debug.Log(ex.ToString());  
 			}  
 
@@ -1124,7 +1139,7 @@ public class drawJterrain : MonoBehaviour {
 
 
 		if (TerrainManagerStatics.lowPolyStyle) {
-			Debug.LogWarning ("lowPolyStyle");
+			//Debug.LogWarning ("lowPolyStyle");
 			setMeshPolyTo6Mode ();
 			mesh.vertices = _vertices6;
 			mesh.uv = _uvs6;

@@ -253,7 +253,7 @@ public class worldMap : MonoBehaviour {
 	public void loadLevelselect(string location)
 	{
 		string[] s = location.Split (",".ToCharArray ());
-		float lat = float.Parse (s [0]);
+		//float lat = float.Parse (s [0]);
 		//// start new game so initialize player state
 		//PlayerPrefManager.ResetPlayerState(startLives,false);
 

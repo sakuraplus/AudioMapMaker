@@ -88,3 +88,15 @@ $RECYCLE.BIN/
 ~$*.*
 Assets/Photon Unity Networking/Demos/
 /Assets/Photon Unity Networking/Demos.meta
+/Assets/Photon Unity Networking
+/Assets/PhotonChatApi
+/Assets/PlayFabEditorExtensions
+/Assets/PlayFabSdk
+/Assets/playfabtest
+/Assets/Plugins
+/Assets/Plugins.meta
+/Assets/Photon Unity Networking.meta
+/Assets/PhotonChatApi.meta
+/Assets/PlayFabEditorExtensions.meta
+/Assets/PlayFabSdk.meta
+/Assets/playfabtest.meta

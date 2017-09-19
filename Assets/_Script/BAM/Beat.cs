@@ -169,43 +169,43 @@ public class Beat : MonoBehaviour {
 	/// <returns>The points.</returns>
 	void calcPoints(){
 		float ii = 360 - timerRot;
-		int point;
+		int point=1;
 		if (Mathf.Abs (ii) <= GameManager.gm.RotationRangePerfect) {
 			point = 10;
 			_audio.PlayOneShot  (AC);
-			if (ExpoPartPerfect) {
-				Instantiate (ExpoPartPerfect, transform.position, transform.rotation);
-			}
+//			if (ExpoPartPerfect) {
+//				Instantiate (ExpoPartPerfect, transform.position, transform.rotation);
+//			}
 		} else if (ii < 0 - GameManager.gm.RotationRangePerfect) {
 			//_audio.PlayOneShot  (AC3);
-			if (ExpoPartMiss) {
-				Instantiate (ExpoPartMiss, transform.position, transform.rotation);
-			}
+//			if (ExpoPartMiss) {
+//				Instantiate (ExpoPartMiss, transform.position, transform.rotation);
+//			}
 			point = 1;
 		} else if (ii > GameManager.gm.RotationRangePerfect && ii <= GameManager.gm.RotationRangeCool) {
 			_audio.PlayOneShot  (AC2);
-			if (ExpoPartCool) {
-				Instantiate (ExpoPartCool, transform.position, transform.rotation);
-			}
+//			if (ExpoPartCool) {
+//				Instantiate (ExpoPartCool, transform.position, transform.rotation);
+//			}
 			point = 5;
 		} else if (ii > GameManager.gm.RotationRangeCool && ii <= GameManager.gm.RotationRangeGood) {
 			_audio.PlayOneShot  (AC3);
-			if (ExpoPartGood) {
-				Instantiate (ExpoPartGood, transform.position, transform.rotation);
-			}
+//			if (ExpoPartGood) {
+//				Instantiate (ExpoPartGood, transform.position, transform.rotation);
+//			}
 			point = 3;
 		} else  {
 			point = 0;
 		}
 		//Debug.LogError ("point>>"+ii+">>"+point+"<"+GameManager.gm.RotationRangePerfect+","+GameManager.gm.RotationRangeGood+">");
-
-		if (point > 0) {
-			CheckState = true;
-			//_audio.PlayOneShot  (AC);
-			DestroyNow ();
-
-			GameManager.gm.AddPoints (point);
-		}
+//
+//		if (point > 0) {
+//			CheckState = true;
+//			//_audio.PlayOneShot  (AC);
+//			DestroyNow ();
+//
+//			GameManager.gm.AddPoints (point);
+//		}
 	}
 
 	void DestroyNow ()

@@ -113,36 +113,26 @@ public class CharacterControllerSeed : MonoBehaviour {
 
 		followCamera.transform.LookAt(TargetObj.transform);
 	}
-//	[SerializeField ]
-//	LayerMask layerGround;
+	[SerializeField ]
+	LayerMask layerGround;
 	Vector3 groundLimit(Vector3 _nextpos){
 		RaycastHit hit;
-		//if(Physics.Raycast (followCamera.transform.position ,Vector3.down ,out hit ,Mathf.Infinity,layerGround ))
-		if(Physics.Raycast (followCamera.transform.position ,Vector3.down ,out hit ))
+	
+		if(Physics.Raycast (followCamera.transform.position ,Vector3.down ,out hit,Mathf.Infinity,layerGround  ))
 		{
-			//Debug.Log ("glglgl");
-			bool objFound = false;
+		//	Debug.Log ("glglgl"+hit.distance );
+	
 			GameObject g=hit.collider.gameObject;
-			do {
-				if (g.tag =="Ground") {
-					objFound=true;
-					break ;
-				}else if(g.transform.parent !=null){
-					g=g.transform.parent.gameObject ;
-				}else{
-					return _nextpos    ;
-				}
-			} while(objFound == false);
-//
-			//if(hit.collider.tag =="Ground"){
-			if (_nextpos.y-1 <hit.point.y ) {
-				sttt="groundLimit"+(_nextpos.y-hit.point.y );
 
+			if (_nextpos.y-1 <hit.point.y ) {
 				_nextpos.y = hit.point.y + 1f;//方法需要根据体验效果调整****
 
 			//	Debug.Log("r "+hit.distance+"//hitp= "+hit.point+"//new= "+_nextpos+"//"+hit.collider.name  );
 			}
 			//}
+		}else if(Physics.Raycast (followCamera.transform.position ,Vector3.up ,out hit,Mathf.Infinity,layerGround  )){
+			_nextpos.y = hit.point.y + 1f;
+			Debug.LogError ("zzz");
 		}
 		return _nextpos;
 
@@ -152,7 +142,7 @@ public class CharacterControllerSeed : MonoBehaviour {
 		RaycastHit hit;
 
 		if( Physics.Raycast (TargetObj.transform.position ,Vector3.down ,out hit  )||Physics.Raycast (TargetObj.transform.position ,Vector3.up ,out hit  ))
-		{	//LayerMask.NameToLayer("Ground")
+		{	
 			Debug.LogWarning ("resetPlayerPos>>"+TargetObj.transform.position+"//"+hit.point );
 			TargetObj.transform.position =hit.point+new Vector3(0, maxHeight,0);
 		}
@@ -435,32 +425,3 @@ public class CharacterControllerSeed : MonoBehaviour {
 	#endregion
 }
 
-
-//	Vector3 lastAcc=Vector3.zero;
-//	public void LookRotationAcc(Vector3 gy)
-//	{
-//		
-//		xRot = Mathf.Abs (gy.y+1) * YSensitivity;
-//		if (gy.z > 0) {
-//			xRot *= -1;
-//		} 
-//		if (Mathf.Abs (gy.x) > Mathf.Abs(lastAcc.x)||Mathf.Abs (gy.x)>0.5) {
-//			yRot = (gy.x) * XSensitivity;
-//		} else {
-//			yRot = 0;
-//		}
-//		lastAcc = gy;
-//		tttt.text =st+"\nAcc    "+ gy+"xy="+yRot+","+xRot ;
-//
-//		m_CharacterTargetRot *= Quaternion.Euler (0, yRot, 0f);
-//
-//		if(clampVerticalRotation)
-//		{
-//			m_CharacterTargetRot = ClampRotationAroundXAxis (m_CharacterTargetRot);
-//		}
-//
-//		TargetObj.transform.localRotation  = m_CharacterTargetRot;
-//		TargetObj.transform.RotateAround (TargetObj.transform.position, TargetObj.transform.right,Mathf.LerpAngle ( 0,xRot,0.2f));// ;
-//	}
-//
-//

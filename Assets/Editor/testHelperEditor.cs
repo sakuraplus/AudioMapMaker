@@ -5,7 +5,6 @@ using UnityEditor; // this is needed since this script references the Unity Edit
 [CustomEditor(typeof(TestTest))]
 public class testHelperEditor : Editor { // extend the Editor class
 
-	float[,][] fff=new float[2,3][] ;
 
 
 	// called when Unity Editor Inspector is updated

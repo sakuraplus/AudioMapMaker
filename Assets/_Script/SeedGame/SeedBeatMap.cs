@@ -38,8 +38,7 @@ public class SeedBeatMap : MonoBehaviour {
 
 	bool playmap=false;
 	//bool beatmapauto=false;
-	[SerializeField ]
-	GameObject checkobject;
+
 	List<MusicData >  BeatArrayList;//存beat信息
 	//ArrayList MusicArrayList=new ArrayList() ;//存音乐信息
 	[SerializeField ]
@@ -95,8 +94,9 @@ public class SeedBeatMap : MonoBehaviour {
 			CCS.canmove = false;
 			Cursor.visible=true;
 			Cursor.lockState=CursorLockMode.None ;
-			GameManager.gm. LevelCompete ();
-
+			if (GameManager.gm) {
+				GameManager.gm.LevelCompete ();
+			}
 		}
 
 	}
@@ -172,14 +172,16 @@ public class SeedBeatMap : MonoBehaviour {
 	}
 	public void LoadJsonAndPlay(){
 		if (BeatAnalysisManager.BAL.Count < 1) {
-			Debug.Log ("qq");
+			Debug.Log ("qq\n"+jsonfileAsset.text.ToString ());
 			load (jsonfileAsset.text.ToString ());
 		}
 		beatmapToseedMode ();
 		btnPlaymap ();
-		GameManager.gm .fullPoint = BeatAnalysisManager.BAL.Count;
-		Cursor.visible=false;
-		Cursor.lockState=CursorLockMode.Locked ;
+		if (GameManager.gm) {
+			GameManager.gm.fullPoint = BeatAnalysisManager.BAL.Count;
+		}
+		//Cursor.visible=false;
+		//Cursor.lockState=CursorLockMode.Locked ;
 		CharacterControllerSeed   CCS = FindObjectOfType<CharacterControllerSeed > ();
 		CCS.canmove  = true;//.onBeat.AddListener  (onOnbeatDetected);
 		CCS.startFall=  false ;
@@ -188,7 +190,7 @@ public class SeedBeatMap : MonoBehaviour {
 	}
 	void load(string jsonstr) {  
 		savedBeatMap  smdread = JsonUtility.FromJson<savedBeatMap> (jsonstr);
-		Debug.Log ("load smdread.md="+smdread.MD );
+		Debug.Log ("load smdread.md="+smdread.MD.Length );
 		BeatAnalysisManager.BeatmapOffset  = smdread.offset;
 		BeatAnalysisManager.numBands   = smdread.numband ;
 		BeatAnalysisManager.BAL.Clear ();
@@ -327,19 +329,11 @@ public class SeedBeatMap : MonoBehaviour {
 	GameObject[] goo;
 	[SerializeField ]
 	float maxHeight=2;
+	public LayerMask LayerOfGround;
 	//***
 	public  Vector3  nextSeedPosS(MusicData MD,float offset)
 	{
 		RaycastHit hit;
-		float offsetY=0;
-		if(Physics.Raycast (charPos.transform.position  ,Vector3.down ,out hit ))
-		{
-			if(hit.collider.tag =="Ground"){
-				if (hit.distance > maxHeight) {
-					offsetY = Mathf.Min  ( hit.distance / maxHeight,1f);// (maxHeight - hit.distance)/hit.distance;// 
-				}
-			}
-		}
 
 		float R = speed *(MD.playtime - _audio.time + BeatAnalysisManager.BeatmapOffset-0.5f);
 		if (offset > 0) {
@@ -354,9 +348,7 @@ public class SeedBeatMap : MonoBehaviour {
 		for(int i=0;i<targetposS.Length;i++){
 			targetVecS [i].x =targetposS [i].transform.position.x - charPos.position.x;//targetDri[i];
 			targetVecS [i].y =0;//
-			//targetVecS [i].y=offsetY+Random.Range(-0.5f,0.5f)-charPos.position.y;//
-			//targetVecS [i].y=0-offsetY+targetposS [i].transform.position.y - charPos.position.y;
-			//targetVecS [i].y=targetposS [i].transform.position.y - charPos.position.y;
+		
 			targetVecS [i].z = targetposS [i].transform.position.z - charPos.position.z;
 			sttt+=targetVecS[i]+",";
 
@@ -369,9 +361,9 @@ public class SeedBeatMap : MonoBehaviour {
 				targetVecS[i].z *=  R / rr;
 			}
 			targetVecS [i] += charPos.transform.position;
-			if (Physics.Raycast (targetVecS [i], Vector3.down, out hit)) {
-				//on ground
-				if (hit.collider.tag == "Ground") {
+				
+			if (Physics.Raycast (targetVecS [i], Vector3.down, out hit,Mathf.Infinity ,LayerOfGround )) {
+
 					//Debug.LogWarning ("add " + i+">>"+targetVecS [i].y+","+hit.point.y);
 					targetVecS [i].y = Mathf.Min  (targetVecS [i].y, hit.point.y + maxHeight);
 				
@@ -379,14 +371,10 @@ public class SeedBeatMap : MonoBehaviour {
 						targetVecS [i].y += hit.distance / 3;
 					}
 					targetVecSInds.Add (i);
-					//goo [i].transform.position = targetVecS [i];
-				}
+
 			} else {
-				//Debug.Log ("---underground  "+targetVecS[i]);
+				Debug.Log ("---underground  "+targetVecS[i]);
 			}
-
-
-			//goo [i].transform.position.y = Mathf.Clamp (goo [i].transform.position.y, charPos.transform.position.y-0.5f,charPos.transform.position.y+0.5f);
 		}
 		if (targetVecSInds.Count > 0) {
 			int ind = Mathf.FloorToInt (Random.Range (0, targetVecSInds.Count));
@@ -395,7 +383,7 @@ public class SeedBeatMap : MonoBehaviour {
 
 			return targetVecS [ind];
 		} else {
-			//Debug.LogWarning ("no! "+targetVecSInds.Count );
+			Debug.LogWarning ("no! "+targetVecSInds.Count );
 			return Vector3.zero;
 		}
 	}
@@ -404,13 +392,10 @@ public class SeedBeatMap : MonoBehaviour {
 	{
 		RaycastHit hit;
 
-		if (Physics.Raycast (_tarPos, Vector3.down, out hit)) {
-			if (hit.collider.tag == "Ground") {
-				//offsetY = charPos.transform.position.y - hit.distance+targetFormGround;
-				_tarPos = hit.point;
-				//if(hit.distance 
-
-			}
+		if (Physics.Raycast (_tarPos, Vector3.down, out hit,Mathf.Infinity ,LayerOfGround )) {
+			
+			_tarPos = hit.point;
+				
 		} else {
 			Debug.LogError ("underground");
 			_tarPos.y = charPos.transform.position .y;
@@ -458,21 +443,21 @@ public class SeedBeatMap : MonoBehaviour {
 	Vector3 groundLimit(Vector3 _nextpos){
 		Vector3 oldpos = _nextpos;
 		RaycastHit hit;
-		if(Physics.Raycast (_nextpos ,Vector3.up ,out hit )){
-			if(hit.collider.tag =="Ground"){
+		if(Physics.Raycast (_nextpos ,Vector3.up ,out hit,Mathf.Infinity ,LayerOfGround  )){
+			//if(hit.collider.tag =="Ground"){
 				_nextpos.y = hit.point.y + 3;
 				
 				Debug.LogError("rD "+hit.distance+"//hitp= "+hit.point+"//old= "+oldpos+"//new= "+_nextpos+"//"+hit.collider.name  );
-			}
-		}else if(Physics.Raycast (_nextpos ,Vector3.down ,out hit ))
+			//}
+		}else if(Physics.Raycast (_nextpos ,Vector3.down ,out hit,Mathf.Infinity ,LayerOfGround  ))
 		{
-			if(hit.collider.tag =="Ground"){
+			//if(hit.collider.tag =="Ground"){
 				if (_nextpos.y-2 <hit.point.y ) {
 					// = new Vector3 (_nextpos.x, _nextpos.y, _nextpos.z);
 					_nextpos.y = hit.point.y +3f;//方法需要根据体验效果调整****
 					Debug.LogError ("rIN "+hit.distance+"//hitp= "+hit.point+"//old= "+oldpos+"//new= "+_nextpos+"//"+hit.collider.name  );
 				}
-			}
+			//}
 		}
 		return _nextpos;
 
@@ -502,66 +487,4 @@ public class SeedBeatMap : MonoBehaviour {
 
 
 
-//	Vector3  nextSeedPos(MusicData MD,float offset)
-//	{
-//		float R = speed*(MD.playtime - _audio.time + BeatAnalysisManager.BeatmapOffset-0.5f);
-//		if (offset > 0) {
-//			R += speed * offset / 100;
-//		}
-//
-//		//	float charA = 0;
-//		Vector3 charAxis = charPos.forward;
-//
-//
-//		/////////////////////////****
-//		// float newX=charAxis.x* Random.Range (0.7f,2f);
-//		float newX=charAxis.x* Random.Range (1-angleRange,1+angleRange);
-//		float newY= Random.Range (0-yRange,yRange);
-//		//float newZ=charAxis.z* Random.Range (0.7f,2f);
-//		float newZ=charAxis.z* Random.Range (1-angleRange,1+angleRange);
-//		float r = Mathf.Sqrt (newX*newX+newZ*newZ+newY*newY);
-//		if (r != 0) {
-//			newX = newX * R / r;
-//			newY = newY * R / r;
-//			newZ = newZ * R / r;
-//		}
-//
-//		/// 
-//		/// //////////////////
-//		//		charPos.localRotation.ToAngleAxis (out charA, out charAxis);
-//		//		if (charAxis.x >= 0 && charAxis.z >= 0 && charAxis.y < 0) {
-//		//			charA = 360 - charA;
-//		//
-//		//		}
-//		//		float A = angleWind - charA;
-//		//		if (A > 180) {
-//		//			A = A-360;
-//		//		} else if (A < -180) {
-//		//			A = A + 360;
-//		//		}
-//		//		A = Mathf.Clamp (A / 5, -1, 1);
-//		//
-//		//		A+=charA+ Random.Range (0,angleRange )-angleRange/2;//风向范围
-//		//		
-//		//		float newlengthX = R * Mathf.Sin (Mathf.Deg2Rad *A);
-//		//		float newlengthZ = R * Mathf.Cos  (Mathf.Deg2Rad * A);
-//		//		float	newPosX = newlengthX +charPos.position.x;
-//		//		float	newPosZ=newlengthZ+ charPos.position.z;
-//		//		float newPosY = charPos.position.y + Random.Range (0, yRange) - yRange / 2;
-//		//		
-//		//		Debug.LogWarning ("make seed time="+MD.playtime+" // "+_audio.time +"pos="+new Vector3 (newPosX, newPosY, newPosZ)
-//		//			+"//"+charPos .position +" A="+A+"//CA="+charA+"R="+R );
-//		///////////////////////////////////////////////////
-//		//	Vector3 newPos=new Vector3 (newPosX, newPosY, newPosZ);
-//		Vector3 newPos=new Vector3 (newX+charPos.position.x, newY+charPos.position.y, newZ+charPos.position.z);
-//		//		if(charAxis.z/newlengthZ<0||charAxis.x/newlengthX<0)
-//		//		{
-//		//			Debug.LogError  ("wrong D "+charAxis+"/"+newlengthX+","+newlengthZ);
-//		//		}
-//		newPos = groundLimit (newPos);
-//
-//
-//		return newPos;//new Vector3 (newPosX, newPosY, newPosZ);
-//	}
-//
 }

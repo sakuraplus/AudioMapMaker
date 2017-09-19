@@ -234,7 +234,7 @@ public class GameManager : MonoBehaviour {
 		if (newlat < -85) {
 			newlat=-85;
 		} else if (newlat > 85) {
-			newlat = newlat;
+			newlat = 85;
 		}
 
 		print ("newlat/lng="+newlat+","+newlng);

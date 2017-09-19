@@ -76,7 +76,7 @@ public class SetTerrains : MonoBehaviour {
 
 		if (!GetComponent<SetTextures  > ()) {
 			TerrainManagerStatics.LoadSTM = false;
-			Debug.LogError ("Textures not set");
+			Debug.Log ("Textures not set");
 		} else if (GetComponent<SetTextures  > ().isActiveAndEnabled) {
 			TerrainManagerStatics.LoadSTM = true;
 		} else {
@@ -85,7 +85,7 @@ public class SetTerrains : MonoBehaviour {
 		}
 		if (!GetComponent<SetElevation  > ()) {
 			TerrainManagerStatics.DataSource = datasource.random;
-			Debug.LogError ("SetElevation not set");
+			Debug.Log ("SetElevation not set");
 		} else if (!GetComponent<SetElevation  > ().isActiveAndEnabled) {
 			TerrainManagerStatics.DataSource = datasource.random;
 			Debug.LogError ("Elevation not set,will build a random terrain. please enable the script " +
